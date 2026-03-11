@@ -347,42 +347,49 @@ class LG_WD_Admin {
             <span class="lg-wd-hint">These appear as available sections when composing an email.</span>
           </div>
           <div class="lg-wd-card-body">
+            <?php if ( empty( $registry ) ) : ?>
+              <p style="color:#aaa;font-style:italic;">No content types registered yet. Add one below.</p>
+            <?php else : ?>
             <table class="widefat striped" id="lg-wd-registry-table">
               <thead>
                 <tr>
                   <th>Label</th>
                   <th>Slug</th>
-                  <th>Type</th>
-                  <th>Max Items</th>
+                  <th>Template</th>
+                  <th>Tag Filter</th>
+                  <th>Max</th>
                   <th>Enabled</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                <?php foreach ( $registry as $entry ) :
-                    $is_builtin = ! empty( $entry['builtin'] );
-                    ?>
+                <?php foreach ( $registry as $entry ) : ?>
                     <tr data-slug="<?php echo esc_attr( $entry['slug'] ); ?>">
                       <td><?php echo esc_html( $entry['label'] ); ?></td>
                       <td><code><?php echo esc_html( $entry['slug'] ); ?></code></td>
-                      <td><?php echo esc_html( ucfirst( $entry['type'] ) ); ?></td>
+                      <td><?php echo esc_html( $entry['template'] ?? 'card' ); ?></td>
+                      <td>
+                        <?php if ( ! empty( $entry['tag_filter'] ) ) : ?>
+                          <code><?php echo esc_html( $entry['tag_filter'] ); ?></code>
+                          <span style="color:#aaa;font-size:11px;">(<?php echo esc_html( $entry['tag_taxonomy'] ?? 'post_tag' ); ?>)</span>
+                        <?php else : ?>
+                          <span style="color:#aaa;">—</span>
+                        <?php endif; ?>
+                      </td>
                       <td><?php echo (int) $entry['max_items']; ?></td>
                       <td><?php echo $entry['enabled'] ? 'Yes' : 'No'; ?></td>
                       <td>
-                        <?php if ( $is_builtin ) : ?>
-                          <span class="lg-wd-section-type-badge">Built-in</span>
-                        <?php else : ?>
-                          <button class="button button-small lg-wd-registry-remove" data-slug="<?php echo esc_attr( $entry['slug'] ); ?>">Remove</button>
-                        <?php endif; ?>
+                        <button class="button button-small lg-wd-registry-remove" data-slug="<?php echo esc_attr( $entry['slug'] ); ?>">Remove</button>
                       </td>
                     </tr>
                 <?php endforeach; ?>
               </tbody>
             </table>
+            <?php endif; ?>
 
-            <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;">
-              <h4 style="margin:0 0 10px;">Add New Content Type</h4>
-              <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee;">
+              <h4 style="margin:0 0 12px;">Add New Content Type</h4>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;align-items:end;">
                 <div class="lg-wd-form-group" style="margin-bottom:0;">
                   <label class="lg-wd-label">Post Type</label>
                   <select id="lg-wd-reg-slug" class="lg-wd-select">
@@ -399,10 +406,35 @@ class LG_WD_Admin {
                   <input type="text" id="lg-wd-reg-label" class="lg-wd-input" placeholder="e.g. Videos">
                 </div>
                 <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Template</label>
+                  <select id="lg-wd-reg-template" class="lg-wd-select">
+                    <?php foreach ( LG_WD_CPT_Registry::TEMPLATES as $slug => $name ) : ?>
+                      <option value="<?php echo esc_attr( $slug ); ?>"><?php echo esc_html( $name ); ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Sort Mode</label>
+                  <select id="lg-wd-reg-sort" class="lg-wd-select">
+                    <option value="newest">Newest first</option>
+                    <option value="upcoming">Upcoming (events)</option>
+                  </select>
+                </div>
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Tag Filter <span class="lg-wd-hint">(optional)</span></label>
+                  <input type="text" id="lg-wd-reg-tag" class="lg-wd-input" placeholder="e.g. weeklyyes">
+                </div>
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Tag Taxonomy</label>
+                  <input type="text" id="lg-wd-reg-taxonomy" class="lg-wd-input" value="post_tag" placeholder="post_tag or topic-tag">
+                </div>
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
                   <label class="lg-wd-label">Max Items</label>
                   <input type="number" id="lg-wd-reg-max" class="lg-wd-input" value="5" min="1" max="20" style="width:60px;">
                 </div>
-                <button class="button button-primary" id="lg-wd-reg-add-btn">+ Add</button>
+                <div style="padding-bottom:2px;">
+                  <button class="button button-primary" id="lg-wd-reg-add-btn">+ Add</button>
+                </div>
               </div>
             </div>
           </div>
@@ -620,11 +652,14 @@ class LG_WD_Admin {
         if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
 
         $entry = [
-            'slug'      => sanitize_key( $_POST['slug'] ?? '' ),
-            'label'     => sanitize_text_field( $_POST['label'] ?? '' ),
-            'type'      => 'cpt',
-            'max_items' => absint( $_POST['max_items'] ?? 5 ),
-            'enabled'   => true,
+            'slug'         => sanitize_key( $_POST['slug'] ?? '' ),
+            'label'        => sanitize_text_field( $_POST['label'] ?? '' ),
+            'max_items'    => absint( $_POST['max_items'] ?? 5 ),
+            'enabled'      => true,
+            'template'     => sanitize_key( $_POST['template'] ?? 'card' ),
+            'tag_filter'   => sanitize_text_field( $_POST['tag_filter'] ?? '' ),
+            'tag_taxonomy' => sanitize_key( $_POST['tag_taxonomy'] ?? 'post_tag' ),
+            'sort_mode'    => in_array( $_POST['sort_mode'] ?? '', [ 'newest', 'upcoming' ], true ) ? $_POST['sort_mode'] : 'newest',
         ];
 
         if ( LG_WD_CPT_Registry::add( $entry ) ) {

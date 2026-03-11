@@ -114,8 +114,8 @@ class LG_WD_Issue {
             $sections[] = [
                 'key'      => sanitize_key( $entry['slug'] ),
                 'label'    => $entry['label'],
-                'type'     => $entry['type'],
                 'slug'     => $entry['slug'],
+                'template' => $entry['template'] ?? 'card',
                 'post_ids' => $post_ids,
             ];
         }
@@ -168,8 +168,8 @@ class LG_WD_Issue {
         $data['sections'][] = [
             'key'      => sanitize_key( $section['key'] ?? '' ),
             'label'    => sanitize_text_field( $section['label'] ?? '' ),
-            'type'     => sanitize_key( $section['type'] ?? 'cpt' ),
             'slug'     => sanitize_text_field( $section['slug'] ?? '' ),
+            'template' => sanitize_key( $section['template'] ?? 'card' ),
             'post_ids' => array_map( 'absint', $section['post_ids'] ?? [] ),
         ];
 

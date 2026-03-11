@@ -110,10 +110,14 @@ jQuery( function ( $ ) {
     // ── CPT Registry: Add ────────────────────────────────────────────────────
 
     $( '#lg-wd-reg-add-btn' ).on( 'click', function () {
-        const $btn  = $( this );
-        const slug  = $( '#lg-wd-reg-slug' ).val();
-        const label = $( '#lg-wd-reg-label' ).val().trim();
-        const max   = parseInt( $( '#lg-wd-reg-max' ).val() ) || 5;
+        const $btn       = $( this );
+        const slug       = $( '#lg-wd-reg-slug' ).val();
+        const label      = $( '#lg-wd-reg-label' ).val().trim();
+        const template   = $( '#lg-wd-reg-template' ).val() || 'card';
+        const sort_mode  = $( '#lg-wd-reg-sort' ).val() || 'newest';
+        const tag_filter = $( '#lg-wd-reg-tag' ).val().trim();
+        const taxonomy   = $( '#lg-wd-reg-taxonomy' ).val().trim() || 'post_tag';
+        const max        = parseInt( $( '#lg-wd-reg-max' ).val() ) || 5;
 
         if ( ! slug || ! label ) {
             showResponse( 'Select a post type and enter a label.', 'error' );
@@ -123,11 +127,15 @@ jQuery( function ( $ ) {
         setLoading( $btn, true );
 
         $.post( ajaxUrl, {
-            action:    'lg_wd_registry_add',
+            action:       'lg_wd_registry_add',
             nonce,
             slug,
             label,
-            max_items: max,
+            template,
+            sort_mode,
+            tag_filter,
+            tag_taxonomy: taxonomy,
+            max_items:    max,
         }, function ( res ) {
             setLoading( $btn, false );
             if ( res.success ) {

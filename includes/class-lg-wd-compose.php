@@ -158,7 +158,7 @@ class LG_WD_Compose {
                   <?php foreach ( $registry as $entry ) : ?>
                     <option value="<?php echo esc_attr( $entry['slug'] ); ?>"
                             data-label="<?php echo esc_attr( $entry['label'] ); ?>"
-                            data-type="<?php echo esc_attr( $entry['type'] ); ?>">
+                            data-template="<?php echo esc_attr( $entry['template'] ?? 'card' ); ?>">
                       <?php echo esc_html( $entry['label'] ); ?> (<?php echo esc_html( $entry['slug'] ); ?>)
                     </option>
                   <?php endforeach; ?>
@@ -252,15 +252,15 @@ class LG_WD_Compose {
     public static function render_section_card( array $section, int $idx ): void {
         $key      = esc_attr( $section['key'] ?? '' );
         $label    = esc_html( $section['label'] ?? '' );
-        $type     = esc_attr( $section['type'] ?? 'cpt' );
+        $template = esc_attr( $section['template'] ?? 'card' );
         $slug     = esc_attr( $section['slug'] ?? '' );
         $post_ids = $section['post_ids'] ?? [];
         ?>
-        <div class="lg-wd-compose-section" data-section-key="<?php echo $key; ?>" data-section-type="<?php echo $type; ?>" data-section-slug="<?php echo $slug; ?>">
+        <div class="lg-wd-compose-section" data-section-key="<?php echo $key; ?>" data-section-template="<?php echo $template; ?>" data-section-slug="<?php echo $slug; ?>">
           <div class="lg-wd-compose-section-header">
             <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
             <strong><?php echo $label; ?></strong>
-            <span class="lg-wd-section-type-badge"><?php echo esc_html( ucfirst( $type ) ); ?></span>
+            <span class="lg-wd-section-type-badge"><?php echo esc_html( $template ); ?></span>
             <span class="lg-wd-section-count"><?php echo count( $post_ids ); ?> items</span>
             <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
           </div>
@@ -319,8 +319,8 @@ class LG_WD_Compose {
             $sections[] = [
                 'key'      => sanitize_key( $s['key'] ?? '' ),
                 'label'    => sanitize_text_field( $s['label'] ?? '' ),
-                'type'     => sanitize_key( $s['type'] ?? 'cpt' ),
                 'slug'     => sanitize_text_field( $s['slug'] ?? '' ),
+                'template' => sanitize_key( $s['template'] ?? 'card' ),
                 'post_ids' => array_map( 'absint', $s['post_ids'] ?? [] ),
             ];
         }
@@ -472,8 +472,8 @@ class LG_WD_Compose {
                     $data['sections'][] = [
                         'key'      => sanitize_key( $s['key'] ?? '' ),
                         'label'    => sanitize_text_field( $s['label'] ?? '' ),
-                        'type'     => sanitize_key( $s['type'] ?? 'cpt' ),
                         'slug'     => sanitize_text_field( $s['slug'] ?? '' ),
+                        'template' => sanitize_key( $s['template'] ?? 'card' ),
                         'post_ids' => array_map( 'absint', $s['post_ids'] ?? [] ),
                     ];
                 }

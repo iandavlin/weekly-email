@@ -3,7 +3,7 @@
  * Plugin Name: LG Weekly Digest
  * Plugin URI:  https://loothgroup.com
  * Description: Curated weekly digest email with pluggable sender support. Compose issues from any registered CPT, preview inline, and send via FluentCRM or wp_mail.
- * Version:     2.0.0
+ * Version:     3.0.0
  * Author:      The Looth Group
  * License:     GPL-2.0+
  */
@@ -13,15 +13,11 @@ defined( 'ABSPATH' ) || exit;
 // ─────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────
-define( 'LG_WD_VERSION',      '2.0.0' );
-define( 'LG_WD_PLUGIN_DIR',   plugin_dir_path( __FILE__ ) );
-define( 'LG_WD_PLUGIN_URL',   plugin_dir_url( __FILE__ ) );
-define( 'LG_WD_OPTION_KEY',   'lg_wd_settings' );
-
-// FluentCRM targets
-define( 'LG_WD_FCRM_LIST_ID', 3 );   // Weekly News Letter
-define( 'LG_WD_FCRM_TAG',     'all' );
-define( 'LG_WD_TIMEZONE',     'America/New_York' );
+define( 'LG_WD_VERSION',    '3.0.0' );
+define( 'LG_WD_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'LG_WD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'LG_WD_OPTION_KEY', 'lg_wd_settings' );
+define( 'LG_WD_TIMEZONE',   'America/New_York' );
 
 // ─────────────────────────────────────────────
 // Includes
@@ -44,6 +40,30 @@ add_action( 'plugins_loaded', function () {
     LG_WD_Admin::init();
     LG_WD_Compose::init();
     LG_WD_Cron::init();
+} );
+
+// ─────────────────────────────────────────────
+// Weekly Email Append CPT
+// A simple WYSIWYG post type for injecting custom
+// content into any issue (announcements, notes, etc.)
+// ─────────────────────────────────────────────
+add_action( 'init', function () {
+    register_post_type( 'email_append', [
+        'labels' => [
+            'name'          => 'Email Appends',
+            'singular_name' => 'Email Append',
+            'add_new_item'  => 'Add New Email Append',
+            'edit_item'     => 'Edit Email Append',
+            'all_items'     => 'All Email Appends',
+        ],
+        'public'       => false,
+        'show_ui'      => true,
+        'show_in_menu' => 'lg-weekly-digest',
+        'supports'     => [ 'title', 'editor' ],
+        'has_archive'  => false,
+        'rewrite'      => false,
+        'capability_type' => 'post',
+    ] );
 } );
 
 // Activation / Deactivation
