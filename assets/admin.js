@@ -182,12 +182,13 @@ jQuery( function ( $ ) {
         const $list  = $( '#lg-wd-sections-list' );
         const i      = $list.children().length;
         const key    = slug.replace( /[^a-z0-9_]/g, '_' );
+        const type   = slug.indexOf( ',' ) !== -1 ? 'multi_cpt' : 'cpt';
 
         const $li = $( `
             <li class="lg-wd-section-item" data-index="${i}">
               <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
               <input type="hidden" name="sections[${i}][key]"  value="${key}">
-              <input type="hidden" name="sections[${i}][type]" value="cpt">
+              <input type="hidden" name="sections[${i}][type]" value="${type}">
               <label class="lg-wd-toggle">
                 <input type="checkbox" name="sections[${i}][enabled]" value="1" checked>
                 <span class="lg-wd-toggle-track"></span>

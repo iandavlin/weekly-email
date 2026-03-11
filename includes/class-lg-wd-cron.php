@@ -34,8 +34,16 @@ class LG_WD_Cron {
         }
 
         error_log( '[LG Weekly Digest] Cron fired — starting digest send.' );
-        $result = LG_WD_Sender::send();
-        error_log( '[LG Weekly Digest] Cron result: ' . ( $result['success'] ? 'SUCCESS' : 'FAIL' ) . ' — ' . $result['message'] );
+
+        try {
+            $result = LG_WD_Sender::send();
+            error_log( '[LG Weekly Digest] Cron result: ' . ( $result['success'] ? 'SUCCESS' : 'FAIL' ) . ' — ' . $result['message'] );
+        } catch ( \Throwable $e ) {
+            error_log( '[LG Weekly Digest] Cron fire threw: ' . $e->getMessage() );
+        }
+
+        // Always reschedule, even if send failed, so the digest continues next week
+        self::schedule();
     }
 
     // ── Schedule management ───────────────────────────────────────────────────
@@ -63,15 +71,11 @@ class LG_WD_Cron {
 
     /**
      * Re-schedule after each fire so it repeats weekly.
-     * Called by adding action in send flow.
+     * Uses next_send_timestamp() which finds the next occurrence of the
+     * configured send_day + send_time, avoiding drift from late cron fires.
      */
     public static function reschedule_after_send(): void {
-        // Schedule next week
-        $timestamp = self::next_send_timestamp( 7 );
-        if ( $timestamp ) {
-            wp_schedule_single_event( $timestamp, self::HOOK );
-            error_log( '[LG Weekly Digest] Next digest scheduled for: ' . date( 'Y-m-d H:i:s', $timestamp ) . ' ET' );
-        }
+        self::schedule();
     }
 
     // ── Timestamp calculation ──────────────────────────────────────────────────
@@ -123,5 +127,3 @@ class LG_WD_Cron {
     }
 }
 
-// Re-schedule after every successful fire
-add_action( LG_WD_Cron::HOOK, [ 'LG_WD_Cron', 'reschedule_after_send' ], 20 );

@@ -452,8 +452,12 @@ class LG_WD_Admin {
             'skip_empty'       => ! empty( $raw['skip_empty'] ),
         ];
 
-        if ( isset( $raw['sections'] ) ) {
-            $data['sections'] = $raw['sections'];
+        if ( isset( $raw['sections'] ) && is_array( $raw['sections'] ) ) {
+            // Only pass well-formed section entries
+            $data['sections'] = array_values( array_filter(
+                $raw['sections'],
+                fn( $s ) => is_array( $s ) && ! empty( $s['key'] )
+            ) );
         }
 
         LG_WD_Settings::save( $data );
