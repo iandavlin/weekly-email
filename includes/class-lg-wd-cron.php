@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * LG_WD_Cron
  * Manages WP Cron scheduling for the weekly digest.
- * Recalculates next send time whenever settings change.
+ * On fire, sends the latest draft issue (or auto-creates one).
  */
 class LG_WD_Cron {
 
@@ -30,19 +30,45 @@ class LG_WD_Cron {
     public static function fire(): void {
         if ( ! LG_WD_Settings::get( 'enabled' ) ) {
             error_log( '[LG Weekly Digest] Cron fired but digest is disabled. Skipping.' );
+            self::schedule();
             return;
         }
 
         error_log( '[LG Weekly Digest] Cron fired — starting digest send.' );
 
         try {
-            $result = LG_WD_Sender::send();
+            // Find or create a draft issue
+            $issue_id = LG_WD_Issue::get_latest_draft();
+
+            if ( ! $issue_id ) {
+                // Auto-create an issue and populate it
+                $issue_id = LG_WD_Issue::create();
+                if ( $issue_id ) {
+                    $date_to   = date( 'Y-m-d' );
+                    $date_from = date( 'Y-m-d', strtotime( '-7 days' ) );
+                    $sections  = LG_WD_Issue::auto_populate( $date_from, $date_to );
+
+                    $data = LG_WD_Issue::get_data( $issue_id );
+                    $data['date_from'] = $date_from;
+                    $data['date_to']   = $date_to;
+                    $data['sections']  = $sections;
+                    LG_WD_Issue::save_data( $issue_id, $data );
+                }
+            }
+
+            if ( ! $issue_id ) {
+                error_log( '[LG Weekly Digest] Failed to create issue for cron send.' );
+                self::schedule();
+                return;
+            }
+
+            $result = LG_WD_Sender::send_issue( $issue_id );
             error_log( '[LG Weekly Digest] Cron result: ' . ( $result['success'] ? 'SUCCESS' : 'FAIL' ) . ' — ' . $result['message'] );
         } catch ( \Throwable $e ) {
             error_log( '[LG Weekly Digest] Cron fire threw: ' . $e->getMessage() );
         }
 
-        // Always reschedule, even if send failed, so the digest continues next week
+        // Always reschedule for next week
         self::schedule();
     }
 
@@ -69,21 +95,8 @@ class LG_WD_Cron {
         wp_clear_scheduled_hook( self::HOOK );
     }
 
-    /**
-     * Re-schedule after each fire so it repeats weekly.
-     * Uses next_send_timestamp() which finds the next occurrence of the
-     * configured send_day + send_time, avoiding drift from late cron fires.
-     */
-    public static function reschedule_after_send(): void {
-        self::schedule();
-    }
-
     // ── Timestamp calculation ──────────────────────────────────────────────────
 
-    /**
-     * Calculate Unix timestamp for the next (or +$add_days) occurrence
-     * of the configured send_day + send_time in America/New_York.
-     */
     public static function next_send_timestamp( int $add_days = 0 ): int {
         $send_day  = strtolower( LG_WD_Settings::get( 'send_day', 'monday' ) );
         $send_time = LG_WD_Settings::get( 'send_time', '09:00' );
@@ -93,7 +106,7 @@ class LG_WD_Cron {
             $now  = new DateTime( 'now', $tz );
             $next = new DateTime( "next {$send_day} {$send_time}", $tz );
 
-            // If today IS the send day but time hasn't passed yet, use today
+            // If today IS the send day but time hasn't passed, use today
             $today_name = strtolower( $now->format( 'l' ) );
             if ( $today_name === $send_day ) {
                 $today_send = new DateTime( "today {$send_time}", $tz );
@@ -113,17 +126,13 @@ class LG_WD_Cron {
         }
     }
 
-    /**
-     * Human-readable next send date for the admin UI.
-     */
     public static function next_send_label(): string {
         $ts = wp_next_scheduled( self::HOOK );
         if ( ! $ts ) return 'Not scheduled';
 
-        $tz   = new DateTimeZone( LG_WD_TIMEZONE );
-        $dt   = new DateTime( '@' . $ts );
+        $tz = new DateTimeZone( LG_WD_TIMEZONE );
+        $dt = new DateTime( '@' . $ts );
         $dt->setTimezone( $tz );
         return $dt->format( 'D M j · g:i A T' );
     }
 }
-

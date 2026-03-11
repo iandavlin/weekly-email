@@ -2,83 +2,57 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * LG_WD_Sender
- * Creates and dispatches the FluentCRM campaign.
- *
- * Uses the PROVEN two-step pattern from LG Event Reminders v3.2.0+:
- *   1. getSubscriberIdsBySegmentSettings()
- *   2. subscribe()
- *
- * NEVER use subscribeBySegment() — it silently returns 0 recipients.
- * NEVER use Subject::create() — throws "Unknown column campaign_id".
- * Settings subscribers array MUST include both 'list' and 'tag' keys.
+ * LG_WD_Sender_Interface
+ * All senders must implement this.
  */
-class LG_WD_Sender {
+interface LG_WD_Sender_Interface {
+    /**
+     * Send the email to the full subscriber list.
+     * @return array [ 'success' => bool, 'message' => string, 'campaign_id' => int|null ]
+     */
+    public function send( string $subject, string $html, array $options = [] ): array;
 
     /**
-     * Build the payload, render the email, create the campaign, and send.
-     *
-     * @param  bool   $dry_run  If true, returns rendered HTML without sending.
-     * @param  string $to_email If set (test send), sends only to this address via WP mail fallback.
-     * @return array  [ 'success' => bool, 'message' => string, 'campaign_id' => int|null ]
+     * Send a test email to a single address.
+     * @return array [ 'success' => bool, 'message' => string ]
      */
-    public static function send( bool $dry_run = false, string $to_email = '' ): array {
-        // 1. Guard: FluentCRM must be loaded
+    public function send_test( string $to_email, string $subject, string $html ): array;
+
+    /**
+     * Human-readable label for this sender.
+     */
+    public function get_label(): string;
+}
+
+// ── FluentCRM implementation ────────────────────────────────────────────────
+
+class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
+
+    public function get_label(): string {
+        return 'FluentCRM';
+    }
+
+    public function send( string $subject, string $html, array $options = [] ): array {
         if ( ! class_exists( 'FluentCrm\App\Models\Campaign' ) ) {
-            self::log( 'ERROR: FluentCRM Campaign model not found. Is FluentCRM active?' );
+            self::log( 'ERROR: FluentCRM Campaign model not found.' );
             return [ 'success' => false, 'message' => 'FluentCRM not available.', 'campaign_id' => null ];
         }
 
-        // 2. Build content payload
-        self::log( 'INFO: Building content payload.' );
-        $payload = LG_WD_Query::build_payload();
-
-        if ( empty( $payload ) ) {
-            self::log( 'WARNING: No content found in payload. Aborting send.' );
-            return [ 'success' => false, 'message' => 'No content available.', 'campaign_id' => null ];
-        }
-
-        $item_count = array_sum( array_map( fn( $p ) => count( $p['items'] ), $payload ) );
-        self::log( "INFO: Payload built. {$item_count} items across " . count( $payload ) . ' sections.' );
-
-        // 3. Render HTML
-        $html    = LG_WD_Email_Builder::build( $payload );
-        $subject = LG_WD_Email_Builder::build_subject( $payload );
-
-        if ( $dry_run ) {
-            self::log( 'INFO: Dry run — returning HTML without sending.' );
-            return [ 'success' => true, 'message' => 'Dry run complete.', 'html' => $html, 'subject' => $subject, 'campaign_id' => null ];
-        }
-
-        // 4. Test send (single address via wp_mail)
-        if ( $to_email ) {
-            return self::send_test( $to_email, $subject, $html );
-        }
-
-        // 5. Full FluentCRM send
-        return self::send_via_fluentcrm( $subject, $html );
-    }
-
-    // ── FluentCRM campaign pipeline ──────────────────────────────────────────
-
-    private static function send_via_fluentcrm( string $subject, string $html ): array {
         $settings   = LG_WD_Settings::get_all();
         $list_id    = (string) LG_WD_FCRM_LIST_ID;
         $from_name  = $settings['from_name'];
         $from_email = $settings['from_email'];
 
-        // Subscriber segment settings — MUST include both list AND tag
         $subscriber_settings = [
             'subscribers' => [
                 [ 'list' => $list_id, 'tag' => 'all' ],
             ],
         ];
 
-        // Campaign data
         $scheduled_at = current_time( 'mysql' );
 
         $campaign_data = [
-            'title'        => 'Weekly Digest — ' . date_i18n( 'F j, Y' ),
+            'title'        => $options['campaign_title'] ?? ( 'Weekly Digest — ' . date_i18n( 'F j, Y' ) ),
             'subject'      => $subject,
             'status'       => 'scheduled',
             'type'         => 'regular',
@@ -94,12 +68,12 @@ class LG_WD_Sender {
                 'subscribers'     => $subscriber_settings['subscribers'],
                 'sending_filter'  => 'list_tag',
                 'template_config' => [
-                    'content_width'   => '600',
-                    'body_bg_color'   => '#e8e2d8',
-                    'content_bg_color'=> '#FAF6EE',
-                    'content_font'    => 'Arial, Helvetica, sans-serif',
+                    'content_width'    => '600',
+                    'body_bg_color'    => '#e8e2d8',
+                    'content_bg_color' => '#FAF6EE',
+                    'content_font'     => 'Arial, Helvetica, sans-serif',
                     'footer_text_color'=> '#5C4E3A',
-                    'disable_footer'  => 'yes', // we have our own footer
+                    'disable_footer'   => 'yes',
                 ],
             ],
             'scheduled_at' => $scheduled_at,
@@ -121,10 +95,9 @@ class LG_WD_Sender {
 
         self::log( "INFO: Campaign created. ID={$campaign->id}" );
 
-        // Step 1: Resolve subscriber IDs
-        self::log( 'INFO: Resolving subscriber IDs via getSubscriberIdsBySegmentSettings.' );
+        // Resolve subscriber IDs
         try {
-            $result = $campaign->getSubscriberIdsBySegmentSettings( $subscriber_settings );
+            $result         = $campaign->getSubscriberIdsBySegmentSettings( $subscriber_settings );
             $subscriber_ids = $result['subscriber_ids'] ?? [];
         } catch ( \Exception $e ) {
             self::log( 'ERROR: getSubscriberIdsBySegmentSettings threw: ' . $e->getMessage() );
@@ -132,14 +105,13 @@ class LG_WD_Sender {
         }
 
         if ( empty( $subscriber_ids ) ) {
-            self::log( "WARNING: Zero subscribers resolved for List ID {$list_id}. Check list/tag config." );
+            self::log( "WARNING: Zero subscribers resolved for List ID {$list_id}." );
             return [ 'success' => false, 'message' => 'No subscribers resolved.', 'campaign_id' => $campaign->id ];
         }
 
         self::log( 'INFO: Resolved ' . count( $subscriber_ids ) . ' subscribers.' );
 
-        // Step 2: Create CampaignEmail rows
-        self::log( 'INFO: Subscribing via $campaign->subscribe().' );
+        // Create CampaignEmail rows
         try {
             $campaign->subscribe( $subscriber_ids );
         } catch ( \Exception $e ) {
@@ -147,21 +119,17 @@ class LG_WD_Sender {
             return [ 'success' => false, 'message' => 'subscribe() failed.', 'campaign_id' => $campaign->id ];
         }
 
-        // Step 3: Verify CampaignEmail rows were created
+        // Verify
         $email_count = \FluentCrm\App\Models\CampaignEmail::where( 'campaign_id', $campaign->id )->count();
         self::log( "INFO: CampaignEmail rows created: {$email_count}" );
 
         if ( $email_count === 0 ) {
-            self::log( 'ERROR: CampaignEmail rows = 0 after subscribe(). Pipeline failure.' );
+            self::log( 'ERROR: CampaignEmail rows = 0 after subscribe().' );
             return [ 'success' => false, 'message' => 'CampaignEmail rows not created.', 'campaign_id' => $campaign->id ];
         }
 
-        // Update campaign status to processing so FluentCRM picks it up
         $campaign->status = 'working';
         $campaign->save();
-
-        // Store send record
-        self::record_send( $campaign->id, $campaign_data['title'], $email_count );
 
         self::log( "SUCCESS: Campaign ID={$campaign->id} dispatched to {$email_count} subscribers." );
 
@@ -172,9 +140,7 @@ class LG_WD_Sender {
         ];
     }
 
-    // ── Test send ────────────────────────────────────────────────────────────
-
-    private static function send_test( string $to_email, string $subject, string $html ): array {
+    public function send_test( string $to_email, string $subject, string $html ): array {
         self::log( "INFO: Sending test email to {$to_email}" );
 
         $headers = [
@@ -185,37 +151,135 @@ class LG_WD_Sender {
         $sent = wp_mail( $to_email, '[TEST] ' . $subject, $html, $headers );
 
         if ( $sent ) {
-            self::log( "INFO: Test email sent successfully to {$to_email}" );
-            return [ 'success' => true, 'message' => "Test sent to {$to_email}.", 'campaign_id' => null ];
+            self::log( "INFO: Test email sent to {$to_email}" );
+            return [ 'success' => true, 'message' => "Test sent to {$to_email}." ];
         }
 
-        self::log( "ERROR: wp_mail() failed for test send to {$to_email}" );
-        return [ 'success' => false, 'message' => 'wp_mail() failed.', 'campaign_id' => null ];
+        self::log( "ERROR: wp_mail() failed for {$to_email}" );
+        return [ 'success' => false, 'message' => 'wp_mail() failed.' ];
     }
-
-    // ── Send history ─────────────────────────────────────────────────────────
-
-    private static function record_send( int $campaign_id, string $title, int $recipients ): void {
-        $history   = get_option( 'lg_wd_send_history', [] );
-        $history[] = [
-            'campaign_id' => $campaign_id,
-            'title'       => $title,
-            'recipients'  => $recipients,
-            'sent_at'     => current_time( 'mysql' ),
-        ];
-        // Keep last 20
-        if ( count( $history ) > 20 ) {
-            $history = array_slice( $history, -20 );
-        }
-        update_option( 'lg_wd_send_history', $history, false );
-    }
-
-    // ── Logging ───────────────────────────────────────────────────────────────
 
     private static function log( string $message ): void {
         $always = str_starts_with( $message, 'ERROR' ) || str_starts_with( $message, 'WARNING' ) || str_starts_with( $message, 'SUCCESS' );
         if ( $always || ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) ) {
             error_log( '[LG Weekly Digest] ' . $message );
         }
+    }
+}
+
+// ── wp_mail implementation ──────────────────────────────────────────────────
+
+class LG_WD_Sender_WPMail implements LG_WD_Sender_Interface {
+
+    public function get_label(): string {
+        return 'WordPress Mail';
+    }
+
+    public function send( string $subject, string $html, array $options = [] ): array {
+        $to = $options['to'] ?? '';
+        if ( empty( $to ) ) {
+            return [ 'success' => false, 'message' => 'No recipient specified for wp_mail sender.', 'campaign_id' => null ];
+        }
+
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . LG_WD_Settings::get( 'from_name' ) . ' <' . LG_WD_Settings::get( 'from_email' ) . '>',
+        ];
+
+        $sent = wp_mail( $to, $subject, $html, $headers );
+
+        return [
+            'success'     => $sent,
+            'message'     => $sent ? 'Email sent via wp_mail.' : 'wp_mail() failed.',
+            'campaign_id' => null,
+        ];
+    }
+
+    public function send_test( string $to_email, string $subject, string $html ): array {
+        return $this->send( $subject, $html, [ 'to' => $to_email ] );
+    }
+}
+
+// ── Factory ─────────────────────────────────────────────────────────────────
+
+class LG_WD_Sender {
+
+    /**
+     * Get the active sender implementation.
+     * Developers can override via the 'lg_wd_sender' filter.
+     */
+    public static function get_sender(): LG_WD_Sender_Interface {
+        $sender = apply_filters( 'lg_wd_sender', null );
+        if ( $sender instanceof LG_WD_Sender_Interface ) {
+            return $sender;
+        }
+
+        // Default: FluentCRM if available, otherwise wp_mail
+        if ( class_exists( 'FluentCrm\App\Models\Campaign' ) ) {
+            return new LG_WD_Sender_FluentCRM();
+        }
+
+        return new LG_WD_Sender_WPMail();
+    }
+
+    /**
+     * Convenience: send an issue.
+     */
+    public static function send_issue( int $issue_id, bool $dry_run = false, string $test_email = '' ): array {
+        $issue_data = LG_WD_Issue::get_data( $issue_id );
+
+        if ( empty( $issue_data['sections'] ) ) {
+            return [ 'success' => false, 'message' => 'Issue has no sections.', 'campaign_id' => null ];
+        }
+
+        // Build payload from curated issue
+        $payload = LG_WD_Query::build_payload_from_issue( $issue_data );
+
+        if ( empty( $payload ) ) {
+            return [ 'success' => false, 'message' => 'No content in issue.', 'campaign_id' => null ];
+        }
+
+        // Render HTML
+        $html    = LG_WD_Email_Builder::build( $payload );
+        $subject = LG_WD_Email_Builder::build_subject( $payload );
+
+        if ( $dry_run ) {
+            return [ 'success' => true, 'message' => 'Preview ready.', 'html' => $html, 'subject' => $subject, 'campaign_id' => null ];
+        }
+
+        $sender = self::get_sender();
+
+        // Test send
+        if ( $test_email ) {
+            return $sender->send_test( $test_email, $subject, $html );
+        }
+
+        // Full send
+        $issue_title = get_the_title( $issue_id );
+        $result = $sender->send( $subject, $html, [ 'campaign_title' => $issue_title ] );
+
+        if ( $result['success'] ) {
+            LG_WD_Issue::mark_sent( $issue_id, $result['campaign_id'] ?? null );
+            self::record_send( $result['campaign_id'] ?? null, $issue_title, $result['message'] );
+        }
+
+        return $result;
+    }
+
+    // ── Send history ─────────────────────────────────────────────────────────
+
+    private static function record_send( ?int $campaign_id, string $title, string $message ): void {
+        $history   = get_option( 'lg_wd_send_history', [] );
+        $history[] = [
+            'campaign_id' => $campaign_id,
+            'title'       => $title,
+            'message'     => $message,
+            'sent_at'     => current_time( 'mysql' ),
+        ];
+        // Keep last 50
+        if ( count( $history ) > 50 ) {
+            $history = array_slice( $history, -50 );
+        }
+        update_option( 'lg_wd_send_history', $history, false );
     }
 }

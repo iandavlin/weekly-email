@@ -269,4 +269,61 @@ jQuery( function ( $ ) {
         $( '#lg-wd-choose-img' ).text( 'Choose Header Image' );
     });
 
+    // ── CPT Registry: Add ────────────────────────────────────────────────────
+
+    $( '#lg-wd-reg-add-btn' ).on( 'click', function () {
+        const $btn  = $( this );
+        const slug  = $( '#lg-wd-reg-slug' ).val();
+        const label = $( '#lg-wd-reg-label' ).val().trim();
+        const max   = parseInt( $( '#lg-wd-reg-max' ).val() ) || 5;
+
+        if ( ! slug || ! label ) {
+            showResponse( 'Select a post type and enter a label.', 'error' );
+            return;
+        }
+
+        setLoading( $btn, true );
+
+        $.post( ajaxUrl, {
+            action:    'lg_wd_registry_add',
+            nonce,
+            slug,
+            label,
+            max_items: max,
+        }, function ( res ) {
+            setLoading( $btn, false );
+            if ( res.success ) {
+                showResponse( '✓ ' + res.data.message, 'success' );
+                location.reload();
+            } else {
+                showResponse( '✗ ' + ( res.data || 'Failed to add.' ), 'error' );
+            }
+        });
+    });
+
+    // ── CPT Registry: Remove ─────────────────────────────────────────────────
+
+    $( document ).on( 'click', '.lg-wd-registry-remove', function () {
+        if ( ! confirm( 'Remove this content type from the registry?' ) ) return;
+
+        const $btn = $( this );
+        const slug = $btn.data( 'slug' );
+
+        setLoading( $btn, true );
+
+        $.post( ajaxUrl, {
+            action: 'lg_wd_registry_remove',
+            nonce,
+            slug,
+        }, function ( res ) {
+            setLoading( $btn, false );
+            if ( res.success ) {
+                $btn.closest( 'tr' ).fadeOut( 200, function () { $( this ).remove(); });
+                showResponse( '✓ ' + res.data.message, 'success' );
+            } else {
+                showResponse( '✗ ' + ( res.data || 'Failed to remove.' ), 'error' );
+            }
+        });
+    });
+
 });

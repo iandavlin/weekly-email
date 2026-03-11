@@ -3,7 +3,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * LG_WD_Admin
- * Registers the admin menu page and handles all admin UI + form saves.
+ * Admin menu registration + Settings/Registry/Design/History pages.
+ * The compose workflow lives in LG_WD_Compose.
  */
 class LG_WD_Admin {
 
@@ -14,9 +15,8 @@ class LG_WD_Admin {
         add_action( 'admin_menu',             [ __CLASS__, 'register_menu' ] );
         add_action( 'admin_enqueue_scripts',  [ __CLASS__, 'enqueue_assets' ] );
         add_action( 'wp_ajax_lg_wd_save',     [ __CLASS__, 'ajax_save' ] );
-        add_action( 'wp_ajax_lg_wd_test_send',[ __CLASS__, 'ajax_test_send' ] );
-        add_action( 'wp_ajax_lg_wd_send_now', [ __CLASS__, 'ajax_send_now' ] );
-        add_action( 'wp_ajax_lg_wd_preview',  [ __CLASS__, 'ajax_preview' ] );
+        add_action( 'wp_ajax_lg_wd_registry_add',   [ __CLASS__, 'ajax_registry_add' ] );
+        add_action( 'wp_ajax_lg_wd_registry_remove', [ __CLASS__, 'ajax_registry_remove' ] );
         add_action( 'admin_notices',          [ __CLASS__, 'admin_notices' ] );
     }
 
@@ -32,6 +32,33 @@ class LG_WD_Admin {
             'dashicons-email-alt',
             30
         );
+
+        // First submenu replaces the top-level duplicate
+        add_submenu_page(
+            self::PAGE_SLUG,
+            'Settings',
+            'Settings',
+            self::CAP,
+            self::PAGE_SLUG,
+            [ __CLASS__, 'render_page' ]
+        );
+
+        add_submenu_page(
+            self::PAGE_SLUG,
+            'Compose',
+            'Compose',
+            self::CAP,
+            LG_WD_Compose::PAGE_SLUG,
+            [ 'LG_WD_Compose', 'render_page' ]
+        );
+
+        add_submenu_page(
+            self::PAGE_SLUG,
+            'All Issues',
+            'All Issues',
+            self::CAP,
+            'edit.php?post_type=' . LG_WD_Issue::POST_TYPE
+        );
     }
 
     // ── Assets ────────────────────────────────────────────────────────────────
@@ -39,7 +66,6 @@ class LG_WD_Admin {
     public static function enqueue_assets( string $hook ): void {
         if ( strpos( $hook, self::PAGE_SLUG ) === false ) return;
 
-        // Media uploader for header image
         wp_enqueue_media();
 
         wp_enqueue_style(
@@ -71,7 +97,7 @@ class LG_WD_Admin {
         if ( ! $screen || strpos( $screen->id, self::PAGE_SLUG ) === false ) return;
 
         if ( ! class_exists( 'FluentCrm\App\Models\Campaign' ) ) {
-            echo '<div class="notice notice-error"><p><strong>LG Weekly Digest:</strong> FluentCRM is not active. The digest cannot send without it.</p></div>';
+            echo '<div class="notice notice-warning"><p><strong>LG Weekly Digest:</strong> FluentCRM not detected. Will fall back to wp_mail for sends.</p></div>';
         }
     }
 
@@ -87,7 +113,7 @@ class LG_WD_Admin {
 
         $tabs = [
             'settings' => 'Settings',
-            'sections' => 'Content Sections',
+            'registry' => 'CPT Registry',
             'design'   => 'Email Design',
             'history'  => 'Send History',
         ];
@@ -96,12 +122,15 @@ class LG_WD_Admin {
 
           <div class="lg-wd-page-header">
             <div>
-              <h1 class="lg-wd-title">Weekly Digest</h1>
-              <p class="lg-wd-subtitle">Automated email · List ID <?php echo LG_WD_FCRM_LIST_ID; ?></p>
+              <h1 class="lg-wd-title">Weekly Digest Settings</h1>
+              <p class="lg-wd-subtitle">
+                Sender: <strong><?php echo esc_html( LG_WD_Sender::get_sender()->get_label() ); ?></strong>
+              </p>
             </div>
             <div class="lg-wd-header-actions">
-              <button class="button lg-wd-btn-secondary" id="lg-wd-preview-btn">Preview Email</button>
-              <button class="button button-primary lg-wd-btn-primary" id="lg-wd-save-btn">Save Changes</button>
+              <a href="<?php echo esc_url( admin_url( 'admin.php?page=' . LG_WD_Compose::PAGE_SLUG ) ); ?>"
+                 class="button button-primary lg-wd-btn-primary">Go to Compose</a>
+              <button class="button lg-wd-btn-secondary" id="lg-wd-save-btn">Save Changes</button>
             </div>
           </div>
 
@@ -125,13 +154,6 @@ class LG_WD_Admin {
                   : '<span style="color:#aaa;">No sends yet</span>';
               ?>
             </div>
-            <div style="margin-left:auto;display:flex;gap:8px;">
-              <input type="email" id="lg-wd-test-email" placeholder="test@email.com"
-                     value="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>"
-                     class="lg-wd-input-sm">
-              <button class="button lg-wd-btn-secondary" id="lg-wd-test-btn">Send Test</button>
-              <button class="button lg-wd-btn-danger" id="lg-wd-send-now-btn">Send Now</button>
-            </div>
           </div>
 
           <!-- Response area -->
@@ -152,28 +174,14 @@ class LG_WD_Admin {
 
             <?php
             switch ( $active_tab ) {
-                case 'sections': self::render_tab_sections( $settings ); break;
-                case 'design':   self::render_tab_design( $settings );   break;
-                case 'history':  self::render_tab_history( $history );   break;
+                case 'registry': self::render_tab_registry(); break;
+                case 'design':   self::render_tab_design( $settings ); break;
+                case 'history':  self::render_tab_history( $history ); break;
                 default:         self::render_tab_settings( $settings ); break;
             }
             ?>
           </form>
 
-        </div><!-- /.wrap -->
-
-        <!-- Preview modal -->
-        <div id="lg-wd-preview-modal" style="display:none;">
-          <div class="lg-wd-modal-overlay"></div>
-          <div class="lg-wd-modal-inner">
-            <div class="lg-wd-modal-header">
-              <strong>Email Preview</strong>
-              <button class="lg-wd-modal-close">&times;</button>
-            </div>
-            <div class="lg-wd-modal-body">
-              <iframe id="lg-wd-preview-frame" src="" style="width:100%;height:100%;border:none;"></iframe>
-            </div>
-          </div>
         </div>
         <?php
     }
@@ -214,23 +222,11 @@ class LG_WD_Admin {
               </div>
 
               <div class="lg-wd-form-group">
-                <label class="lg-wd-label">Content Lookback Window</label>
-                <select name="lookback_days" class="lg-wd-select">
-                  <?php foreach ( [ 7 => '7 days (standard)', 14 => '14 days', 30 => '30 days' ] as $val => $lbl ) : ?>
-                    <option value="<?php echo $val; ?>" <?php selected( $s['lookback_days'], $val ); ?>>
-                      <?php echo $lbl; ?>
-                    </option>
-                  <?php endforeach; ?>
-                </select>
-                <p class="lg-wd-hint">If no new content found within this window, falls back to archive.</p>
-              </div>
-
-              <div class="lg-wd-form-group">
                 <label class="lg-wd-label">Subject Line Template</label>
                 <input type="text" name="subject_template"
                        value="<?php echo esc_attr( $s['subject_template'] ); ?>"
                        class="lg-wd-input">
-                <p class="lg-wd-hint">Available tokens: <code>{{week_date}}</code> <code>{{site_name}}</code> <code>{{item_count}}</code></p>
+                <p class="lg-wd-hint">Tokens: <code>{{week_date}}</code> <code>{{site_name}}</code> <code>{{item_count}}</code></p>
               </div>
 
             </div>
@@ -239,7 +235,6 @@ class LG_WD_Admin {
           <div class="lg-wd-card">
             <div class="lg-wd-card-header"><h3>Display Options</h3></div>
             <div class="lg-wd-card-body">
-
               <?php
               $toggles = [
                   'show_excerpts'   => [ 'Show Excerpts',         'Append post excerpt below each title' ],
@@ -258,7 +253,6 @@ class LG_WD_Admin {
                   </label>
                 </div>
               <?php endforeach; ?>
-
             </div>
           </div>
 
@@ -283,70 +277,75 @@ class LG_WD_Admin {
         </div>
     <?php }
 
-    // ── Tab: Content Sections ─────────────────────────────────────────────────
+    // ── Tab: CPT Registry ────────────────────────────────────────────────────
 
-    private static function render_tab_sections( array $s ): void {
-        $sections = $s['sections'] ?? [];
+    private static function render_tab_registry(): void {
+        $registry = LG_WD_CPT_Registry::get_all_with_overrides();
+        $wp_cpts  = LG_WD_CPT_Registry::get_available_post_types();
         ?>
         <div class="lg-wd-card">
           <div class="lg-wd-card-header">
-            <h3>Content Sections</h3>
-            <span class="lg-wd-hint">Drag to reorder · toggle to include/exclude</span>
+            <h3>Registered Content Types</h3>
+            <span class="lg-wd-hint">These appear as available sections when composing an email.</span>
           </div>
           <div class="lg-wd-card-body">
-            <ul id="lg-wd-sections-list" class="lg-wd-sections-list">
-              <?php foreach ( $sections as $i => $sec ) :
-                $key    = esc_attr( $sec['key'] );
-                $label  = esc_attr( $sec['label'] );
-                $type   = esc_attr( $sec['type'] );
-                $slug   = esc_attr( $sec['slug'] );
-                $max    = (int) $sec['max_items'];
-                $on     = ! empty( $sec['enabled'] );
-                ?>
-                <li class="lg-wd-section-item" data-index="<?php echo $i; ?>">
-                  <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
+            <table class="widefat striped" id="lg-wd-registry-table">
+              <thead>
+                <tr>
+                  <th>Label</th>
+                  <th>Slug</th>
+                  <th>Type</th>
+                  <th>Max Items</th>
+                  <th>Enabled</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ( $registry as $entry ) :
+                    $is_builtin = ! empty( $entry['builtin'] );
+                    ?>
+                    <tr data-slug="<?php echo esc_attr( $entry['slug'] ); ?>">
+                      <td><?php echo esc_html( $entry['label'] ); ?></td>
+                      <td><code><?php echo esc_html( $entry['slug'] ); ?></code></td>
+                      <td><?php echo esc_html( ucfirst( $entry['type'] ) ); ?></td>
+                      <td><?php echo (int) $entry['max_items']; ?></td>
+                      <td><?php echo $entry['enabled'] ? 'Yes' : 'No'; ?></td>
+                      <td>
+                        <?php if ( $is_builtin ) : ?>
+                          <span class="lg-wd-section-type-badge">Built-in</span>
+                        <?php else : ?>
+                          <button class="button button-small lg-wd-registry-remove" data-slug="<?php echo esc_attr( $entry['slug'] ); ?>">Remove</button>
+                        <?php endif; ?>
+                      </td>
+                    </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
 
-                  <input type="hidden" name="sections[<?php echo $i; ?>][key]"   value="<?php echo $key; ?>">
-                  <input type="hidden" name="sections[<?php echo $i; ?>][type]"  value="<?php echo $type; ?>">
-
-                  <label class="lg-wd-toggle">
-                    <input type="checkbox" name="sections[<?php echo $i; ?>][enabled]"
-                           value="1" <?php checked( $on ); ?>>
-                    <span class="lg-wd-toggle-track"></span>
-                  </label>
-
-                  <div class="lg-wd-section-info">
-                    <input type="text" name="sections[<?php echo $i; ?>][label]"
-                           value="<?php echo $label; ?>"
-                           class="lg-wd-section-label-input"
-                           placeholder="Section label">
-                    <input type="text" name="sections[<?php echo $i; ?>][slug]"
-                           value="<?php echo $slug; ?>"
-                           class="lg-wd-section-slug-input"
-                           placeholder="CPT slug(s) comma-separated">
-                  </div>
-
-                  <div class="lg-wd-section-max">
-                    <label>Max</label>
-                    <input type="number" name="sections[<?php echo $i; ?>][max_items]"
-                           value="<?php echo $max; ?>" min="1" max="20" style="width:50px;">
-                  </div>
-
-                  <?php if ( ! in_array( $type, [ 'events', 'forum', 'spotlight', 'sponsor' ], true ) ) : ?>
-                    <button type="button" class="button button-small lg-wd-remove-section"
-                            title="Remove section">✕</button>
-                  <?php else : ?>
-                    <span class="lg-wd-section-type-badge"><?php echo ucfirst( $type ); ?></span>
-                  <?php endif; ?>
-                </li>
-              <?php endforeach; ?>
-            </ul>
-
-            <div class="lg-wd-add-section">
-              <input type="text" id="lg-wd-new-label" placeholder="Section label (e.g. Loothprints)">
-              <input type="text" id="lg-wd-new-slug"  placeholder="CPT slug (e.g. loothprints)">
-              <input type="number" id="lg-wd-new-max" placeholder="Max" value="3" min="1" max="20" style="width:60px;">
-              <button type="button" class="button" id="lg-wd-add-section-btn">+ Add Section</button>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;">
+              <h4 style="margin:0 0 10px;">Add New Content Type</h4>
+              <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Post Type</label>
+                  <select id="lg-wd-reg-slug" class="lg-wd-select">
+                    <option value="">— Select —</option>
+                    <?php foreach ( $wp_cpts as $slug => $label ) : ?>
+                      <option value="<?php echo esc_attr( $slug ); ?>">
+                        <?php echo esc_html( $label ); ?> (<?php echo esc_html( $slug ); ?>)
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Display Label</label>
+                  <input type="text" id="lg-wd-reg-label" class="lg-wd-input" placeholder="e.g. Videos">
+                </div>
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Max Items</label>
+                  <input type="number" id="lg-wd-reg-max" class="lg-wd-input" value="5" min="1" max="20" style="width:60px;">
+                </div>
+                <button class="button button-primary" id="lg-wd-reg-add-btn">+ Add</button>
+              </div>
             </div>
           </div>
         </div>
@@ -356,7 +355,6 @@ class LG_WD_Admin {
 
     private static function render_tab_design( array $s ): void { ?>
         <div class="lg-wd-grid lg-wd-grid-2">
-
           <div class="lg-wd-card">
             <div class="lg-wd-card-header"><h3>Header Image</h3></div>
             <div class="lg-wd-card-body">
@@ -385,7 +383,6 @@ class LG_WD_Admin {
               <p class="lg-wd-hint">Appears at the bottom of every digest above the unsubscribe link.</p>
             </div>
           </div>
-
         </div>
     <?php }
 
@@ -402,9 +399,9 @@ class LG_WD_Admin {
                 <thead>
                   <tr>
                     <th>Date</th>
-                    <th>Campaign</th>
+                    <th>Title</th>
                     <th>Campaign ID</th>
-                    <th>Recipients</th>
+                    <th>Result</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -413,13 +410,13 @@ class LG_WD_Admin {
                       <td><?php echo esc_html( date( 'M j, Y g:i A', strtotime( $row['sent_at'] ) ) ); ?></td>
                       <td><?php echo esc_html( $row['title'] ); ?></td>
                       <td>
-                        <?php if ( $row['campaign_id'] ) : ?>
+                        <?php if ( ! empty( $row['campaign_id'] ) ) : ?>
                           <a href="<?php echo esc_url( admin_url( 'admin.php?page=fluentcrm-admin#/campaigns/' . $row['campaign_id'] ) ); ?>">
                             #<?php echo (int) $row['campaign_id']; ?>
                           </a>
                         <?php else : ?>—<?php endif; ?>
                       </td>
-                      <td><?php echo number_format( (int) $row['recipients'] ); ?></td>
+                      <td><?php echo esc_html( $row['message'] ?? '' ); ?></td>
                     </tr>
                   <?php endforeach; ?>
                 </tbody>
@@ -429,7 +426,7 @@ class LG_WD_Admin {
         </div>
     <?php }
 
-    // ── AJAX handlers ─────────────────────────────────────────────────────────
+    // ── AJAX: Save settings ──────────────────────────────────────────────────
 
     public static function ajax_save(): void {
         check_ajax_referer( 'lg_wd_admin', 'nonce' );
@@ -441,7 +438,6 @@ class LG_WD_Admin {
             'enabled'          => ! empty( $raw['enabled'] ),
             'send_day'         => sanitize_key( $raw['send_day'] ?? 'monday' ),
             'send_time'        => sanitize_text_field( $raw['send_time'] ?? '09:00' ),
-            'lookback_days'    => absint( $raw['lookback_days'] ?? 7 ),
             'header_image_url' => esc_url_raw( $raw['header_image_url'] ?? '' ),
             'from_name'        => sanitize_text_field( $raw['from_name'] ?? '' ),
             'from_email'       => sanitize_email( $raw['from_email'] ?? '' ),
@@ -452,58 +448,45 @@ class LG_WD_Admin {
             'skip_empty'       => ! empty( $raw['skip_empty'] ),
         ];
 
-        if ( isset( $raw['sections'] ) && is_array( $raw['sections'] ) ) {
-            // Only pass well-formed section entries
-            $data['sections'] = array_values( array_filter(
-                $raw['sections'],
-                fn( $s ) => is_array( $s ) && ! empty( $s['key'] )
-            ) );
-        }
-
         LG_WD_Settings::save( $data );
-        do_action( 'lg_wd_settings_saved' ); // triggers reschedule
+        do_action( 'lg_wd_settings_saved' );
 
         wp_send_json_success( [ 'message' => 'Settings saved. Cron rescheduled.' ] );
     }
 
-    public static function ajax_test_send(): void {
+    // ── AJAX: Registry add ──────────────────────────────────────────────────
+
+    public static function ajax_registry_add(): void {
         check_ajax_referer( 'lg_wd_admin', 'nonce' );
         if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
 
-        $to = sanitize_email( $_POST['to'] ?? get_option( 'admin_email' ) );
-        if ( ! is_email( $to ) ) {
-            wp_send_json_error( 'Invalid email address.' );
-        }
+        $entry = [
+            'slug'      => sanitize_key( $_POST['slug'] ?? '' ),
+            'label'     => sanitize_text_field( $_POST['label'] ?? '' ),
+            'type'      => 'cpt',
+            'max_items' => absint( $_POST['max_items'] ?? 5 ),
+            'enabled'   => true,
+        ];
 
-        $result = LG_WD_Sender::send( false, $to );
-        if ( $result['success'] ) {
-            wp_send_json_success( [ 'message' => $result['message'] ] );
+        if ( LG_WD_CPT_Registry::add( $entry ) ) {
+            wp_send_json_success( [ 'message' => 'Content type registered.' ] );
         } else {
-            wp_send_json_error( $result['message'] );
-        }
-    }
-
-    public static function ajax_send_now(): void {
-        check_ajax_referer( 'lg_wd_admin', 'nonce' );
-        if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
-
-        $result = LG_WD_Sender::send();
-        if ( $result['success'] ) {
-            wp_send_json_success( [ 'message' => $result['message'] ] );
-        } else {
-            wp_send_json_error( $result['message'] );
+            wp_send_json_error( 'Failed to add. Slug may already exist or be empty.' );
         }
     }
 
-    public static function ajax_preview(): void {
+    // ── AJAX: Registry remove ───────────────────────────────────────────────
+
+    public static function ajax_registry_remove(): void {
         check_ajax_referer( 'lg_wd_admin', 'nonce' );
         if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
 
-        $result = LG_WD_Sender::send( true ); // dry run
-        if ( $result['success'] ) {
-            wp_send_json_success( [ 'html' => $result['html'], 'subject' => $result['subject'] ] );
+        $slug = sanitize_key( $_POST['slug'] ?? '' );
+
+        if ( LG_WD_CPT_Registry::remove( $slug ) ) {
+            wp_send_json_success( [ 'message' => 'Content type removed.' ] );
         } else {
-            wp_send_json_error( $result['message'] );
+            wp_send_json_error( 'Cannot remove built-in type or slug not found.' );
         }
     }
 }
