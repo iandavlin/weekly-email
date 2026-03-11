@@ -24,6 +24,28 @@ class LG_WD_Settings {
         'show_excerpts'    => true,
         'show_thumbnails'  => true,
         'skip_empty'       => true,
+
+        // FluentCRM targeting
+        'fcrm_list_id'        => 3,
+        'fcrm_tag'            => 'all',
+
+        // Cron behavior
+        'cron_mode'           => 'auto_send',
+        'review_notify_email' => '',
+
+        // Email content
+        'intro_text'          => "Here's what's been happening in the Looth Group community this week. Catch up on new content, events, and conversations from the forum.",
+        'footer_links'        => '[]',
+        'branding_tagline'    => 'Guitar Repair & Restoration Community',
+
+        // UTM tracking
+        'utm_enabled'         => false,
+        'utm_source'          => 'weekly-digest',
+        'utm_medium'          => 'email',
+        'utm_campaign'        => '{{week_date}}',
+
+        // Content fallback
+        'fallback_enabled'    => true,
     ];
 
     public static function get_all(): array {

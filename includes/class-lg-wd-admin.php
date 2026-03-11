@@ -274,6 +274,64 @@ class LG_WD_Admin {
             </div>
           </div>
 
+          <div class="lg-wd-card">
+            <div class="lg-wd-card-header"><h3>FluentCRM Targeting</h3></div>
+            <div class="lg-wd-card-body">
+              <div class="lg-wd-grid lg-wd-grid-2">
+                <div class="lg-wd-form-group">
+                  <label class="lg-wd-label">List ID</label>
+                  <input type="number" name="fcrm_list_id"
+                         value="<?php echo absint( $s['fcrm_list_id'] ?? 3 ); ?>"
+                         class="lg-wd-input" min="1">
+                  <p class="lg-wd-hint">FluentCRM list that receives the digest.</p>
+                </div>
+                <div class="lg-wd-form-group">
+                  <label class="lg-wd-label">Tag</label>
+                  <input type="text" name="fcrm_tag"
+                         value="<?php echo esc_attr( $s['fcrm_tag'] ?? 'all' ); ?>"
+                         class="lg-wd-input">
+                  <p class="lg-wd-hint">FluentCRM tag filter. Use <code>all</code> for all subscribers.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg-wd-card">
+            <div class="lg-wd-card-header"><h3>Automation</h3></div>
+            <div class="lg-wd-card-body">
+
+              <div class="lg-wd-form-group">
+                <label class="lg-wd-label">Cron Behavior</label>
+                <select name="cron_mode" class="lg-wd-select">
+                  <option value="auto_send" <?php selected( $s['cron_mode'] ?? 'auto_send', 'auto_send' ); ?>>Auto Send</option>
+                  <option value="draft_and_notify" <?php selected( $s['cron_mode'] ?? 'auto_send', 'draft_and_notify' ); ?>>Draft &amp; Notify</option>
+                </select>
+                <p class="lg-wd-hint"><strong>Auto Send</strong> fires immediately. <strong>Draft &amp; Notify</strong> creates a draft and emails you a review link.</p>
+              </div>
+
+              <div class="lg-wd-form-group">
+                <label class="lg-wd-label">Notification Email</label>
+                <input type="email" name="review_notify_email"
+                       value="<?php echo esc_attr( $s['review_notify_email'] ?? '' ); ?>"
+                       class="lg-wd-input"
+                       placeholder="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>">
+                <p class="lg-wd-hint">Used in Draft &amp; Notify mode. Defaults to site admin email if empty.</p>
+              </div>
+
+              <div class="lg-wd-toggle-row">
+                <div>
+                  <div class="lg-wd-toggle-label">Content Fallback</div>
+                  <div class="lg-wd-hint">If a section has 0 posts in the date range, pull the most recent posts regardless of date.</div>
+                </div>
+                <label class="lg-wd-toggle">
+                  <input type="checkbox" name="fallback_enabled" value="1" <?php checked( $s['fallback_enabled'] ?? true ); ?>>
+                  <span class="lg-wd-toggle-track"></span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+
         </div>
     <?php }
 
@@ -383,6 +441,77 @@ class LG_WD_Admin {
               <p class="lg-wd-hint">Appears at the bottom of every digest above the unsubscribe link.</p>
             </div>
           </div>
+
+          <div class="lg-wd-card">
+            <div class="lg-wd-card-header"><h3>Intro Text</h3></div>
+            <div class="lg-wd-card-body">
+              <textarea name="intro_text" rows="3" class="lg-wd-textarea"><?php
+                echo esc_textarea( $s['intro_text'] ?? '' );
+              ?></textarea>
+              <p class="lg-wd-hint">Appears at the top of every digest below the gold band.</p>
+            </div>
+          </div>
+
+          <div class="lg-wd-card">
+            <div class="lg-wd-card-header"><h3>Branding Tagline</h3></div>
+            <div class="lg-wd-card-body">
+              <input type="text" name="branding_tagline"
+                     value="<?php echo esc_attr( $s['branding_tagline'] ?? '' ); ?>"
+                     class="lg-wd-input"
+                     placeholder="Guitar Repair & Restoration Community">
+              <p class="lg-wd-hint">Shown below the logo text in the email header.</p>
+            </div>
+          </div>
+
+          <div class="lg-wd-card">
+            <div class="lg-wd-card-header"><h3>Footer Links</h3></div>
+            <div class="lg-wd-card-body">
+              <input type="hidden" name="footer_links" id="lg-wd-footer-links-json"
+                     value="<?php echo esc_attr( $s['footer_links'] ?? '[]' ); ?>">
+              <div id="lg-wd-footer-links-list"></div>
+              <button type="button" class="button" id="lg-wd-footer-link-add">+ Add Link</button>
+              <p class="lg-wd-hint">Links shown in the email footer. Leave empty to use defaults (Website, Forum, Events, Videos).</p>
+            </div>
+          </div>
+
+          <div class="lg-wd-card">
+            <div class="lg-wd-card-header"><h3>UTM Tracking</h3></div>
+            <div class="lg-wd-card-body">
+              <div class="lg-wd-toggle-row" style="margin-bottom:14px;">
+                <div>
+                  <div class="lg-wd-toggle-label">Enable UTM Parameters</div>
+                  <div class="lg-wd-hint">Append tracking parameters to all email links.</div>
+                </div>
+                <label class="lg-wd-toggle">
+                  <input type="checkbox" name="utm_enabled" value="1" <?php checked( $s['utm_enabled'] ?? false ); ?>>
+                  <span class="lg-wd-toggle-track"></span>
+                </label>
+              </div>
+              <div id="lg-wd-utm-fields" style="<?php echo empty( $s['utm_enabled'] ) ? 'display:none;' : ''; ?>">
+                <div class="lg-wd-grid lg-wd-grid-2" style="gap:10px;">
+                  <div class="lg-wd-form-group">
+                    <label class="lg-wd-label">Source</label>
+                    <input type="text" name="utm_source"
+                           value="<?php echo esc_attr( $s['utm_source'] ?? 'weekly-digest' ); ?>"
+                           class="lg-wd-input" placeholder="weekly-digest">
+                  </div>
+                  <div class="lg-wd-form-group">
+                    <label class="lg-wd-label">Medium</label>
+                    <input type="text" name="utm_medium"
+                           value="<?php echo esc_attr( $s['utm_medium'] ?? 'email' ); ?>"
+                           class="lg-wd-input" placeholder="email">
+                  </div>
+                </div>
+                <div class="lg-wd-form-group">
+                  <label class="lg-wd-label">Campaign</label>
+                  <input type="text" name="utm_campaign"
+                         value="<?php echo esc_attr( $s['utm_campaign'] ?? '{{week_date}}' ); ?>"
+                         class="lg-wd-input" placeholder="{{week_date}}">
+                  <p class="lg-wd-hint">Supports <code>{{week_date}}</code> token.</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
     <?php }
 
@@ -434,6 +563,13 @@ class LG_WD_Admin {
 
         $raw = $_POST;
 
+        // Validate footer_links JSON
+        $footer_links_raw = stripslashes( $raw['footer_links'] ?? '[]' );
+        $footer_links_arr = json_decode( $footer_links_raw, true );
+        if ( ! is_array( $footer_links_arr ) ) {
+            $footer_links_raw = '[]';
+        }
+
         $data = [
             'enabled'          => ! empty( $raw['enabled'] ),
             'send_day'         => sanitize_key( $raw['send_day'] ?? 'monday' ),
@@ -446,6 +582,29 @@ class LG_WD_Admin {
             'show_excerpts'    => ! empty( $raw['show_excerpts'] ),
             'show_thumbnails'  => ! empty( $raw['show_thumbnails'] ),
             'skip_empty'       => ! empty( $raw['skip_empty'] ),
+
+            // FluentCRM targeting
+            'fcrm_list_id'        => absint( $raw['fcrm_list_id'] ?? 3 ),
+            'fcrm_tag'            => sanitize_text_field( $raw['fcrm_tag'] ?? 'all' ),
+
+            // Cron behavior
+            'cron_mode'           => in_array( ( $raw['cron_mode'] ?? '' ), [ 'auto_send', 'draft_and_notify' ], true )
+                                        ? $raw['cron_mode'] : 'auto_send',
+            'review_notify_email' => sanitize_email( $raw['review_notify_email'] ?? '' ),
+
+            // Email content
+            'intro_text'          => sanitize_textarea_field( $raw['intro_text'] ?? '' ),
+            'footer_links'        => $footer_links_raw,
+            'branding_tagline'    => sanitize_text_field( $raw['branding_tagline'] ?? '' ),
+
+            // UTM tracking
+            'utm_enabled'         => ! empty( $raw['utm_enabled'] ),
+            'utm_source'          => sanitize_text_field( $raw['utm_source'] ?? 'weekly-digest' ),
+            'utm_medium'          => sanitize_text_field( $raw['utm_medium'] ?? 'email' ),
+            'utm_campaign'        => sanitize_text_field( $raw['utm_campaign'] ?? '{{week_date}}' ),
+
+            // Content fallback
+            'fallback_enabled'    => ! empty( $raw['fallback_enabled'] ),
         ];
 
         LG_WD_Settings::save( $data );

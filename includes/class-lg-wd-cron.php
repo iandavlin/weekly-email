@@ -62,8 +62,30 @@ class LG_WD_Cron {
                 return;
             }
 
-            $result = LG_WD_Sender::send_issue( $issue_id );
-            error_log( '[LG Weekly Digest] Cron result: ' . ( $result['success'] ? 'SUCCESS' : 'FAIL' ) . ' — ' . $result['message'] );
+            $cron_mode = LG_WD_Settings::get( 'cron_mode', 'auto_send' );
+
+            if ( $cron_mode === 'draft_and_notify' ) {
+                // Leave the issue as a draft and notify the admin
+                $notify_email = LG_WD_Settings::get( 'review_notify_email' );
+                if ( empty( $notify_email ) ) {
+                    $notify_email = get_option( 'admin_email' );
+                }
+
+                $compose_url = add_query_arg( [
+                    'page'     => 'lg-weekly-digest-compose',
+                    'issue_id' => $issue_id,
+                ], admin_url( 'admin.php' ) );
+
+                $subject = 'Weekly Digest Draft Ready for Review';
+                $body    = "A new weekly digest draft has been created and is ready for your review.\n\n";
+                $body   .= "Review and send it here:\n{$compose_url}\n";
+
+                wp_mail( $notify_email, $subject, $body );
+                error_log( "[LG Weekly Digest] Cron: draft_and_notify — notified {$notify_email}, issue #{$issue_id}." );
+            } else {
+                $result = LG_WD_Sender::send_issue( $issue_id );
+                error_log( '[LG Weekly Digest] Cron result: ' . ( $result['success'] ? 'SUCCESS' : 'FAIL' ) . ' — ' . $result['message'] );
+            }
         } catch ( \Throwable $e ) {
             error_log( '[LG Weekly Digest] Cron fire threw: ' . $e->getMessage() );
         }

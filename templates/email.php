@@ -43,7 +43,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
                 THE LOOTH GROUP
               </p>
               <p style="font-size:11px;color:#87986A;letter-spacing:2px;text-transform:uppercase;margin:0;">
-                Guitar Repair &amp; Restoration Community
+                <?php echo esc_html( $settings['branding_tagline'] ?? 'Guitar Repair & Restoration Community' ); ?>
               </p>
             <?php endif; ?>
           </td>
@@ -75,8 +75,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
             <!-- Intro line -->
             <p style="font-size:14px;color:#5C4E3A;line-height:1.6;margin:0 0 20px;
                        padding-bottom:16px;border-bottom:2px solid #ECB351;">
-              Here&rsquo;s what&rsquo;s been happening in the Looth Group community this week.
-              Catch up on new content, events, and conversations from the forum.
+              <?php echo nl2br( esc_html( $settings['intro_text'] ?? '' ) ); ?>
             </p>
 
             <?php foreach ( $payload as $key => $data ) : ?>
@@ -117,10 +116,22 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
               THE LOOTH GROUP
             </p>
             <p style="margin:0 0 10px;">
-              <a href="<?php echo $site_url; ?>" style="color:#87986A;font-size:11px;text-decoration:none;margin:0 8px;">Website</a>
-              <a href="<?php echo esc_url( home_url( '/forum' ) ); ?>" style="color:#87986A;font-size:11px;text-decoration:none;margin:0 8px;">Forum</a>
-              <a href="<?php echo esc_url( home_url( '/events' ) ); ?>" style="color:#87986A;font-size:11px;text-decoration:none;margin:0 8px;">Events</a>
-              <a href="<?php echo esc_url( home_url( '/videos' ) ); ?>" style="color:#87986A;font-size:11px;text-decoration:none;margin:0 8px;">Videos</a>
+              <?php
+              $footer_links = json_decode( $settings['footer_links'] ?? '[]', true );
+              if ( ! is_array( $footer_links ) || empty( $footer_links ) ) {
+                  // Fallback to default links
+                  $footer_links = [
+                      [ 'label' => 'Website', 'url' => home_url() ],
+                      [ 'label' => 'Forum',   'url' => home_url( '/forum' ) ],
+                      [ 'label' => 'Events',  'url' => home_url( '/events' ) ],
+                      [ 'label' => 'Videos',  'url' => home_url( '/videos' ) ],
+                  ];
+              }
+              foreach ( $footer_links as $fl ) :
+                  $fl_url = esc_url( LG_WD_Email_Builder::add_utm( $fl['url'] ) );
+              ?>
+              <a href="<?php echo $fl_url; ?>" style="color:#87986A;font-size:11px;text-decoration:none;margin:0 8px;"><?php echo esc_html( $fl['label'] ); ?></a>
+              <?php endforeach; ?>
             </p>
             <p style="font-size:10px;color:#5C4E3A;margin:0;line-height:1.6;">
               You&rsquo;re receiving this because you subscribed to the Looth Group weekly digest.<br>

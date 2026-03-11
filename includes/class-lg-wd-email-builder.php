@@ -84,7 +84,7 @@ class LG_WD_Email_Builder {
         $show_thumb    = LG_WD_Settings::get( 'show_thumbnails' );
         $show_excerpt  = LG_WD_Settings::get( 'show_excerpts' );
         $title         = esc_html( $item['title'] );
-        $url           = esc_url( $item['url'] );
+        $url           = esc_url( self::add_utm( $item['url'] ) );
         $type_label    = esc_html( $item['type_label'] );
         $date          = esc_html( $item['date'] );
         $excerpt       = $show_excerpt && ! empty( $item['excerpt'] )
@@ -123,7 +123,7 @@ class LG_WD_Email_Builder {
 
     private static function render_event( array $item ): string {
         $title        = esc_html( $item['title'] );
-        $url          = esc_url( $item['url'] );
+        $url          = esc_url( self::add_utm( $item['url'] ) );
         $month        = esc_html( $item['month_short'] ?? '' );
         $day          = esc_html( $item['day_num'] ?? '' );
         $display_date = esc_html( $item['display_date'] ?? '' );
@@ -167,7 +167,7 @@ class LG_WD_Email_Builder {
 
     private static function render_forum_item( array $item ): string {
         $title        = esc_html( $item['title'] );
-        $url          = esc_url( $item['url'] );
+        $url          = esc_url( self::add_utm( $item['url'] ) );
         $author       = esc_html( $item['author'] ?? '' );
         $reply_count  = (int) ( $item['reply_count'] ?? 0 );
         $date         = esc_html( $item['date'] ?? '' );
@@ -190,7 +190,7 @@ class LG_WD_Email_Builder {
 
     private static function render_spotlight( array $item ): string {
         $title   = esc_html( $item['title'] );
-        $url     = esc_url( $item['url'] );
+        $url     = esc_url( self::add_utm( $item['url'] ) );
         $excerpt = esc_html( $item['excerpt'] ?? '' );
         $initial = strtoupper( substr( $item['title'], 0, 1 ) );
 
@@ -218,7 +218,7 @@ class LG_WD_Email_Builder {
 
     private static function render_sponsor( array $item ): string {
         $title   = esc_html( $item['title'] );
-        $url     = esc_url( $item['url'] );
+        $url     = esc_url( self::add_utm( $item['url'] ) );
         $excerpt = esc_html( $item['excerpt'] ?? '' );
 
         return <<<HTML
@@ -234,6 +234,23 @@ class LG_WD_Email_Builder {
           </tr>
         </table>
         HTML;
+    }
+
+    // ── UTM helper ────────────────────────────────────────────────────────────
+
+    public static function add_utm( string $url ): string {
+        if ( ! LG_WD_Settings::get( 'utm_enabled' ) ) {
+            return $url;
+        }
+
+        $week_date = date_i18n( 'Y-m-d' );
+        $campaign  = str_replace( '{{week_date}}', $week_date, LG_WD_Settings::get( 'utm_campaign', '' ) );
+
+        return add_query_arg( [
+            'utm_source'   => LG_WD_Settings::get( 'utm_source', 'weekly-digest' ),
+            'utm_medium'   => LG_WD_Settings::get( 'utm_medium', 'email' ),
+            'utm_campaign' => $campaign,
+        ], $url );
     }
 
     // ── Subject line builder ───────────────────────────────────────────────────

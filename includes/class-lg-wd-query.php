@@ -195,7 +195,15 @@ class LG_WD_Query {
             ];
         }
 
-        return get_posts( $args );
+        $posts = get_posts( $args );
+
+        // Fallback: if date range returned nothing, pull most recent
+        if ( empty( $posts ) && LG_WD_Settings::get( 'fallback_enabled', true ) ) {
+            unset( $args['date_query'] );
+            $posts = get_posts( $args );
+        }
+
+        return $posts;
     }
 
     /**
@@ -220,7 +228,15 @@ class LG_WD_Query {
             ];
         }
 
-        return get_posts( $args );
+        $posts = get_posts( $args );
+
+        // Fallback: if date range returned nothing, pull most recent
+        if ( empty( $posts ) && LG_WD_Settings::get( 'fallback_enabled', true ) ) {
+            unset( $args['date_query'] );
+            $posts = get_posts( $args );
+        }
+
+        return $posts;
     }
 
     // ── Normalizers ──────────────────────────────────────────────────────────

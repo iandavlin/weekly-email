@@ -39,13 +39,14 @@ class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
         }
 
         $settings   = LG_WD_Settings::get_all();
-        $list_id    = (string) LG_WD_FCRM_LIST_ID;
+        $list_id    = (string) ( $settings['fcrm_list_id'] ?? LG_WD_FCRM_LIST_ID );
+        $tag        = $settings['fcrm_tag'] ?? LG_WD_FCRM_TAG;
         $from_name  = $settings['from_name'];
         $from_email = $settings['from_email'];
 
         $subscriber_settings = [
             'subscribers' => [
-                [ 'list' => $list_id, 'tag' => 'all' ],
+                [ 'list' => $list_id, 'tag' => $tag ],
             ],
         ];
 

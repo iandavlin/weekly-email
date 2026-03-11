@@ -657,3 +657,18 @@ code { background: #f0ebe2; padding: 1px 4px; border-radius: 3px; font-size: 11p
 .lg-wd-remove-section-btn {
   flex-shrink: 0;
 }
+
+/* ── Footer links repeater ─────────────────────────────────── */
+
+.lg-wd-footer-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.lg-wd-footer-link-row:last-child { margin-bottom: 0; }
+
+/* ── UTM fields ────────────────────────────────────────────── */
+
+#lg-wd-utm-fields { margin-top: 14px; }
