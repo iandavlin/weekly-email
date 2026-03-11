@@ -24,6 +24,7 @@ class LG_WD_CPT_Registry {
     const TEMPLATES = [
         'card'         => 'Card (thumbnail + excerpt)',
         'list'         => 'List (compact rows)',
+        'forum'        => 'Forum (16:9 image + reply count)',
         'date-forward' => 'Date-forward (events)',
         'sponsor'      => 'Sponsor / Partner',
         'full-text'    => 'Full Text (WYSIWYG)',
