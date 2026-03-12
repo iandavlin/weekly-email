@@ -19,13 +19,16 @@ if ( ! $img_url ) {
     }
 }
 
-// Sponsor page URL from ACF field (try get_field first, fall back to get_post_meta)
+// Sponsor page URL from ACF user field on the post author
+$author_id   = (int) get_post_field( 'post_author', $item['id'] );
 $sponsor_url = '';
-if ( function_exists( 'get_field' ) ) {
-    $sponsor_url = get_field( 'tlg_sponsor_page_url', $item['id'] );
-}
-if ( ! $sponsor_url ) {
-    $sponsor_url = get_post_meta( $item['id'], 'tlg_sponsor_page_url', true );
+if ( $author_id ) {
+    if ( function_exists( 'get_field' ) ) {
+        $sponsor_url = get_field( 'tlg_sponsor_page_url', 'user_' . $author_id );
+    }
+    if ( ! $sponsor_url ) {
+        $sponsor_url = get_user_meta( $author_id, 'tlg_sponsor_page_url', true );
+    }
 }
 
 // Sponsor name: linked to sponsor URL, or plain text fallback
