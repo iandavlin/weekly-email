@@ -123,7 +123,7 @@ if ( $dt_start ) {
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:14px;margin-bottom:14px;">
   <tr>
     <?php if ( $img_url ) : ?>
-    <td width="140" valign="top" style="padding:0 14px 0 0;">
+    <td class="event-thumb" width="140" valign="top" style="padding:0 14px 0 0;">
       <a href="<?php echo $url; ?>" style="display:block;line-height:0;border:0;outline:none;text-decoration:none;">
         <img src="<?php echo esc_url( $img_url ); ?>"
              width="140" height="79"
@@ -132,7 +132,7 @@ if ( $dt_start ) {
       </a>
     </td>
     <?php endif; ?>
-    <td valign="top" style="padding:0;">
+    <td class="event-content" valign="top" style="padding:0;">
       <!-- Date badge + title row -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>

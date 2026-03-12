@@ -20,6 +20,24 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><?php echo esc_html( LG_WD_Email_Builder::build_subject( $payload ) ); ?></title>
+<style>
+  @media only screen and (max-width: 620px) {
+    .email-container { width: 100% !important; }
+    .email-body { padding: 20px 16px 8px !important; }
+    .email-header { padding: 20px 16px !important; }
+    .email-hero { padding: 9px 16px !important; }
+    .email-signoff { padding: 8px 16px 20px !important; }
+    .email-footer { padding: 16px !important; }
+    .card-row { display: block !important; width: 100% !important; }
+    .card-thumb { display: block !important; width: 100% !important; padding: 0 0 10px 0 !important; }
+    .card-thumb img { width: 100% !important; height: auto !important; max-width: 100% !important; border-radius: 4px !important; }
+    .event-thumb { display: block !important; width: 100% !important; padding: 0 0 10px 0 !important; }
+    .event-thumb img { width: 100% !important; height: auto !important; max-width: 100% !important; }
+    .event-content { display: block !important; width: 100% !important; }
+    .sponsor-img img { max-width: 100% !important; height: auto !important; }
+    .hero-left, .hero-right { display: block !important; width: 100% !important; text-align: center !important; }
+  }
+</style>
 </head>
 <body style="margin:0;padding:0;background-color:#e8e2d8;font-family:Arial,Helvetica,sans-serif;">
 
@@ -28,12 +46,12 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     <td align="center" style="padding:24px 16px;">
 
       <!-- Email container -->
-      <table width="600" cellpadding="0" cellspacing="0" border="0"
+      <table class="email-container" width="600" cellpadding="0" cellspacing="0" border="0"
              style="max-width:600px;width:100%;background-color:#FAF6EE;border-radius:8px;overflow:hidden;">
 
         <!-- ── HEADER ─────────────────────────────────────────── -->
         <tr>
-          <td align="center" style="background-color:#2B2318;padding:28px 40px;">
+          <td class="email-header" align="center" style="background-color:#2B2318;padding:28px 40px;">
             <?php if ( $header_img_url ) : ?>
               <a href="<?php echo esc_url( home_url() ); ?>" style="text-decoration:none;border:0;">
                 <img src="<?php echo $header_img_url; ?>" alt="<?php echo $from_name; ?>"
@@ -53,14 +71,14 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
 
         <!-- ── HERO BAND ──────────────────────────────────────── -->
         <tr>
-          <td style="background-color:#ECB351;padding:9px 40px;">
+          <td class="email-hero" style="background-color:#ECB351;padding:9px 40px;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td>
+                <td class="hero-left">
                   <span style="font-size:12px;font-weight:700;color:#2B2318;
                                text-transform:uppercase;letter-spacing:1.5px;">Weekly Digest</span>
                 </td>
-                <td align="right">
+                <td class="hero-right" align="right">
                   <span style="font-size:12px;color:#5C4E3A;">
                     <?php echo $week_label; ?> &middot; <?php echo $item_count; ?> items
                   </span>
@@ -72,7 +90,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
 
         <!-- ── BODY ───────────────────────────────────────────── -->
         <tr>
-          <td style="padding:24px 40px 8px;">
+          <td class="email-body" style="padding:24px 40px 8px;">
 
             <!-- Intro line -->
             <p style="font-size:14px;color:#5C4E3A;line-height:1.6;margin:0 0 20px;
@@ -100,7 +118,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
 
         <!-- ── SIGN-OFF ────────────────────────────────────────── -->
         <tr>
-          <td style="padding:8px 40px 24px;">
+          <td class="email-signoff" style="padding:8px 40px 24px;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td style="border-top:1px solid rgba(92,78,58,0.15);padding-top:18px;
@@ -116,7 +134,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
 
         <!-- ── FOOTER ─────────────────────────────────────────── -->
         <tr>
-          <td style="background-color:#2B2318;padding:20px 40px;text-align:center;">
+          <td class="email-footer" style="background-color:#2B2318;padding:20px 40px;text-align:center;">
             <p style="font-family:Georgia,'Times New Roman',serif;color:#ECB351;
                        font-size:14px;letter-spacing:3px;margin:0 0 10px;">
               THE LOOTH GROUP
