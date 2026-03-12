@@ -20,7 +20,9 @@ $thumb_cell = '';
 if ( $show_thumb && ! empty( $item['thumb_url'] ) ) {
     $thumb_url  = esc_url( $item['thumb_url'] );
     $thumb_cell = '<td width="160" valign="top" style="padding:0 14px 0 0;">'
-        . '<img src="' . $thumb_url . '" width="160" height="90" style="display:block;border-radius:4px;object-fit:cover;" alt="">'
+        . '<a href="' . $url . '" style="display:block;line-height:0;border:0;outline:none;text-decoration:none;">'
+        . '<img src="' . $thumb_url . '" width="160" height="90" style="display:block;border-radius:4px;object-fit:cover;border:0;" alt="">'
+        . '</a>'
         . '</td>';
 }
 ?>
