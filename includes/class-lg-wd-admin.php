@@ -344,6 +344,9 @@ class LG_WD_Admin {
           </div>
 
         </div>
+        <p style="margin-top:16px;text-align:right;">
+          <button type="submit" class="button button-primary lg-wd-btn-primary">Save Settings</button>
+        </p>
     <?php }
 
     // ── Tab: CPT Registry ────────────────────────────────────────────────────
@@ -557,6 +560,9 @@ class LG_WD_Admin {
             </div>
           </div>
         </div>
+        <p style="margin-top:16px;text-align:right;">
+          <button type="submit" class="button button-primary lg-wd-btn-primary">Save Design Settings</button>
+        </p>
     <?php }
 
     // ── Tab: Send History ─────────────────────────────────────────────────────
