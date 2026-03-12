@@ -143,7 +143,7 @@ class LG_WD_Email_Builder {
 
     /**
      * Build an author HTML snippet with contextual link.
-     * - bbPress topics → /forums/users/{nicename}/topics/ (if bbPress URL resolves)
+     * - bbPress topics → BuddyBoss member forums tab (/members/{slug}/forums/)
      * - Other CPTs → author archive (/author/{nicename}/)
      * - Patreon/OAuth usernames → unlinked bold text
      * Returns "By <a>Author Name</a>" or "By <strong>Author Name</strong>".
@@ -155,28 +155,25 @@ class LG_WD_Email_Builder {
         $name = esc_html( get_the_author_meta( 'display_name', $author_id ) );
         if ( ! $name ) return '';
 
-        // Skip linking users with non-human nicenames (Patreon sync, numeric IDs, etc.)
         $nicename = get_the_author_meta( 'user_nicename', $author_id );
-        $is_linkable = $nicename && ! preg_match( '/^(patreon_|oauth_)\d+$|^\d+$/', $nicename );
+        $url      = '';
 
-        if ( ! $is_linkable ) {
-            return 'By <strong style="color:#87986A;">' . $name . '</strong>';
-        }
-
-        $url = '';
-
-        // bbPress topic → forum user topics page (only if URL is under /forums/, not /members/)
-        if ( get_post_type( $post_id ) === 'topic' && function_exists( 'bbp_get_user_profile_url' ) ) {
-            $forums_base = home_url( '/forums/' );
-            $profile_url = bbp_get_user_profile_url( $author_id );
-            if ( $profile_url && str_starts_with( $profile_url, $forums_base ) ) {
-                $url = trailingslashit( $profile_url ) . 'topics/';
+        // bbPress topic → BuddyBoss member forums tab (/members/{slug}/forums/)
+        if ( get_post_type( $post_id ) === 'topic' && function_exists( 'bp_core_get_user_domain' ) ) {
+            $member_url = bp_core_get_user_domain( $author_id );
+            if ( $member_url ) {
+                $url = trailingslashit( $member_url ) . 'forums/';
             }
         }
 
-        // Fallback: author archive
+        // Other CPTs → author archive (only for clean nicenames)
+        if ( ! $url && $nicename && ! preg_match( '/^(patreon_|oauth_)\d+$|^\d+$/', $nicename ) ) {
+            $url = home_url( '/author/' . $nicename . '/' );
+        }
+
+        // No valid URL → unlinked bold name
         if ( ! $url ) {
-            $url = get_author_posts_url( $author_id );
+            return 'By <strong style="color:#87986A;">' . $name . '</strong>';
         }
 
         $url = esc_url( self::add_utm( $url ) );
