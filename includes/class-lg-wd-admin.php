@@ -367,6 +367,7 @@ class LG_WD_Admin {
                 <tr>
                   <th style="width:20px;"></th>
                   <th>Label</th>
+                  <th>Section Header</th>
                   <th>Slug</th>
                   <th>Template</th>
                   <th>Sort</th>
@@ -384,6 +385,7 @@ class LG_WD_Admin {
                 ?>
                     <tr data-slug="<?php echo $slug; ?>"
                         data-label="<?php echo esc_attr( $entry['label'] ); ?>"
+                        data-section-header="<?php echo esc_attr( $entry['section_header'] ?? '' ); ?>"
                         data-template="<?php echo esc_attr( $tmpl ); ?>"
                         data-sort-mode="<?php echo esc_attr( $sort ); ?>"
                         data-tag-filter="<?php echo esc_attr( $entry['tag_filter'] ?? '' ); ?>"
@@ -392,6 +394,7 @@ class LG_WD_Admin {
                         data-enabled="<?php echo $entry['enabled'] ? '1' : '0'; ?>">
                       <td class="lg-wd-drag-handle" style="cursor:grab;text-align:center;color:#aaa;" title="Drag to reorder">☰</td>
                       <td class="lg-wd-reg-label"><?php echo esc_html( $entry['label'] ); ?></td>
+                      <td class="lg-wd-reg-section-header"><?php echo ! empty( $entry['section_header'] ) ? esc_html( $entry['section_header'] ) : '<span style="color:#aaa;">—</span>'; ?></td>
                       <td><code><?php echo esc_html( $entry['slug'] ); ?></code><?php if ( str_starts_with( $entry['slug'], '_all' ) ) echo ' <span style="color:#87986A;font-size:11px;">All Types</span>'; ?></td>
                       <td class="lg-wd-reg-template"><?php echo esc_html( LG_WD_CPT_Registry::TEMPLATES[ $tmpl ] ?? $tmpl ); ?></td>
                       <td class="lg-wd-reg-sort"><?php echo $sort === 'upcoming' ? 'Upcoming' : 'Newest'; ?></td>
@@ -433,6 +436,10 @@ class LG_WD_Admin {
                 <div class="lg-wd-form-group" style="margin-bottom:0;">
                   <label class="lg-wd-label">Display Label</label>
                   <input type="text" id="lg-wd-reg-label" class="lg-wd-input" placeholder="e.g. Videos">
+                </div>
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Section Header <span class="lg-wd-hint">(email)</span></label>
+                  <input type="text" id="lg-wd-reg-section-header" class="lg-wd-input" placeholder="e.g. From the Archive">
                 </div>
                 <div class="lg-wd-form-group" style="margin-bottom:0;">
                   <label class="lg-wd-label">Template</label>
@@ -478,6 +485,10 @@ class LG_WD_Admin {
               <div class="lg-wd-form-group" style="margin:0;">
                 <label class="lg-wd-label">Display Label</label>
                 <input type="text" id="lg-wd-edit-label" class="lg-wd-input">
+              </div>
+              <div class="lg-wd-form-group" style="margin:0;">
+                <label class="lg-wd-label">Section Header <span class="lg-wd-hint">(email)</span></label>
+                <input type="text" id="lg-wd-edit-section-header" class="lg-wd-input" placeholder="Falls back to label if empty">
               </div>
               <div class="lg-wd-form-group" style="margin:0;">
                 <label class="lg-wd-label">Template</label>
@@ -776,14 +787,15 @@ class LG_WD_Admin {
         }
 
         $entry = [
-            'slug'         => $raw_slug,
-            'label'        => sanitize_text_field( $_POST['label'] ?? '' ),
-            'max_items'    => absint( $_POST['max_items'] ?? 5 ),
-            'enabled'      => true,
-            'template'     => sanitize_key( $_POST['template'] ?? 'card' ),
-            'tag_filter'   => sanitize_text_field( $_POST['tag_filter'] ?? '' ),
-            'tag_taxonomy' => sanitize_key( $_POST['tag_taxonomy'] ?? 'post_tag' ),
-            'sort_mode'    => in_array( $_POST['sort_mode'] ?? '', [ 'newest', 'upcoming' ], true ) ? $_POST['sort_mode'] : 'newest',
+            'slug'           => $raw_slug,
+            'label'          => sanitize_text_field( $_POST['label'] ?? '' ),
+            'section_header' => sanitize_text_field( $_POST['section_header'] ?? '' ),
+            'max_items'      => absint( $_POST['max_items'] ?? 5 ),
+            'enabled'        => true,
+            'template'       => sanitize_key( $_POST['template'] ?? 'card' ),
+            'tag_filter'     => sanitize_text_field( $_POST['tag_filter'] ?? '' ),
+            'tag_taxonomy'   => sanitize_key( $_POST['tag_taxonomy'] ?? 'post_tag' ),
+            'sort_mode'      => in_array( $_POST['sort_mode'] ?? '', [ 'newest', 'upcoming' ], true ) ? $_POST['sort_mode'] : 'newest',
         ];
 
         if ( LG_WD_CPT_Registry::add( $entry ) ) {
@@ -818,13 +830,14 @@ class LG_WD_Admin {
         if ( ! $slug ) wp_send_json_error( 'Missing slug.' );
 
         $fields = [];
-        if ( isset( $_POST['label'] ) )        $fields['label']        = sanitize_text_field( $_POST['label'] );
-        if ( isset( $_POST['template'] ) )     $fields['template']     = sanitize_key( $_POST['template'] );
-        if ( isset( $_POST['sort_mode'] ) )    $fields['sort_mode']    = sanitize_key( $_POST['sort_mode'] );
-        if ( isset( $_POST['tag_filter'] ) )   $fields['tag_filter']   = sanitize_text_field( $_POST['tag_filter'] );
-        if ( isset( $_POST['tag_taxonomy'] ) ) $fields['tag_taxonomy'] = sanitize_key( $_POST['tag_taxonomy'] );
-        if ( isset( $_POST['max_items'] ) )    $fields['max_items']    = absint( $_POST['max_items'] );
-        if ( isset( $_POST['enabled'] ) )      $fields['enabled']      = $_POST['enabled'] === '1';
+        if ( isset( $_POST['label'] ) )          $fields['label']          = sanitize_text_field( $_POST['label'] );
+        if ( isset( $_POST['section_header'] ) ) $fields['section_header'] = sanitize_text_field( $_POST['section_header'] );
+        if ( isset( $_POST['template'] ) )       $fields['template']       = sanitize_key( $_POST['template'] );
+        if ( isset( $_POST['sort_mode'] ) )      $fields['sort_mode']      = sanitize_key( $_POST['sort_mode'] );
+        if ( isset( $_POST['tag_filter'] ) )     $fields['tag_filter']     = sanitize_text_field( $_POST['tag_filter'] );
+        if ( isset( $_POST['tag_taxonomy'] ) )   $fields['tag_taxonomy']   = sanitize_key( $_POST['tag_taxonomy'] );
+        if ( isset( $_POST['max_items'] ) )      $fields['max_items']      = absint( $_POST['max_items'] );
+        if ( isset( $_POST['enabled'] ) )        $fields['enabled']        = $_POST['enabled'] === '1';
 
         if ( LG_WD_CPT_Registry::update( $slug, $fields ) ) {
             wp_send_json_success( [ 'message' => 'Content type updated.' ] );

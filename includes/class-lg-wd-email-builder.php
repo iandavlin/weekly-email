@@ -59,11 +59,17 @@ class LG_WD_Email_Builder {
             $rows .= ob_get_clean();
         }
 
-        $label = esc_html( $section['label'] );
+        $label     = esc_html( $section['label'] );
+        $cpt_label = ! empty( $section['cpt_label'] ) ? esc_html( $section['cpt_label'] ) : '';
+
+        // Subheading: show CPT label below the main section header when a section_header is set
+        $sub_html = $cpt_label
+            ? '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:12px;font-weight:600;color:#87986A;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">' . $cpt_label . '</p>'
+            : '';
 
         return '<div style="margin-bottom:28px;">'
             . $archive_notice
-            . '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">'
+            . '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:' . ( $cpt_label ? '8px' : '14px' ) . ';">'
             . '<tr>'
             . '<td style="padding:0;white-space:nowrap;">'
             . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:14px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:1.5px;">' . $label . '</span>'
@@ -73,6 +79,7 @@ class LG_WD_Email_Builder {
             . '</td>'
             . '</tr>'
             . '</table>'
+            . $sub_html
             . $rows
             . '</div>';
     }

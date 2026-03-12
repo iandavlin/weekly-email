@@ -101,14 +101,15 @@ jQuery( function ( $ ) {
 
     $( '#lg-wd-reg-add-btn' ).on( 'click', function ( e ) {
         e.preventDefault();
-        const $btn       = $( this );
-        const slug       = $( '#lg-wd-reg-slug' ).val();
-        const label      = $( '#lg-wd-reg-label' ).val().trim();
-        const template   = $( '#lg-wd-reg-template' ).val() || 'card';
-        const sort_mode  = $( '#lg-wd-reg-sort' ).val() || 'newest';
-        const tag_filter = $( '#lg-wd-reg-tag' ).val().trim();
-        const taxonomy   = $( '#lg-wd-reg-taxonomy' ).val().trim() || 'post_tag';
-        const max        = parseInt( $( '#lg-wd-reg-max' ).val() ) || 5;
+        const $btn           = $( this );
+        const slug           = $( '#lg-wd-reg-slug' ).val();
+        const label          = $( '#lg-wd-reg-label' ).val().trim();
+        const section_header = $( '#lg-wd-reg-section-header' ).val().trim();
+        const template       = $( '#lg-wd-reg-template' ).val() || 'card';
+        const sort_mode      = $( '#lg-wd-reg-sort' ).val() || 'newest';
+        const tag_filter     = $( '#lg-wd-reg-tag' ).val().trim();
+        const taxonomy       = $( '#lg-wd-reg-taxonomy' ).val().trim() || 'post_tag';
+        const max            = parseInt( $( '#lg-wd-reg-max' ).val() ) || 5;
 
         if ( ! slug || ! label ) {
             showResponse( 'Select a post type and enter a label.', 'error' );
@@ -118,15 +119,16 @@ jQuery( function ( $ ) {
         setLoading( $btn, true );
 
         $.post( ajaxUrl, {
-            action:       'lg_wd_registry_add',
+            action:         'lg_wd_registry_add',
             nonce,
             slug,
             label,
+            section_header,
             template,
             sort_mode,
             tag_filter,
-            tag_taxonomy: taxonomy,
-            max_items:    max,
+            tag_taxonomy:   taxonomy,
+            max_items:      max,
         }, function ( res ) {
             setLoading( $btn, false );
             if ( res.success ) {
@@ -173,6 +175,7 @@ jQuery( function ( $ ) {
         const $row = $( this ).closest( 'tr' );
         $( '#lg-wd-edit-slug' ).val( $row.data( 'slug' ) );
         $( '#lg-wd-edit-label' ).val( $row.data( 'label' ) );
+        $( '#lg-wd-edit-section-header' ).val( $row.data( 'section-header' ) || '' );
         $( '#lg-wd-edit-template' ).val( $row.data( 'template' ) );
         $( '#lg-wd-edit-sort' ).val( $row.data( 'sort-mode' ) );
         $( '#lg-wd-edit-tag' ).val( $row.data( 'tag-filter' ) );
@@ -194,16 +197,17 @@ jQuery( function ( $ ) {
         setLoading( $btn, true );
 
         $.post( ajaxUrl, {
-            action:       'lg_wd_registry_update',
+            action:         'lg_wd_registry_update',
             nonce,
             slug,
-            label:        $( '#lg-wd-edit-label' ).val(),
-            template:     $( '#lg-wd-edit-template' ).val(),
-            sort_mode:    $( '#lg-wd-edit-sort' ).val(),
-            tag_filter:   $( '#lg-wd-edit-tag' ).val(),
-            tag_taxonomy: $( '#lg-wd-edit-taxonomy' ).val(),
-            max_items:    $( '#lg-wd-edit-max' ).val(),
-            enabled:      $( '#lg-wd-edit-enabled' ).val(),
+            label:          $( '#lg-wd-edit-label' ).val(),
+            section_header: $( '#lg-wd-edit-section-header' ).val(),
+            template:       $( '#lg-wd-edit-template' ).val(),
+            sort_mode:      $( '#lg-wd-edit-sort' ).val(),
+            tag_filter:     $( '#lg-wd-edit-tag' ).val(),
+            tag_taxonomy:   $( '#lg-wd-edit-taxonomy' ).val(),
+            max_items:      $( '#lg-wd-edit-max' ).val(),
+            enabled:        $( '#lg-wd-edit-enabled' ).val(),
         }, function ( res ) {
             setLoading( $btn, false );
             if ( res.success ) {

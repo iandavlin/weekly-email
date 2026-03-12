@@ -38,11 +38,12 @@ jQuery( function ( $ ) {
             });
 
             sections.push({
-                key:      $sec.data( 'section-key' ),
-                label:    $sec.find( '.lg-wd-compose-section-header strong' ).text(),
-                template: $sec.data( 'section-template' ),
-                slug:     $sec.data( 'section-slug' ),
-                post_ids: postIds,
+                key:            $sec.data( 'section-key' ),
+                label:          $sec.find( '.lg-wd-compose-section-header strong' ).text(),
+                section_header: $sec.data( 'section-header' ) || '',
+                template:       $sec.data( 'section-template' ),
+                slug:           $sec.data( 'section-slug' ),
+                post_ids:       postIds,
             });
         });
         return sections;

@@ -61,11 +61,16 @@ class LG_WD_Query {
             // Resolve template: prefer explicit, fall back from legacy 'type' field
             $template = $section['template'] ?? self::type_to_template( $section['type'] ?? '' );
 
+            // section_header = main heading in email; cpt_label = subheading (when header is set)
+            $has_header    = ! empty( $section['section_header'] );
+            $display_label = $has_header ? $section['section_header'] : $section['label'];
+
             $payload[ $section['key'] ] = [
                 'section' => [
-                    'key'      => $section['key'],
-                    'label'    => $section['label'],
-                    'template' => $template,
+                    'key'       => $section['key'],
+                    'label'     => $display_label,
+                    'cpt_label' => $has_header ? $section['label'] : '',
+                    'template'  => $template,
                 ],
                 'items'      => $items,
                 'is_archive' => false,

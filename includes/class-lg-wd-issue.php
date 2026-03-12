@@ -112,11 +112,12 @@ class LG_WD_Issue {
             $post_ids = LG_WD_Query::fetch_ids_for_section( $entry, $date_from, $date_to );
 
             $sections[] = [
-                'key'      => sanitize_key( $entry['slug'] ),
-                'label'    => $entry['label'],
-                'slug'     => $entry['slug'],
-                'template' => $entry['template'] ?? 'card',
-                'post_ids' => $post_ids,
+                'key'            => sanitize_key( $entry['slug'] ),
+                'label'          => $entry['label'],
+                'section_header' => $entry['section_header'] ?? '',
+                'slug'           => $entry['slug'],
+                'template'       => $entry['template'] ?? 'card',
+                'post_ids'       => $post_ids,
             ];
         }
 

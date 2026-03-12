@@ -253,13 +253,14 @@ class LG_WD_Compose {
     // ── Section card renderer (used in initial render + AJAX) ────────────────
 
     public static function render_section_card( array $section, int $idx ): void {
-        $key      = esc_attr( $section['key'] ?? '' );
-        $label    = esc_html( $section['label'] ?? '' );
-        $template = esc_attr( $section['template'] ?? 'card' );
-        $slug     = esc_attr( $section['slug'] ?? '' );
-        $post_ids = $section['post_ids'] ?? [];
+        $key            = esc_attr( $section['key'] ?? '' );
+        $label          = esc_html( $section['label'] ?? '' );
+        $section_header = esc_attr( $section['section_header'] ?? '' );
+        $template       = esc_attr( $section['template'] ?? 'card' );
+        $slug           = esc_attr( $section['slug'] ?? '' );
+        $post_ids       = $section['post_ids'] ?? [];
         ?>
-        <div class="lg-wd-compose-section" data-section-key="<?php echo $key; ?>" data-section-template="<?php echo $template; ?>" data-section-slug="<?php echo $slug; ?>">
+        <div class="lg-wd-compose-section" data-section-key="<?php echo $key; ?>" data-section-template="<?php echo $template; ?>" data-section-slug="<?php echo $slug; ?>" data-section-header="<?php echo $section_header; ?>">
           <div class="lg-wd-compose-section-header">
             <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
             <strong><?php echo $label; ?></strong>
