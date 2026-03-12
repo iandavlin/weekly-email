@@ -145,7 +145,7 @@ class LG_WD_Email_Builder {
      * Build an author HTML snippet with contextual link.
      * - bbPress topics → BuddyBoss member forums tab (/members/{slug}/forums/)
      * - Other CPTs → author archive (/author/{nicename}/)
-     * - Patreon/OAuth usernames → unlinked bold text
+     * - Ugly nicenames (Patreon/OAuth/numeric) → BuddyBoss member profile fallback
      * Returns "By <a>Author Name</a>" or "By <strong>Author Name</strong>".
      */
     public static function author_html( int $post_id ): string {
@@ -156,6 +156,7 @@ class LG_WD_Email_Builder {
         if ( ! $name ) return '';
 
         $nicename = get_the_author_meta( 'user_nicename', $author_id );
+        $is_clean = $nicename && ! preg_match( '/^(patreon_|oauth_)\d+$|^\d+$/', $nicename );
         $url      = '';
 
         // bbPress topic → BuddyBoss member forums tab (/members/{slug}/forums/)
@@ -166,9 +167,17 @@ class LG_WD_Email_Builder {
             }
         }
 
-        // Other CPTs → author archive (only for clean nicenames)
-        if ( ! $url && $nicename && ! preg_match( '/^(patreon_|oauth_)\d+$|^\d+$/', $nicename ) ) {
+        // Other CPTs → author archive (clean nicenames only)
+        if ( ! $url && $is_clean ) {
             $url = home_url( '/author/' . $nicename . '/' );
+        }
+
+        // Fallback: BuddyBoss member profile for users with ugly nicenames
+        if ( ! $url && function_exists( 'bp_core_get_user_domain' ) ) {
+            $member_url = bp_core_get_user_domain( $author_id );
+            if ( $member_url ) {
+                $url = $member_url;
+            }
         }
 
         // No valid URL → unlinked bold name
