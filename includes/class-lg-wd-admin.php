@@ -392,7 +392,7 @@ class LG_WD_Admin {
                         data-enabled="<?php echo $entry['enabled'] ? '1' : '0'; ?>">
                       <td class="lg-wd-drag-handle" style="cursor:grab;text-align:center;color:#aaa;" title="Drag to reorder">☰</td>
                       <td class="lg-wd-reg-label"><?php echo esc_html( $entry['label'] ); ?></td>
-                      <td><code><?php echo esc_html( $entry['slug'] ); ?></code></td>
+                      <td><code><?php echo esc_html( $entry['slug'] ); ?></code><?php if ( str_starts_with( $entry['slug'], '_all' ) ) echo ' <span style="color:#87986A;font-size:11px;">All Types</span>'; ?></td>
                       <td class="lg-wd-reg-template"><?php echo esc_html( LG_WD_CPT_Registry::TEMPLATES[ $tmpl ] ?? $tmpl ); ?></td>
                       <td class="lg-wd-reg-sort"><?php echo $sort === 'upcoming' ? 'Upcoming' : 'Newest'; ?></td>
                       <td class="lg-wd-reg-tag">
@@ -422,6 +422,7 @@ class LG_WD_Admin {
                   <label class="lg-wd-label">Post Type</label>
                   <select id="lg-wd-reg-slug" class="lg-wd-select">
                     <option value="">— Select —</option>
+                    <option value="_all">⭐ All Post Types (tag-based)</option>
                     <?php foreach ( $wp_cpts as $slug => $label ) : ?>
                       <option value="<?php echo esc_attr( $slug ); ?>">
                         <?php echo esc_html( $label ); ?> (<?php echo esc_html( $slug ); ?>)
@@ -760,8 +761,22 @@ class LG_WD_Admin {
         check_ajax_referer( 'lg_wd_admin', 'nonce' );
         if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
 
+        $raw_slug = sanitize_key( $_POST['slug'] ?? '' );
+
+        // "_all" = cross-type section; generate unique slug from label
+        if ( $raw_slug === '_all' ) {
+            $label_slug = sanitize_key( $_POST['label'] ?? 'picks' );
+            $raw_slug   = '_all_' . ( $label_slug ?: 'section' );
+            // Ensure uniqueness
+            $base = $raw_slug;
+            $i = 2;
+            while ( LG_WD_CPT_Registry::get_by_slug( $raw_slug ) ) {
+                $raw_slug = $base . '_' . $i++;
+            }
+        }
+
         $entry = [
-            'slug'         => sanitize_key( $_POST['slug'] ?? '' ),
+            'slug'         => $raw_slug,
             'label'        => sanitize_text_field( $_POST['label'] ?? '' ),
             'max_items'    => absint( $_POST['max_items'] ?? 5 ),
             'enabled'      => true,

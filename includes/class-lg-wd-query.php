@@ -29,12 +29,15 @@ class LG_WD_Query {
 
         if ( empty( $slug ) ) return [];
 
+        // Resolve post type: slugs starting with '_all' query across all public types
+        $post_type = str_starts_with( $slug, '_all' ) ? self::get_public_post_types() : $slug;
+
         // upcoming sort: future-first by event date meta (for event CPTs)
         if ( $sort_mode === 'upcoming' ) {
-            return self::fetch_upcoming( $slug, $max, $date_from, $date_to, $tag, $taxonomy );
+            return self::fetch_upcoming( $post_type, $max, $date_from, $date_to, $tag, $taxonomy );
         }
 
-        return self::fetch_cpt_posts( $slug, $max, $date_from, $date_to, $tag, $taxonomy );
+        return self::fetch_cpt_posts( $post_type, $max, $date_from, $date_to, $tag, $taxonomy );
     }
 
     // ── Mode 2: Issue-based ──────────────────────────────────────────────────
@@ -106,7 +109,7 @@ class LG_WD_Query {
      * Generic CPT fetch by date range, with optional tag filter.
      */
     private static function fetch_cpt_posts(
-        string $slug,
+        string|array $post_type,
         int $max,
         string $date_from,
         string $date_to,
@@ -114,7 +117,7 @@ class LG_WD_Query {
         string $taxonomy = 'post_tag'
     ): array {
         $args = [
-            'post_type'      => $slug,
+            'post_type'      => $post_type,
             'post_status'    => [ 'publish', 'closed', 'open' ], // bbPress uses 'open' and 'closed'
             'posts_per_page' => $max,
             'orderby'        => 'date',
@@ -157,7 +160,7 @@ class LG_WD_Query {
      * Respects date_from/date_to boundaries when provided.
      * Falls back to most recent past events if none upcoming.
      */
-    private static function fetch_upcoming( string $slug, int $max, string $date_from = '', string $date_to = '', string $tag = '', string $taxonomy = 'post_tag' ): array {
+    private static function fetch_upcoming( string|array $post_type, int $max, string $date_from = '', string $date_to = '', string $tag = '', string $taxonomy = 'post_tag' ): array {
         // Use date_from as lower bound, or today if not specified
         $start = $date_from ? date( 'Ymd', strtotime( $date_from ) ) : current_time( 'Ymd' );
 
@@ -181,7 +184,7 @@ class LG_WD_Query {
         }
 
         $args = [
-            'post_type'      => $slug,
+            'post_type'      => $post_type,
             'post_status'    => 'publish',
             'posts_per_page' => $max,
             'meta_key'       => 'events_start_date_and_time_',
@@ -282,6 +285,15 @@ class LG_WD_Query {
     private static function cpt_label( string $slug ): string {
         $obj = get_post_type_object( $slug );
         return $obj ? ( $obj->labels->singular_name ?? ucfirst( $slug ) ) : ucfirst( $slug );
+    }
+
+    private static function get_public_post_types(): array {
+        $types = get_post_types( [ 'public' => true ], 'names' );
+        unset( $types['attachment'] );
+        // Also include bbPress types that aren't technically public
+        if ( post_type_exists( 'topic' ) ) $types['topic'] = 'topic';
+        if ( post_type_exists( 'reply' ) ) $types['reply'] = 'reply';
+        return array_values( $types );
     }
 
     private static function get_all_registered_slugs(): array {
