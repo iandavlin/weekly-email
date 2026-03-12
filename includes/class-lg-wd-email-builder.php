@@ -142,9 +142,9 @@ class LG_WD_Email_Builder {
     }
 
     /**
-     * Build an author HTML snippet with a contextual link.
-     * - bbPress topics → link to user's bbPress topics page (/forums/users/{nicename}/topics/)
-     * - All other CPTs → link to author archive (/author/{nicename}/)
+     * Build an author HTML snippet linked to their author archive page.
+     * Skips link for users with non-human usernames (e.g. Patreon-synced)
+     * to avoid broken profile pages.
      * Returns "By <a>Author Name</a>" or "By <strong>Author Name</strong>".
      */
     public static function author_html( int $post_id ): string {
@@ -154,24 +154,12 @@ class LG_WD_Email_Builder {
         $name = esc_html( get_the_author_meta( 'display_name', $author_id ) );
         if ( ! $name ) return '';
 
-        $post_type = get_post_type( $post_id );
-        $url       = '';
+        // Skip linking users with non-human nicenames (Patreon sync, numeric IDs, etc.)
+        $nicename = get_the_author_meta( 'user_nicename', $author_id );
+        $is_linkable = $nicename && ! preg_match( '/^(patreon_|oauth_)\d+$|^\d+$/', $nicename );
 
-        // bbPress topic → link to user's forum topics page via bbPress API
-        if ( $post_type === 'topic' && function_exists( 'bbp_get_user_profile_url' ) ) {
-            $profile_url = bbp_get_user_profile_url( $author_id );
-            if ( $profile_url ) {
-                $url = trailingslashit( $profile_url ) . 'topics/';
-            }
-        }
-
-        // Fallback: author archive
-        if ( ! $url ) {
-            $url = get_author_posts_url( $author_id );
-        }
-
-        if ( $url ) {
-            $url = esc_url( self::add_utm( $url ) );
+        if ( $is_linkable ) {
+            $url = esc_url( self::add_utm( get_author_posts_url( $author_id ) ) );
             return 'By <a href="' . $url . '" style="color:#87986A;font-weight:600;text-decoration:none;">' . $name . '</a>';
         }
 
