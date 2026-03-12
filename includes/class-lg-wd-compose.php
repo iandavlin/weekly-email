@@ -175,6 +175,15 @@ class LG_WD_Compose {
               </div>
               <button class="button" id="lg-wd-add-section-btn">Add Section</button>
 
+              <div class="lg-wd-form-group" style="margin-bottom:0;margin-left:16px;border-left:1px solid #ddd;padding-left:16px;">
+                <label class="lg-wd-label">Quick Header</label>
+                <div style="display:flex;gap:6px;">
+                  <input type="text" id="lg-wd-quick-header-input" class="lg-wd-input"
+                         placeholder="e.g. New To The Website" style="width:200px;">
+                  <button class="button" id="lg-wd-quick-header-btn">+ Header</button>
+                </div>
+              </div>
+
               <div style="margin-left:auto;display:flex;gap:8px;align-items:flex-end;">
                 <div class="lg-wd-form-group" style="margin-bottom:0;">
                   <label class="lg-wd-label">Search Posts</label>

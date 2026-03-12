@@ -323,6 +323,25 @@ jQuery( function ( $ ) {
         $select.val( '' );
     });
 
+    // ── Quick Header (on-the-fly) ───────────────────────────────────────
+
+    $( '#lg-wd-quick-header-btn' ).on( 'click', function () {
+        const label = $( '#lg-wd-quick-header-input' ).val().trim();
+        if ( ! label ) {
+            showResponse( 'Enter a header label.', 'error' );
+            return;
+        }
+        const slug = '_header_' + label.toLowerCase().replace( /[^a-z0-9]+/g, '_' ).replace( /^_|_$/g, '' );
+        const key  = slug.replace( /[^a-z0-9_]/g, '_' );
+        addHeaderDivider( key, label, slug );
+        $( '#lg-wd-quick-header-input' ).val( '' );
+        showResponse( '✓ Header "' + label + '" added.', 'success' );
+    });
+
+    $( '#lg-wd-quick-header-input' ).on( 'keydown', function ( e ) {
+        if ( e.key === 'Enter' ) { e.preventDefault(); $( '#lg-wd-quick-header-btn' ).click(); }
+    });
+
     $( '#lg-wd-custom-section-add' ).on( 'click', function () {
         const label = $( '#lg-wd-custom-label' ).val().trim();
         const key   = $( '#lg-wd-custom-key' ).val().trim().replace( /[^a-z0-9_]/g, '_' );
