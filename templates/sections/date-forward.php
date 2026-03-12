@@ -46,32 +46,38 @@ if ( ! $display_date ) {
     $display_date = $item['date'];
 }
 
-// Build time string with UTC conversion
+// Build time string: "3pm EST (8pm UTC)"
 $time_display = '';
-if ( $time_raw ) {
-    $time_eastern = esc_html( $time_raw ) . ' ET';
+if ( $time_raw && $date_raw ) {
+    $tz_eastern = new DateTimeZone( LG_WD_TIMEZONE );
+    $tz_utc     = new DateTimeZone( 'UTC' );
+    $datetime_str = $date_raw . ' ' . $time_raw;
 
-    // Try to convert to UTC
-    $utc_time = '';
-    if ( $date_raw ) {
-        // Try parsing common time formats to build a full datetime
-        $datetime_str = $date_raw . ' ' . $time_raw;
-        $tz_eastern   = new DateTimeZone( LG_WD_TIMEZONE );
-        $tz_utc       = new DateTimeZone( 'UTC' );
+    // Try common time formats from the meta field
+    $formats = [ 'Ymd H:i:s', 'Ymd H:i', 'Ymd g:ia', 'Ymd g:i a', 'Ymd h:iA', 'Ymd h:i A' ];
+    foreach ( $formats as $fmt ) {
+        $dt = DateTime::createFromFormat( $fmt, $datetime_str, $tz_eastern );
+        if ( $dt ) {
+            // Eastern time — use timezone abbreviation (EST/EDT)
+            $eastern_abbr = $dt->format( 'T' ); // e.g. "EST" or "EDT"
+            $eastern_str  = strtolower( $dt->format( 'g' ) ) . $dt->format( ':i' );
+            // Strip :00 minutes for clean display (3pm not 3:00pm)
+            $eastern_str  = str_replace( ':00', '', $eastern_str );
+            $eastern_str .= strtolower( $dt->format( 'A' ) ) . ' ' . $eastern_abbr;
 
-        // Try multiple time formats
-        $formats = [ 'Ymd g:ia', 'Ymd g:i a', 'Ymd G:i', 'Ymd h:iA', 'Ymd h:i A' ];
-        foreach ( $formats as $fmt ) {
-            $dt = DateTime::createFromFormat( $fmt, $datetime_str, $tz_eastern );
-            if ( $dt ) {
-                $dt->setTimezone( $tz_utc );
-                $utc_time = $dt->format( 'g:i A' ) . ' UTC';
-                break;
-            }
+            // UTC conversion
+            $dt->setTimezone( $tz_utc );
+            $utc_str  = strtolower( $dt->format( 'g' ) ) . $dt->format( ':i' );
+            $utc_str  = str_replace( ':00', '', $utc_str );
+            $utc_str .= strtolower( $dt->format( 'A' ) ) . ' UTC';
+
+            $time_display = $eastern_str . ' (' . $utc_str . ')';
+            break;
         }
     }
-
-    $time_display = $utc_time ? $time_eastern . ' / ' . $utc_time : $time_eastern;
+} elseif ( $time_raw ) {
+    // No date to pair with — just show the raw time cleaned up
+    $time_display = esc_html( $time_raw );
 }
 
 // Tier badge
@@ -122,9 +128,6 @@ $tier_html   = $tier
             <p style="font-size:11px;color:#aaa;margin:0;">
               <?php echo $tier_html; ?>
               <span style="font-size:11px;color:#87986A;"><?php echo esc_html( $location ); ?></span>
-              <?php if ( $zoom_url ) : ?>
-                &middot; <a href="<?php echo esc_url( LG_WD_Email_Builder::add_utm( $zoom_url ) ); ?>" style="color:#87986A;text-decoration:underline;font-size:11px;">Join Zoom</a>
-              <?php endif; ?>
             </p>
           </td>
         </tr>

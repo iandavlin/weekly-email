@@ -106,6 +106,11 @@ class LG_WD_Admin {
     public static function render_page(): void {
         if ( ! current_user_can( self::CAP ) ) wp_die( 'Unauthorized' );
 
+        // Handle standard form POST save (fallback when AJAX fails)
+        if ( isset( $_POST['lg_wd_form_save'] ) && check_admin_referer( 'lg_wd_admin', 'lg_wd_nonce' ) ) {
+            self::handle_form_save();
+        }
+
         $settings    = LG_WD_Settings::get_all();
         $next_send   = LG_WD_Cron::next_send_label();
         $history     = array_reverse( get_option( 'lg_wd_send_history', [] ) );
@@ -120,6 +125,10 @@ class LG_WD_Admin {
         ?>
         <div class="wrap lg-wd-wrap">
 
+          <?php if ( ! empty( $_GET['saved'] ) ) : ?>
+            <div class="notice notice-success is-dismissible"><p>Settings saved.</p></div>
+          <?php endif; ?>
+
           <div class="lg-wd-page-header">
             <div>
               <h1 class="lg-wd-title">Weekly Digest Settings</h1>
@@ -130,7 +139,7 @@ class LG_WD_Admin {
             <div class="lg-wd-header-actions">
               <a href="<?php echo esc_url( admin_url( 'admin.php?page=' . LG_WD_Compose::PAGE_SLUG ) ); ?>"
                  class="button button-primary lg-wd-btn-primary">Go to Compose</a>
-              <button class="button lg-wd-btn-secondary" id="lg-wd-save-btn">Save Changes</button>
+              <button type="submit" class="button lg-wd-btn-secondary" id="lg-wd-save-btn">Save Changes</button>
             </div>
           </div>
 
@@ -169,8 +178,9 @@ class LG_WD_Admin {
             <?php endforeach; ?>
           </nav>
 
-          <form id="lg-wd-form">
+          <form id="lg-wd-form" method="post" action="">
             <?php wp_nonce_field( 'lg_wd_admin', 'lg_wd_nonce' ); ?>
+            <input type="hidden" name="lg_wd_form_save" value="1">
 
             <?php
             switch ( $active_tab ) {
@@ -589,21 +599,11 @@ class LG_WD_Admin {
         </div>
     <?php }
 
-    // ── AJAX: Save settings ──────────────────────────────────────────────────
+    // ── Save logic (shared by AJAX and form POST) ────────────────────────────
 
-    public static function ajax_save(): void {
-        check_ajax_referer( 'lg_wd_admin', 'nonce' );
-        if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
-
-        $raw = $_POST;
-
-        // Only save fields actually present in the request.
-        // Tabs render independently — absent fields should NOT be overwritten.
+    private static function save_settings_from_raw( array $raw ): void {
         $data = [];
 
-        // Sanitizer map: field => [ type, default_if_missing ]
-        // Checkbox fields use 'bool' type — they are present when checked (value '1'),
-        // absent when unchecked. We only write them if their name was explicitly sent.
         $text_fields = [
             'send_day'         => 'sanitize_key',
             'send_time'        => 'sanitize_text_field',
@@ -628,27 +628,21 @@ class LG_WD_Admin {
             }
         }
 
-        // Cron mode: validate against allowed values
         if ( isset( $raw['cron_mode'] ) ) {
             $data['cron_mode'] = in_array( $raw['cron_mode'], [ 'auto_send', 'draft_and_notify' ], true )
                 ? $raw['cron_mode'] : 'auto_send';
         }
 
-        // Checkboxes: unchecked boxes aren't sent in POST, so we use _active_tab
-        // to know which tab's checkboxes should be set to false when absent.
+        // Checkboxes: use _active_tab to know which tab's checkboxes to handle
         $tab = sanitize_key( $raw['_active_tab'] ?? '' );
-
         $tab_checkboxes = [
             'settings' => [ 'enabled', 'show_excerpts', 'show_thumbnails', 'skip_empty', 'fallback_enabled' ],
             'design'   => [ 'utm_enabled' ],
         ];
-
-        $active_checkboxes = $tab_checkboxes[ $tab ] ?? [];
-        foreach ( $active_checkboxes as $cb ) {
+        foreach ( $tab_checkboxes[ $tab ] ?? [] as $cb ) {
             $data[ $cb ] = ! empty( $raw[ $cb ] );
         }
 
-        // Footer links JSON
         if ( isset( $raw['footer_links'] ) ) {
             $footer_links_raw = stripslashes( $raw['footer_links'] );
             $footer_links_arr = json_decode( $footer_links_raw, true );
@@ -657,8 +651,31 @@ class LG_WD_Admin {
 
         LG_WD_Settings::save( $data );
         do_action( 'lg_wd_settings_saved' );
+    }
+
+    // ── AJAX: Save settings ──────────────────────────────────────────────────
+
+    public static function ajax_save(): void {
+        check_ajax_referer( 'lg_wd_admin', 'nonce' );
+        if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
+
+        self::save_settings_from_raw( $_POST );
 
         wp_send_json_success( [ 'message' => 'Settings saved. Cron rescheduled.' ] );
+    }
+
+    // ── Standard form POST save ─────────────────────────────────────────────
+
+    private static function handle_form_save(): void {
+        self::save_settings_from_raw( $_POST );
+        // Redirect back to same tab with success notice
+        $tab = sanitize_key( $_POST['_active_tab'] ?? 'settings' );
+        wp_safe_redirect( add_query_arg( [
+            'page'  => self::PAGE_SLUG,
+            'tab'   => $tab,
+            'saved' => '1',
+        ], admin_url( 'admin.php' ) ) );
+        exit;
     }
 
     // ── AJAX: Registry add ──────────────────────────────────────────────────

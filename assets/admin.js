@@ -22,31 +22,20 @@ jQuery( function ( $ ) {
         }
     }
 
-    // ── Save ──────────────────────────────────────────────────────────────────
+    // ── Save (form submit — works as standard POST, with AJAX enhancement) ──
 
-    $( '#lg-wd-save-btn' ).on( 'click', function () {
-        const $btn = $( this );
-        setLoading( $btn, true );
-
-        // Serialize footer links into hidden field before form serialize
+    $( '#lg-wd-form' ).on( 'submit', function ( e ) {
+        // Serialize footer links into hidden field before submit
         serializeFooterLinks();
 
-        const formData = $( '#lg-wd-form' ).serializeArray();
+        // Try AJAX first
+        e.preventDefault();
+        const $btn = $( '#lg-wd-save-btn' );
+        setLoading( $btn, true );
+
+        const formData = $( this ).serializeArray();
         formData.push( { name: 'action', value: 'lg_wd_save' } );
         formData.push( { name: 'nonce', value: nonce } );
-
-        // Collect checkbox states explicitly (serializeArray skips unchecked)
-        const checkboxNames = [
-            'enabled', 'show_excerpts', 'show_thumbnails', 'skip_empty',
-            'utm_enabled', 'fallback_enabled'
-        ];
-        checkboxNames.forEach( name => {
-            const $cb = $( `[name="${name}"]` );
-            if ( $cb.length && ! $cb.is( ':checked' ) ) {
-                const idx = formData.findIndex( f => f.name === name );
-                if ( idx !== -1 ) formData.splice( idx, 1 );
-            }
-        });
 
         $.post( ajaxUrl, formData, function ( res ) {
             setLoading( $btn, false );
@@ -56,8 +45,9 @@ jQuery( function ( $ ) {
                 showResponse( '✗ ' + ( res.data || 'Save failed.' ), 'error' );
             }
         } ).fail( function () {
+            // AJAX failed — fall back to standard form POST
             setLoading( $btn, false );
-            showResponse( '✗ Request failed.', 'error' );
+            e.target.submit();
         });
     });
 
