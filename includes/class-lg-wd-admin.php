@@ -14,6 +14,7 @@ class LG_WD_Admin {
     public static function init(): void {
         add_action( 'admin_menu',             [ __CLASS__, 'register_menu' ] );
         add_action( 'admin_enqueue_scripts',  [ __CLASS__, 'enqueue_assets' ] );
+        add_action( 'admin_init',             [ __CLASS__, 'handle_form_post' ] );
         add_action( 'wp_ajax_lg_wd_save',     [ __CLASS__, 'ajax_save' ] );
         add_action( 'wp_ajax_lg_wd_registry_add',   [ __CLASS__, 'ajax_registry_add' ] );
         add_action( 'wp_ajax_lg_wd_registry_remove', [ __CLASS__, 'ajax_registry_remove' ] );
@@ -105,11 +106,6 @@ class LG_WD_Admin {
 
     public static function render_page(): void {
         if ( ! current_user_can( self::CAP ) ) wp_die( 'Unauthorized' );
-
-        // Handle standard form POST save (fallback when AJAX fails)
-        if ( isset( $_POST['lg_wd_form_save'] ) && check_admin_referer( 'lg_wd_admin', 'lg_wd_nonce' ) ) {
-            self::handle_form_save();
-        }
 
         $settings    = LG_WD_Settings::get_all();
         $next_send   = LG_WD_Cron::next_send_label();
@@ -670,11 +666,15 @@ class LG_WD_Admin {
         wp_send_json_success( [ 'message' => 'Settings saved. Cron rescheduled.' ] );
     }
 
-    // ── Standard form POST save ─────────────────────────────────────────────
+    // ── Standard form POST save (runs on admin_init, before headers) ────────
 
-    private static function handle_form_save(): void {
+    public static function handle_form_post(): void {
+        if ( ! isset( $_POST['lg_wd_form_save'] ) ) return;
+        if ( ! current_user_can( self::CAP ) ) return;
+        if ( ! check_admin_referer( 'lg_wd_admin', 'lg_wd_nonce' ) ) return;
+
         self::save_settings_from_raw( $_POST );
-        // Redirect back to same tab with success notice
+
         $tab = sanitize_key( $_POST['_active_tab'] ?? 'settings' );
         wp_safe_redirect( add_query_arg( [
             'page'  => self::PAGE_SLUG,
