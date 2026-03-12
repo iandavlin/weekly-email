@@ -21,7 +21,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><?php echo esc_html( LG_WD_Email_Builder::build_subject( $payload ) ); ?></title>
 <style>
-  @media only screen and (max-width: 620px) {
+  @media only screen and (max-width: 720px) {
     .email-container { width: 100% !important; }
     .email-body { padding: 20px 16px 8px !important; }
     .email-header { padding: 20px 16px !important; }
@@ -46,8 +46,8 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     <td align="center" style="padding:24px 16px;">
 
       <!-- Email container -->
-      <table class="email-container" width="600" cellpadding="0" cellspacing="0" border="0"
-             style="max-width:600px;width:100%;background-color:#FAF6EE;border-radius:8px;overflow:hidden;">
+      <table class="email-container" width="700" cellpadding="0" cellspacing="0" border="0"
+             style="max-width:700px;width:100%;background-color:#FAF6EE;border-radius:8px;overflow:hidden;">
 
         <!-- ── HEADER ─────────────────────────────────────────── -->
         <tr>
