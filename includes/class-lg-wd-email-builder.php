@@ -78,6 +78,7 @@ class LG_WD_Email_Builder {
         }
 
         $rows = '';
+        $hide_type_label = $under_header; // templates use this to suppress per-item CPT badge
         foreach ( $items as $item ) {
             ob_start();
             include $template_file;
