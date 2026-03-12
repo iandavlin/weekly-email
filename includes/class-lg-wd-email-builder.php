@@ -35,6 +35,7 @@ class LG_WD_Email_Builder {
      * Render a group header divider (gold line + large label, no items).
      */
     public static function render_group_header( string $label ): string {
+        $label = self::strip_emoji( $label );
         return '<div style="margin-bottom:6px;margin-top:32px;">'
             . '<table width="100%" cellpadding="0" cellspacing="0" border="0">'
             . '<tr>'
@@ -83,7 +84,7 @@ class LG_WD_Email_Builder {
             $rows .= ob_get_clean();
         }
 
-        $label = esc_html( $section['label'] );
+        $label = esc_html( self::strip_emoji( $section['label'] ) );
         $html  = '<div style="margin-bottom:28px;">' . $archive_notice;
 
         if ( $under_header ) {
@@ -122,6 +123,21 @@ class LG_WD_Email_Builder {
             'utm_medium'   => LG_WD_Settings::get( 'utm_medium', 'email' ),
             'utm_campaign' => $campaign,
         ], $url );
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Strip emoji and other symbol characters from a string.
+     * Keeps letters, numbers, punctuation, and whitespace.
+     */
+    private static function strip_emoji( string $text ): string {
+        // Remove emoji & miscellaneous symbols (broad Unicode ranges)
+        $clean = preg_replace( '/[\x{1F000}-\x{1FFFF}]/u', '', $text );   // Emoticons, Dingbats, etc.
+        $clean = preg_replace( '/[\x{2600}-\x{27BF}]/u', '', $clean );    // Misc Symbols & Dingbats
+        $clean = preg_replace( '/[\x{FE00}-\x{FE0F}]/u', '', $clean );    // Variation Selectors
+        $clean = preg_replace( '/[\x{200D}]/u', '', $clean );              // Zero-width joiner
+        return trim( $clean );
     }
 
     // ── Subject line builder ───────────────────────────────────────────────────

@@ -265,7 +265,7 @@ class LG_WD_Query {
 
     public static function normalize_post( \WP_Post $post ): array {
         $thumb_url = has_post_thumbnail( $post->ID )
-            ? get_the_post_thumbnail_url( $post->ID, 'thumbnail' )
+            ? get_the_post_thumbnail_url( $post->ID, 'medium' )
             : '';
 
         return [
