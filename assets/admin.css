@@ -643,6 +643,28 @@ code { background: #f0ebe2; padding: 1px 4px; border-radius: 3px; font-size: 11p
 
 .lg-wd-post-date {}
 
+.lg-wd-external-badge {
+  background: #ECB351 !important;
+  color: #2B2318 !important;
+  font-weight: 600;
+}
+
+.lg-wd-manual-item {
+  border-left: 3px solid #ECB351;
+}
+
+.lg-wd-add-external-btn {
+  font-size: 11px !important;
+  padding: 0 8px !important;
+  color: var(--wd-gold) !important;
+  border-color: var(--wd-gold) !important;
+  background: transparent !important;
+}
+.lg-wd-add-external-btn:hover {
+  background: var(--wd-gold) !important;
+  color: var(--wd-dark) !important;
+}
+
 .lg-wd-post-remove {
   background: none;
   border: none;

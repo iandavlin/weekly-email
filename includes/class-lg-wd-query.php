@@ -70,10 +70,28 @@ class LG_WD_Query {
                 continue;
             }
 
-            $post_ids = $section['post_ids'] ?? [];
-            if ( empty( $post_ids ) && $skip_empty ) continue;
+            $post_ids     = $section['post_ids'] ?? [];
+            $manual_items = $section['manual_items'] ?? [];
+
+            if ( empty( $post_ids ) && empty( $manual_items ) && $skip_empty ) continue;
 
             $items = self::normalize_posts_by_ids( $post_ids );
+
+            // Append manual (external) items
+            foreach ( $manual_items as $mi ) {
+                $items[] = [
+                    'id'          => 0,
+                    'title'       => $mi['title'] ?? '',
+                    'url'         => $mi['url'] ?? '',
+                    'excerpt'     => $mi['excerpt'] ?? '',
+                    'thumb_url'   => $mi['thumb_url'] ?? '',
+                    'date'        => '',
+                    'post_type'   => 'external',
+                    'type_label'  => '',
+                    'author_name' => $mi['author_name'] ?? '',
+                    'author_url'  => $mi['author_url'] ?? '',
+                ];
+            }
 
             if ( empty( $items ) && $skip_empty ) continue;
 

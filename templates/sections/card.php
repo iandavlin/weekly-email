@@ -12,7 +12,18 @@ $title        = esc_html( $item['title'] );
 $url          = esc_url( LG_WD_Email_Builder::add_utm( $item['url'] ) );
 $type_label   = esc_html( $item['type_label'] );
 $date         = esc_html( $item['date'] );
-$author_html  = LG_WD_Email_Builder::author_html( $item['id'] );
+// Manual (external) items carry their own author data; WP items use post lookup
+if ( ! empty( $item['id'] ) ) {
+    $author_html = LG_WD_Email_Builder::author_html( $item['id'] );
+} elseif ( ! empty( $item['author_name'] ) ) {
+    $a_name = esc_html( $item['author_name'] );
+    $a_url  = ! empty( $item['author_url'] ) ? esc_url( LG_WD_Email_Builder::add_utm( $item['author_url'] ) ) : '';
+    $author_html = $a_url
+        ? 'By <a href="' . $a_url . '" style="color:#87986A;font-weight:600;text-decoration:none;">' . $a_name . '</a>'
+        : 'By <strong style="color:#87986A;">' . $a_name . '</strong>';
+} else {
+    $author_html = '';
+}
 $excerpt      = $show_excerpt && ! empty( $item['excerpt'] )
     ? '<p style="font-size:13px;color:#5C4E3A;margin:4px 0 0;line-height:1.6;">' . esc_html( $item['excerpt'] ) . '</p>'
     : '';
@@ -30,7 +41,7 @@ if ( $show_thumb && ! empty( $item['thumb_url'] ) ) {
 // Meta line: "By Author · Mar 12"
 $meta_parts = [];
 if ( $author_html ) $meta_parts[] = $author_html;
-$meta_parts[] = $date;
+if ( $date ) $meta_parts[] = $date;
 $meta_html = implode( ' &middot; ', $meta_parts );
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"

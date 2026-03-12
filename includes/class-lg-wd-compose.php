@@ -261,18 +261,61 @@ class LG_WD_Compose {
             </div>
           </div>
         </div>
+
+        <!-- External card modal -->
+        <div id="lg-wd-external-card-modal" style="display:none;">
+          <div class="lg-wd-modal-overlay"></div>
+          <div class="lg-wd-modal-inner" style="max-width:500px;">
+            <div class="lg-wd-modal-header">
+              <strong>Add External Card</strong>
+              <button class="lg-wd-modal-close">&times;</button>
+            </div>
+            <div class="lg-wd-modal-body" style="padding:20px;">
+              <input type="hidden" id="lg-wd-ext-target-section" value="">
+              <div class="lg-wd-form-group">
+                <label class="lg-wd-label">Title *</label>
+                <input type="text" id="lg-wd-ext-title" class="lg-wd-input" placeholder="Post title">
+              </div>
+              <div class="lg-wd-form-group">
+                <label class="lg-wd-label">Post URL *</label>
+                <input type="url" id="lg-wd-ext-url" class="lg-wd-input" placeholder="https://example.com/article">
+              </div>
+              <div class="lg-wd-form-group">
+                <label class="lg-wd-label">Featured Image URL</label>
+                <input type="url" id="lg-wd-ext-thumb" class="lg-wd-input" placeholder="https://example.com/image.jpg">
+              </div>
+              <div class="lg-wd-form-group">
+                <label class="lg-wd-label">Excerpt</label>
+                <textarea id="lg-wd-ext-excerpt" class="lg-wd-input" rows="2" placeholder="Short description…"></textarea>
+              </div>
+              <div class="lg-wd-form-row" style="display:flex;gap:12px;">
+                <div class="lg-wd-form-group" style="flex:1;">
+                  <label class="lg-wd-label">Author / Source Name</label>
+                  <input type="text" id="lg-wd-ext-author-name" class="lg-wd-input" placeholder="Guitar World">
+                </div>
+                <div class="lg-wd-form-group" style="flex:1;">
+                  <label class="lg-wd-label">Author / Source URL</label>
+                  <input type="url" id="lg-wd-ext-author-url" class="lg-wd-input" placeholder="https://example.com">
+                </div>
+              </div>
+              <button class="button button-primary" id="lg-wd-ext-add-btn">Add Card</button>
+            </div>
+          </div>
+        </div>
         <?php
     }
 
     // ── Section card renderer (used in initial render + AJAX) ────────────────
 
     public static function render_section_card( array $section, int $idx ): void {
-        $key       = esc_attr( $section['key'] ?? '' );
-        $label     = esc_html( $section['label'] ?? '' );
-        $is_header = ! empty( $section['is_header'] );
-        $template  = esc_attr( $section['template'] ?? 'card' );
-        $slug      = esc_attr( $section['slug'] ?? '' );
-        $post_ids  = $section['post_ids'] ?? [];
+        $key           = esc_attr( $section['key'] ?? '' );
+        $label         = esc_html( $section['label'] ?? '' );
+        $is_header     = ! empty( $section['is_header'] );
+        $template      = esc_attr( $section['template'] ?? 'card' );
+        $slug          = esc_attr( $section['slug'] ?? '' );
+        $post_ids      = $section['post_ids'] ?? [];
+        $manual_items  = $section['manual_items'] ?? [];
+        $total_items   = count( $post_ids ) + count( $manual_items );
 
         // Group header — visual divider, no posts
         if ( $is_header ) : ?>
@@ -290,11 +333,12 @@ class LG_WD_Compose {
             <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
             <strong><?php echo $label; ?></strong>
             <span class="lg-wd-section-type-badge"><?php echo esc_html( $template ); ?></span>
-            <span class="lg-wd-section-count"><?php echo count( $post_ids ); ?> items</span>
+            <span class="lg-wd-section-count"><?php echo $total_items; ?> items</span>
+            <button type="button" class="button button-small lg-wd-add-external-btn" title="Add external card">+ External</button>
             <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
           </div>
           <div class="lg-wd-compose-section-body">
-            <?php if ( empty( $post_ids ) ) : ?>
+            <?php if ( empty( $post_ids ) && empty( $manual_items ) ) : ?>
               <p class="lg-wd-empty-section">No posts in this section.</p>
             <?php else : ?>
               <ul class="lg-wd-post-list" data-section-key="<?php echo $key; ?>">
@@ -315,6 +359,25 @@ class LG_WD_Compose {
                         <span class="lg-wd-post-date"><?php echo esc_html( $date ); ?></span>
                       </span>
                       <button type="button" class="lg-wd-post-remove" title="Remove" data-post-id="<?php echo $pid; ?>">✕</button>
+                    </li>
+                <?php endforeach; ?>
+                <?php foreach ( $manual_items as $mi_idx => $mi ) : ?>
+                    <li class="lg-wd-post-item lg-wd-manual-item"
+                        data-manual-title="<?php echo esc_attr( $mi['title'] ); ?>"
+                        data-manual-url="<?php echo esc_attr( $mi['url'] ); ?>"
+                        data-manual-thumb="<?php echo esc_attr( $mi['thumb_url'] ); ?>"
+                        data-manual-excerpt="<?php echo esc_attr( $mi['excerpt'] ); ?>"
+                        data-manual-author-name="<?php echo esc_attr( $mi['author_name'] ); ?>"
+                        data-manual-author-url="<?php echo esc_attr( $mi['author_url'] ); ?>">
+                      <label class="lg-wd-post-check">
+                        <input type="checkbox" checked>
+                        <span class="lg-wd-post-title"><?php echo esc_html( $mi['title'] ); ?></span>
+                      </label>
+                      <span class="lg-wd-post-meta">
+                        <span class="lg-wd-post-type lg-wd-external-badge">EXTERNAL</span>
+                        <span class="lg-wd-post-date"><?php echo esc_html( $mi['author_name'] ); ?></span>
+                      </span>
+                      <button type="button" class="lg-wd-post-remove lg-wd-manual-remove" title="Remove">✕</button>
                     </li>
                 <?php endforeach; ?>
               </ul>
@@ -345,13 +408,27 @@ class LG_WD_Compose {
 
         $sections = [];
         foreach ( $raw_sections as $s ) {
+            // Sanitize manual (external) items
+            $manual_items = [];
+            foreach ( $s['manual_items'] ?? [] as $mi ) {
+                $manual_items[] = [
+                    'title'       => sanitize_text_field( $mi['title'] ?? '' ),
+                    'url'         => esc_url_raw( $mi['url'] ?? '' ),
+                    'thumb_url'   => esc_url_raw( $mi['thumb_url'] ?? '' ),
+                    'excerpt'     => sanitize_text_field( $mi['excerpt'] ?? '' ),
+                    'author_name' => sanitize_text_field( $mi['author_name'] ?? '' ),
+                    'author_url'  => esc_url_raw( $mi['author_url'] ?? '' ),
+                ];
+            }
+
             $sections[] = [
-                'key'       => sanitize_key( $s['key'] ?? '' ),
-                'label'     => sanitize_text_field( $s['label'] ?? '' ),
-                'is_header' => ! empty( $s['is_header'] ),
-                'slug'      => sanitize_text_field( $s['slug'] ?? '' ),
-                'template'  => sanitize_key( $s['template'] ?? 'card' ),
-                'post_ids'  => array_map( 'absint', $s['post_ids'] ?? [] ),
+                'key'          => sanitize_key( $s['key'] ?? '' ),
+                'label'        => sanitize_text_field( $s['label'] ?? '' ),
+                'is_header'    => ! empty( $s['is_header'] ),
+                'slug'         => sanitize_text_field( $s['slug'] ?? '' ),
+                'template'     => sanitize_key( $s['template'] ?? 'card' ),
+                'post_ids'     => array_map( 'absint', $s['post_ids'] ?? [] ),
+                'manual_items' => $manual_items,
             ];
         }
 

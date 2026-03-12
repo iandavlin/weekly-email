@@ -182,12 +182,13 @@ class LG_WD_Issue {
         $data = self::get_data( $post_id );
 
         $data['sections'][] = [
-            'key'       => sanitize_key( $section['key'] ?? '' ),
-            'label'     => sanitize_text_field( $section['label'] ?? '' ),
-            'is_header' => ! empty( $section['is_header'] ),
-            'slug'      => sanitize_text_field( $section['slug'] ?? '' ),
-            'template'  => sanitize_key( $section['template'] ?? 'card' ),
-            'post_ids'  => array_map( 'absint', $section['post_ids'] ?? [] ),
+            'key'          => sanitize_key( $section['key'] ?? '' ),
+            'label'        => sanitize_text_field( $section['label'] ?? '' ),
+            'is_header'    => ! empty( $section['is_header'] ),
+            'slug'         => sanitize_text_field( $section['slug'] ?? '' ),
+            'template'     => sanitize_key( $section['template'] ?? 'card' ),
+            'post_ids'     => array_map( 'absint', $section['post_ids'] ?? [] ),
+            'manual_items' => $section['manual_items'] ?? [],
         ];
 
         self::save_data( $post_id, $data );
