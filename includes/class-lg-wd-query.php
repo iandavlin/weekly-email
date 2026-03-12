@@ -296,10 +296,16 @@ class LG_WD_Query {
     }
 
     private static function clean_excerpt( \WP_Post $post ): string {
-        if ( ! empty( $post->post_excerpt ) ) {
-            return wp_strip_all_tags( $post->post_excerpt );
-        }
-        return wp_trim_words( wp_strip_all_tags( $post->post_content ), 20, '…' );
+        $text = ! empty( $post->post_excerpt )
+            ? wp_strip_all_tags( $post->post_excerpt )
+            : wp_trim_words( wp_strip_all_tags( $post->post_content ), 20, '…' );
+
+        // Strip any URLs (YouTube, etc.) from the excerpt
+        $text = preg_replace( '#https?://\S+#i', '', $text );
+        // Collapse multiple spaces left behind
+        $text = trim( preg_replace( '/\s{2,}/', ' ', $text ) );
+
+        return $text;
     }
 
     private static function cpt_label( string $slug ): string {

@@ -94,8 +94,8 @@ $tier_html   = $tier
     ? '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' . $tier_bg . ';color:' . $tier_color . ';' . $tier_border . 'margin-right:6px;">' . esc_html( $tier ) . '</span>'
     : '';
 
-// Author
-$author = esc_html( get_the_author_meta( 'display_name', get_post_field( 'post_author', $item['id'] ) ) );
+// Author (linked to BuddyBoss profile if available)
+$author_html = LG_WD_Email_Builder::author_html( $item['id'] );
 
 // ── Google Calendar link ──────────────────────────────────────────────────
 $gcal_url = '';
@@ -155,8 +155,8 @@ if ( $dt_start ) {
             <p style="font-size:11px;color:#aaa;margin:0 0 4px;">
               <?php echo $tier_html; ?>
               <span style="font-size:11px;color:#87986A;"><?php echo esc_html( $location ); ?></span>
-              <?php if ( $author ) : ?>
-                &middot; By <strong style="color:#87986A;"><?php echo $author; ?></strong>
+              <?php if ( $author_html ) : ?>
+                &middot; <?php echo $author_html; ?>
               <?php endif; ?>
             </p>
             <?php if ( $gcal_url ) : ?>

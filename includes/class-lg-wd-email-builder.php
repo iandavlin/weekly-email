@@ -141,6 +141,33 @@ class LG_WD_Email_Builder {
         return trim( $clean );
     }
 
+    /**
+     * Build an author HTML snippet: linked to BuddyBoss/BuddyPress profile if available.
+     * Returns "By <a>Author Name</a>" or "By <strong>Author Name</strong>".
+     */
+    public static function author_html( int $post_id ): string {
+        $author_id = (int) get_post_field( 'post_author', $post_id );
+        if ( ! $author_id ) return '';
+
+        $name = esc_html( get_the_author_meta( 'display_name', $author_id ) );
+        if ( ! $name ) return '';
+
+        // Try BuddyBoss / BuddyPress profile URL
+        $profile_url = '';
+        if ( function_exists( 'bp_core_get_user_domain' ) ) {
+            $profile_url = bp_core_get_user_domain( $author_id );
+        } elseif ( function_exists( 'bbp_get_user_profile_url' ) ) {
+            $profile_url = bbp_get_user_profile_url( $author_id );
+        }
+
+        if ( $profile_url ) {
+            $profile_url = esc_url( self::add_utm( $profile_url ) );
+            return 'By <a href="' . $profile_url . '" style="color:#87986A;font-weight:600;text-decoration:none;">' . $name . '</a>';
+        }
+
+        return 'By <strong style="color:#87986A;">' . $name . '</strong>';
+    }
+
     // ── Subject line builder ───────────────────────────────────────────────────
 
     public static function build_subject( array $payload ): string {

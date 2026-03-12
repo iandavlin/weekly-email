@@ -26,13 +26,13 @@ $excerpt      = $show_excerpt && ! empty( $item['excerpt'] )
     : '';
 
 // bbPress meta
-$author      = esc_html( get_the_author_meta( 'display_name', get_post_field( 'post_author', $item['id'] ) ) );
+$author_html = LG_WD_Email_Builder::author_html( $item['id'] );
 $reply_count = 0;
 if ( function_exists( 'bbp_get_topic_reply_count' ) ) {
     $reply_count = (int) bbp_get_topic_reply_count( $item['id'] );
 }
 $meta = [];
-if ( $author )      $meta[] = 'By <strong style="color:#87986A;">' . $author . '</strong>';
+if ( $author_html ) $meta[] = $author_html;
 if ( $reply_count ) $meta[] = $reply_count . ( $reply_count === 1 ? ' reply' : ' replies' );
 $meta[] = $date;
 $meta_html = implode( ' &middot; ', $meta );

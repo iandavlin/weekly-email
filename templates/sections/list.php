@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 $title  = esc_html( $item['title'] );
 $url    = esc_url( LG_WD_Email_Builder::add_utm( $item['url'] ) );
 $date   = esc_html( $item['date'] );
-$author = esc_html( get_the_author_meta( 'display_name', get_post_field( 'post_author', $item['id'] ) ) );
+$author_html = LG_WD_Email_Builder::author_html( $item['id'] );
 
 $reply_count = 0;
 if ( function_exists( 'bbp_get_topic_reply_count' ) ) {
@@ -18,7 +18,7 @@ if ( function_exists( 'bbp_get_topic_reply_count' ) ) {
 }
 
 $meta = [];
-if ( $author )       $meta[] = 'By <strong style="color:#87986A;">' . $author . '</strong>';
+if ( $author_html )  $meta[] = $author_html;
 if ( $reply_count )  $meta[] = $reply_count . ( $reply_count === 1 ? ' reply' : ' replies' );
 $meta[] = $date;
 $meta_html = implode( ' &middot; ', $meta );

@@ -12,7 +12,7 @@ $title        = esc_html( $item['title'] );
 $url          = esc_url( LG_WD_Email_Builder::add_utm( $item['url'] ) );
 $type_label   = esc_html( $item['type_label'] );
 $date         = esc_html( $item['date'] );
-$author       = esc_html( get_the_author_meta( 'display_name', get_post_field( 'post_author', $item['id'] ) ) );
+$author_html  = LG_WD_Email_Builder::author_html( $item['id'] );
 $excerpt      = $show_excerpt && ! empty( $item['excerpt'] )
     ? '<p style="font-size:12px;color:#5C4E3A;margin:3px 0 0;line-height:1.5;">' . esc_html( $item['excerpt'] ) . '</p>'
     : '';
@@ -29,7 +29,7 @@ if ( $show_thumb && ! empty( $item['thumb_url'] ) ) {
 
 // Meta line: "By Author · Mar 12"
 $meta_parts = [];
-if ( $author ) $meta_parts[] = 'By <strong style="color:#87986A;">' . $author . '</strong>';
+if ( $author_html ) $meta_parts[] = $author_html;
 $meta_parts[] = $date;
 $meta_html = implode( ' &middot; ', $meta_parts );
 ?>
