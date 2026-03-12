@@ -40,7 +40,7 @@ jQuery( function ( $ ) {
             sections.push({
                 key:      $sec.data( 'section-key' ),
                 label:    $sec.find( '.lg-wd-compose-section-header strong' ).text(),
-                type:     $sec.data( 'section-type' ),
+                template: $sec.data( 'section-template' ),
                 slug:     $sec.data( 'section-slug' ),
                 post_ids: postIds,
             });
@@ -280,12 +280,12 @@ jQuery( function ( $ ) {
             return;
         }
 
-        const $opt  = $select.find( ':selected' );
-        const label = $opt.data( 'label' );
-        const type  = $opt.data( 'type' );
-        const key   = val.replace( /[^a-z0-9_]/g, '_' );
+        const $opt     = $select.find( ':selected' );
+        const label    = $opt.data( 'label' );
+        const template = $opt.data( 'template' ) || 'card';
+        const key      = val.replace( /[^a-z0-9_]/g, '_' );
 
-        addEmptySection( key, label, type, val );
+        addEmptySection( key, label, template, val );
         $select.val( '' );
     });
 
@@ -298,18 +298,18 @@ jQuery( function ( $ ) {
             return;
         }
 
-        addEmptySection( key, label, 'cpt', '' );
+        addEmptySection( key, label, 'card', '' );
         $( '#lg-wd-custom-label, #lg-wd-custom-key' ).val( '' );
         $( '#lg-wd-custom-section-modal' ).hide();
     });
 
-    function addEmptySection( key, label, type, slug ) {
+    function addEmptySection( key, label, template, slug ) {
         const html = `
-            <div class="lg-wd-compose-section" data-section-key="${key}" data-section-type="${type}" data-section-slug="${slug}">
+            <div class="lg-wd-compose-section" data-section-key="${key}" data-section-template="${template}" data-section-slug="${slug}">
               <div class="lg-wd-compose-section-header">
                 <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
                 <strong>${label}</strong>
-                <span class="lg-wd-section-type-badge">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                <span class="lg-wd-section-type-badge">${template.toUpperCase()}</span>
                 <span class="lg-wd-section-count">0 items</span>
                 <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
               </div>
