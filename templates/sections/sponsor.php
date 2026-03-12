@@ -19,12 +19,21 @@ if ( ! $img_url ) {
     }
 }
 
-// Sponsor page URL from ACF field on the sponsor post
-$sponsor_url = get_field( 'tlg_sponsor_page_url', $item['id'] );
-$sponsor_name_html = '';
+// Sponsor page URL from ACF field (try get_field first, fall back to get_post_meta)
+$sponsor_url = '';
+if ( function_exists( 'get_field' ) ) {
+    $sponsor_url = get_field( 'tlg_sponsor_page_url', $item['id'] );
+}
+if ( ! $sponsor_url ) {
+    $sponsor_url = get_post_meta( $item['id'], 'tlg_sponsor_page_url', true );
+}
+
+// Sponsor name: linked to sponsor URL, or plain text fallback
 if ( $sponsor_url ) {
-    $sponsor_url = esc_url( LG_WD_Email_Builder::add_utm( $sponsor_url ) );
-    $sponsor_name_html = 'By <a href="' . $sponsor_url . '" style="color:#ECB351;font-weight:600;text-decoration:none;">' . $title . '</a>';
+    $sponsor_link = esc_url( LG_WD_Email_Builder::add_utm( $sponsor_url ) );
+    $partner_label = '<a href="' . $sponsor_link . '" style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ECB351;text-decoration:none;">' . $title . '</a>';
+} else {
+    $partner_label = '<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ECB351;">' . $title . '</span>';
 }
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -43,15 +52,12 @@ if ( $sponsor_url ) {
   <?php endif; ?>
   <tr>
     <td style="padding:16px 18px;">
-      <p style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ECB351;margin:0 0 6px;">Partner</p>
+      <p style="margin:0 0 6px;"><?php echo $partner_label; ?></p>
       <p style="font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:700;color:#2B2318;margin:0 0 8px;"><?php echo $title; ?></p>
       <?php if ( $excerpt ) : ?>
       <p style="font-size:13px;color:#5C4E3A;margin:0 0 10px;line-height:1.6;"><?php echo $excerpt; ?></p>
       <?php endif; ?>
       <a href="<?php echo $url; ?>" style="font-size:12px;font-weight:600;color:#ECB351;text-decoration:none;">Learn more →</a>
-      <?php if ( $sponsor_name_html ) : ?>
-      <p style="font-size:11px;color:#aaa;margin:8px 0 0;"><?php echo $sponsor_name_html; ?></p>
-      <?php endif; ?>
     </td>
   </tr>
 </table>
