@@ -79,7 +79,7 @@ class LG_WD_Query {
 
         $posts = get_posts( [
             'post_type'      => $types ?: 'any',
-            'post_status'    => 'publish',
+            'post_status'    => [ 'publish', 'closed', 'open' ],
             'posts_per_page' => $limit,
             's'              => $search_term,
             'orderby'        => 'date',
@@ -115,7 +115,7 @@ class LG_WD_Query {
     ): array {
         $args = [
             'post_type'      => $slug,
-            'post_status'    => [ 'publish', 'closed' ], // 'closed' for bbPress topics
+            'post_status'    => [ 'publish', 'closed', 'open' ], // bbPress uses 'open' and 'closed'
             'posts_per_page' => $max,
             'orderby'        => 'date',
             'order'          => 'DESC',
@@ -224,12 +224,17 @@ class LG_WD_Query {
     private static function normalize_posts_by_ids( array $post_ids ): array {
         if ( empty( $post_ids ) ) return [];
 
+        // Use explicit post types from registry + 'any' to catch all registered CPTs.
+        // 'any' alone can miss non-publicly-queryable types like bbPress topics.
+        $types = self::get_all_registered_slugs();
+        $types[] = 'any';
+
         $posts = get_posts( [
-            'post_type'      => 'any',
+            'post_type'      => $types,
             'post__in'       => $post_ids,
             'posts_per_page' => count( $post_ids ),
             'orderby'        => 'post__in',
-            'post_status'    => [ 'publish', 'closed' ],
+            'post_status'    => [ 'publish', 'closed', 'open' ],
         ] );
 
         return array_map( [ __CLASS__, 'normalize_post' ], $posts );
