@@ -161,8 +161,13 @@ class LG_WD_Compose {
                   <?php foreach ( $registry as $entry ) : ?>
                     <option value="<?php echo esc_attr( $entry['slug'] ); ?>"
                             data-label="<?php echo esc_attr( $entry['label'] ); ?>"
-                            data-template="<?php echo esc_attr( $entry['template'] ?? 'card' ); ?>">
-                      <?php echo esc_html( $entry['label'] ); ?> (<?php echo esc_html( $entry['slug'] ); ?>)
+                            data-template="<?php echo esc_attr( $entry['template'] ?? 'card' ); ?>"
+                            data-is-header="<?php echo ! empty( $entry['is_header'] ) ? '1' : '0'; ?>">
+                      <?php if ( ! empty( $entry['is_header'] ) ) : ?>
+                        📌 <?php echo esc_html( $entry['label'] ); ?> (header)
+                      <?php else : ?>
+                        <?php echo esc_html( $entry['label'] ); ?> (<?php echo esc_html( $entry['slug'] ); ?>)
+                      <?php endif; ?>
                     </option>
                   <?php endforeach; ?>
                   <option value="__custom__">+ Custom Section…</option>
@@ -253,14 +258,25 @@ class LG_WD_Compose {
     // ── Section card renderer (used in initial render + AJAX) ────────────────
 
     public static function render_section_card( array $section, int $idx ): void {
-        $key            = esc_attr( $section['key'] ?? '' );
-        $label          = esc_html( $section['label'] ?? '' );
-        $section_header = esc_attr( $section['section_header'] ?? '' );
-        $template       = esc_attr( $section['template'] ?? 'card' );
-        $slug           = esc_attr( $section['slug'] ?? '' );
-        $post_ids       = $section['post_ids'] ?? [];
-        ?>
-        <div class="lg-wd-compose-section" data-section-key="<?php echo $key; ?>" data-section-template="<?php echo $template; ?>" data-section-slug="<?php echo $slug; ?>" data-section-header="<?php echo $section_header; ?>">
+        $key       = esc_attr( $section['key'] ?? '' );
+        $label     = esc_html( $section['label'] ?? '' );
+        $is_header = ! empty( $section['is_header'] );
+        $template  = esc_attr( $section['template'] ?? 'card' );
+        $slug      = esc_attr( $section['slug'] ?? '' );
+        $post_ids  = $section['post_ids'] ?? [];
+
+        // Group header — visual divider, no posts
+        if ( $is_header ) : ?>
+        <div class="lg-wd-compose-section lg-wd-compose-header" data-section-key="<?php echo $key; ?>" data-section-template="header" data-section-slug="<?php echo $slug; ?>" data-is-header="1">
+          <div class="lg-wd-compose-section-header" style="background:#2B2318;color:#ECB351;border-left:4px solid #ECB351;">
+            <span class="lg-wd-drag-handle" title="Drag to reorder" style="color:#ECB351;">⠿</span>
+            <strong style="color:#ECB351;">📌 <?php echo $label; ?></strong>
+            <span class="lg-wd-section-type-badge" style="background:#ECB351;color:#2B2318;">GROUP HEADER</span>
+            <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section" style="color:#ECB351;">✕</button>
+          </div>
+        </div>
+        <?php else : ?>
+        <div class="lg-wd-compose-section" data-section-key="<?php echo $key; ?>" data-section-template="<?php echo $template; ?>" data-section-slug="<?php echo $slug; ?>" data-is-header="0">
           <div class="lg-wd-compose-section-header">
             <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
             <strong><?php echo $label; ?></strong>
@@ -296,7 +312,7 @@ class LG_WD_Compose {
             <?php endif; ?>
           </div>
         </div>
-        <?php
+        <?php endif;
     }
 
     // ── AJAX: Save draft ────────────────────────────────────────────────────
@@ -321,11 +337,12 @@ class LG_WD_Compose {
         $sections = [];
         foreach ( $raw_sections as $s ) {
             $sections[] = [
-                'key'      => sanitize_key( $s['key'] ?? '' ),
-                'label'    => sanitize_text_field( $s['label'] ?? '' ),
-                'slug'     => sanitize_text_field( $s['slug'] ?? '' ),
-                'template' => sanitize_key( $s['template'] ?? 'card' ),
-                'post_ids' => array_map( 'absint', $s['post_ids'] ?? [] ),
+                'key'       => sanitize_key( $s['key'] ?? '' ),
+                'label'     => sanitize_text_field( $s['label'] ?? '' ),
+                'is_header' => ! empty( $s['is_header'] ),
+                'slug'      => sanitize_text_field( $s['slug'] ?? '' ),
+                'template'  => sanitize_key( $s['template'] ?? 'card' ),
+                'post_ids'  => array_map( 'absint', $s['post_ids'] ?? [] ),
             ];
         }
 
@@ -474,11 +491,12 @@ class LG_WD_Compose {
                 $data['sections'] = [];
                 foreach ( $raw_sections as $s ) {
                     $data['sections'][] = [
-                        'key'      => sanitize_key( $s['key'] ?? '' ),
-                        'label'    => sanitize_text_field( $s['label'] ?? '' ),
-                        'slug'     => sanitize_text_field( $s['slug'] ?? '' ),
-                        'template' => sanitize_key( $s['template'] ?? 'card' ),
-                        'post_ids' => array_map( 'absint', $s['post_ids'] ?? [] ),
+                        'key'       => sanitize_key( $s['key'] ?? '' ),
+                        'label'     => sanitize_text_field( $s['label'] ?? '' ),
+                        'is_header' => ! empty( $s['is_header'] ),
+                        'slug'      => sanitize_text_field( $s['slug'] ?? '' ),
+                        'template'  => sanitize_key( $s['template'] ?? 'card' ),
+                        'post_ids'  => array_map( 'absint', $s['post_ids'] ?? [] ),
                     ];
                 }
                 if ( ! empty( $_POST['date_from'] ) ) {

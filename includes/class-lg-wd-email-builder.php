@@ -31,10 +31,34 @@ class LG_WD_Email_Builder {
 
     // ── Section renderer (called from email.php template) ─────────────────────
 
+    /**
+     * Render a group header divider (gold line + large label, no items).
+     */
+    public static function render_group_header( string $label ): string {
+        return '<div style="margin-bottom:6px;margin-top:32px;">'
+            . '<table width="100%" cellpadding="0" cellspacing="0" border="0">'
+            . '<tr>'
+            . '<td style="padding:0;white-space:nowrap;">'
+            . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:14px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:1.5px;">' . esc_html( $label ) . '</span>'
+            . '</td>'
+            . '<td width="100%" style="padding-left:12px;">'
+            . '<div style="height:1px;background:#ECB351;"></div>'
+            . '</td>'
+            . '</tr>'
+            . '</table>'
+            . '</div>';
+    }
+
+    /**
+     * Render a content section.
+     * If under_header is true, the label is shown as a smaller subheading (mint).
+     * If under_header is false, the label gets the full gold-line header treatment.
+     */
     public static function render_section( array $data ): string {
-        $section = $data['section'];
-        $items   = $data['items'];
-        $is_arch = $data['is_archive'];
+        $section      = $data['section'];
+        $items        = $data['items'];
+        $is_arch      = $data['is_archive'];
+        $under_header = ! empty( $data['under_header'] );
 
         if ( empty( $items ) ) return '';
 
@@ -59,29 +83,28 @@ class LG_WD_Email_Builder {
             $rows .= ob_get_clean();
         }
 
-        $label     = esc_html( $section['label'] );
-        $cpt_label = ! empty( $section['cpt_label'] ) ? esc_html( $section['cpt_label'] ) : '';
+        $label = esc_html( $section['label'] );
+        $html  = '<div style="margin-bottom:28px;">' . $archive_notice;
 
-        // Subheading: show CPT label below the main section header when a section_header is set
-        $sub_html = $cpt_label
-            ? '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:12px;font-weight:600;color:#87986A;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">' . $cpt_label . '</p>'
-            : '';
+        if ( $under_header ) {
+            // Subheading style (mint, smaller) — appears under a group header
+            $html .= '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:12px;font-weight:600;color:#87986A;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">' . $label . '</p>';
+        } else {
+            // Full section header (gold line)
+            $html .= '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">'
+                . '<tr>'
+                . '<td style="padding:0;white-space:nowrap;">'
+                . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:14px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:1.5px;">' . $label . '</span>'
+                . '</td>'
+                . '<td width="100%" style="padding-left:12px;">'
+                . '<div style="height:1px;background:#ECB351;"></div>'
+                . '</td>'
+                . '</tr>'
+                . '</table>';
+        }
 
-        return '<div style="margin-bottom:28px;">'
-            . $archive_notice
-            . '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:' . ( $cpt_label ? '8px' : '14px' ) . ';">'
-            . '<tr>'
-            . '<td style="padding:0;white-space:nowrap;">'
-            . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:14px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:1.5px;">' . $label . '</span>'
-            . '</td>'
-            . '<td width="100%" style="padding-left:12px;">'
-            . '<div style="height:1px;background:#ECB351;"></div>'
-            . '</td>'
-            . '</tr>'
-            . '</table>'
-            . $sub_html
-            . $rows
-            . '</div>';
+        $html .= $rows . '</div>';
+        return $html;
     }
 
     // ── UTM helper ────────────────────────────────────────────────────────────

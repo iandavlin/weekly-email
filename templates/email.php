@@ -79,14 +79,18 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
             </p>
 
             <?php foreach ( $payload as $key => $data ) : ?>
-              <?php echo LG_WD_Email_Builder::render_section( $data ); ?>
+              <?php if ( ! empty( $data['is_header'] ) ) : ?>
+                <?php echo LG_WD_Email_Builder::render_group_header( $data['section']['label'] ); ?>
+              <?php else : ?>
+                <?php echo LG_WD_Email_Builder::render_section( $data ); ?>
 
-              <!-- Divider between sections -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
-                <tr>
-                  <td height="1" style="background:linear-gradient(to right,transparent,#D4E0B8,transparent);font-size:0;line-height:0;">&nbsp;</td>
-                </tr>
-              </table>
+                <!-- Divider between sections -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+                  <tr>
+                    <td height="1" style="background:linear-gradient(to right,transparent,#D4E0B8,transparent);font-size:0;line-height:0;">&nbsp;</td>
+                  </tr>
+                </table>
+              <?php endif; ?>
             <?php endforeach; ?>
 
           </td>

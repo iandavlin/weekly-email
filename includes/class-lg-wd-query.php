@@ -46,11 +46,30 @@ class LG_WD_Query {
      * Build the full content payload from an issue's curated data.
      */
     public static function build_payload_from_issue( array $issue_data ): array {
-        $sections   = $issue_data['sections'] ?? [];
-        $payload    = [];
-        $skip_empty = LG_WD_Settings::get( 'skip_empty', true );
+        $sections     = $issue_data['sections'] ?? [];
+        $payload      = [];
+        $skip_empty   = LG_WD_Settings::get( 'skip_empty', true );
+        $under_header = false; // Tracks whether we're under a group header
 
         foreach ( $sections as $section ) {
+            $is_header = ! empty( $section['is_header'] );
+
+            // Group header entry — render as divider, subsequent sections get subheadings
+            if ( $is_header ) {
+                $under_header = true;
+                $payload[ $section['key'] ] = [
+                    'section' => [
+                        'key'       => $section['key'],
+                        'label'     => $section['label'],
+                        'template'  => 'header',
+                    ],
+                    'items'        => [],
+                    'is_archive'   => false,
+                    'is_header'    => true,
+                ];
+                continue;
+            }
+
             $post_ids = $section['post_ids'] ?? [];
             if ( empty( $post_ids ) && $skip_empty ) continue;
 
@@ -61,19 +80,15 @@ class LG_WD_Query {
             // Resolve template: prefer explicit, fall back from legacy 'type' field
             $template = $section['template'] ?? self::type_to_template( $section['type'] ?? '' );
 
-            // section_header = main heading in email; cpt_label = subheading (when header is set)
-            $has_header    = ! empty( $section['section_header'] );
-            $display_label = $has_header ? $section['section_header'] : $section['label'];
-
             $payload[ $section['key'] ] = [
                 'section' => [
-                    'key'       => $section['key'],
-                    'label'     => $display_label,
-                    'cpt_label' => $has_header ? $section['label'] : '',
-                    'template'  => $template,
+                    'key'      => $section['key'],
+                    'label'    => $section['label'],
+                    'template' => $template,
                 ],
-                'items'      => $items,
-                'is_archive' => false,
+                'items'        => $items,
+                'is_archive'   => false,
+                'under_header' => $under_header,
             ];
         }
 

@@ -101,34 +101,38 @@ jQuery( function ( $ ) {
 
     $( '#lg-wd-reg-add-btn' ).on( 'click', function ( e ) {
         e.preventDefault();
-        const $btn           = $( this );
-        const slug           = $( '#lg-wd-reg-slug' ).val();
-        const label          = $( '#lg-wd-reg-label' ).val().trim();
-        const section_header = $( '#lg-wd-reg-section-header' ).val().trim();
-        const template       = $( '#lg-wd-reg-template' ).val() || 'card';
-        const sort_mode      = $( '#lg-wd-reg-sort' ).val() || 'newest';
-        const tag_filter     = $( '#lg-wd-reg-tag' ).val().trim();
-        const taxonomy       = $( '#lg-wd-reg-taxonomy' ).val().trim() || 'post_tag';
-        const max            = parseInt( $( '#lg-wd-reg-max' ).val() ) || 5;
+        const $btn       = $( this );
+        const slug       = $( '#lg-wd-reg-slug' ).val();
+        const label      = $( '#lg-wd-reg-label' ).val().trim();
+        const template   = $( '#lg-wd-reg-template' ).val() || 'card';
+        const sort_mode  = $( '#lg-wd-reg-sort' ).val() || 'newest';
+        const tag_filter = $( '#lg-wd-reg-tag' ).val().trim();
+        const taxonomy   = $( '#lg-wd-reg-taxonomy' ).val().trim() || 'post_tag';
+        const max        = parseInt( $( '#lg-wd-reg-max' ).val() ) || 5;
 
-        if ( ! slug || ! label ) {
-            showResponse( 'Select a post type and enter a label.', 'error' );
+        if ( slug === '_header' ) {
+            // Group headers only need a label
+            if ( ! label ) {
+                showResponse( 'Enter a label for the group header.', 'error' );
+                return;
+            }
+        } else if ( ! slug || ! label ) {
+            showResponse( 'Select a type and enter a label.', 'error' );
             return;
         }
 
         setLoading( $btn, true );
 
         $.post( ajaxUrl, {
-            action:         'lg_wd_registry_add',
+            action:       'lg_wd_registry_add',
             nonce,
             slug,
             label,
-            section_header,
             template,
             sort_mode,
             tag_filter,
-            tag_taxonomy:   taxonomy,
-            max_items:      max,
+            tag_taxonomy: taxonomy,
+            max_items:    max,
         }, function ( res ) {
             setLoading( $btn, false );
             if ( res.success ) {
@@ -138,6 +142,14 @@ jQuery( function ( $ ) {
                 showResponse( '✗ ' + ( res.data || 'Failed to add.' ), 'error' );
             }
         });
+    });
+
+    // ── CPT Registry: Toggle fields when header selected ────────────────────
+    $( '#lg-wd-reg-slug' ).on( 'change', function () {
+        const isHeader = $( this ).val() === '_header';
+        // Hide template, sort, tag, taxonomy, max when adding a group header
+        $( '#lg-wd-reg-template, #lg-wd-reg-sort, #lg-wd-reg-tag, #lg-wd-reg-taxonomy, #lg-wd-reg-max' )
+            .closest( '.lg-wd-form-group' ).toggle( ! isHeader );
     });
 
     // ── CPT Registry: Remove ─────────────────────────────────────────────────
@@ -172,16 +184,19 @@ jQuery( function ( $ ) {
 
     $( document ).on( 'click', '.lg-wd-registry-edit', function ( e ) {
         e.preventDefault();
-        const $row = $( this ).closest( 'tr' );
+        const $row     = $( this ).closest( 'tr' );
+        const isHeader = $row.data( 'is-header' ) === 1 || $row.data( 'is-header' ) === '1';
         $( '#lg-wd-edit-slug' ).val( $row.data( 'slug' ) );
+        $( '#lg-wd-edit-is-header' ).val( isHeader ? '1' : '0' );
         $( '#lg-wd-edit-label' ).val( $row.data( 'label' ) );
-        $( '#lg-wd-edit-section-header' ).val( $row.data( 'section-header' ) || '' );
         $( '#lg-wd-edit-template' ).val( $row.data( 'template' ) );
         $( '#lg-wd-edit-sort' ).val( $row.data( 'sort-mode' ) );
         $( '#lg-wd-edit-tag' ).val( $row.data( 'tag-filter' ) );
         $( '#lg-wd-edit-taxonomy' ).val( $row.data( 'tag-taxonomy' ) );
         $( '#lg-wd-edit-max' ).val( $row.data( 'max-items' ) );
         $( '#lg-wd-edit-enabled' ).val( $row.data( 'enabled' ) );
+        // Show/hide CPT-only fields for group headers
+        $modal.find( '.lg-wd-edit-cpt-only' ).toggle( ! isHeader );
         $modal.css( 'display', 'flex' );
     });
 
@@ -197,17 +212,16 @@ jQuery( function ( $ ) {
         setLoading( $btn, true );
 
         $.post( ajaxUrl, {
-            action:         'lg_wd_registry_update',
+            action:       'lg_wd_registry_update',
             nonce,
             slug,
-            label:          $( '#lg-wd-edit-label' ).val(),
-            section_header: $( '#lg-wd-edit-section-header' ).val(),
-            template:       $( '#lg-wd-edit-template' ).val(),
-            sort_mode:      $( '#lg-wd-edit-sort' ).val(),
-            tag_filter:     $( '#lg-wd-edit-tag' ).val(),
-            tag_taxonomy:   $( '#lg-wd-edit-taxonomy' ).val(),
-            max_items:      $( '#lg-wd-edit-max' ).val(),
-            enabled:        $( '#lg-wd-edit-enabled' ).val(),
+            label:        $( '#lg-wd-edit-label' ).val(),
+            template:     $( '#lg-wd-edit-template' ).val(),
+            sort_mode:    $( '#lg-wd-edit-sort' ).val(),
+            tag_filter:   $( '#lg-wd-edit-tag' ).val(),
+            tag_taxonomy: $( '#lg-wd-edit-taxonomy' ).val(),
+            max_items:    $( '#lg-wd-edit-max' ).val(),
+            enabled:      $( '#lg-wd-edit-enabled' ).val(),
         }, function ( res ) {
             setLoading( $btn, false );
             if ( res.success ) {

@@ -8,8 +8,9 @@ defined( 'ABSPATH' ) || exit;
  * Stored in wp_options as 'lg_wd_cpt_registry'.
  *
  * Each section entry:
- *   slug         - WordPress post type slug
+ *   slug         - WordPress post type slug (or _header_{name} for group headers)
  *   label        - Display name in registry and email
+ *   is_header    - If true, this is a group header divider (no post type, no items)
  *   max_items    - How many posts to auto-populate
  *   enabled      - Include in auto-populate and compose dropdown
  *   template     - Section template file: card, list, date-forward, sponsor, full-text
@@ -149,15 +150,15 @@ class LG_WD_CPT_Registry {
         }
 
         return [
-            'slug'           => sanitize_key( $s['slug'] ?? '' ),
-            'label'          => sanitize_text_field( $s['label'] ?? '' ),
-            'section_header' => sanitize_text_field( $s['section_header'] ?? '' ),
-            'max_items'      => absint( $s['max_items'] ?? 5 ),
-            'enabled'        => ! empty( $s['enabled'] ),
-            'template'       => $template,
-            'tag_filter'     => sanitize_text_field( $s['tag_filter'] ?? '' ),
-            'tag_taxonomy'   => sanitize_key( $s['tag_taxonomy'] ?? 'post_tag' ),
-            'sort_mode'      => $sort_mode,
+            'slug'         => sanitize_key( $s['slug'] ?? '' ),
+            'label'        => sanitize_text_field( $s['label'] ?? '' ),
+            'is_header'    => ! empty( $s['is_header'] ),
+            'max_items'    => absint( $s['max_items'] ?? 5 ),
+            'enabled'      => ! empty( $s['enabled'] ),
+            'template'     => $template,
+            'tag_filter'   => sanitize_text_field( $s['tag_filter'] ?? '' ),
+            'tag_taxonomy' => sanitize_key( $s['tag_taxonomy'] ?? 'post_tag' ),
+            'sort_mode'    => $sort_mode,
         ];
     }
 }

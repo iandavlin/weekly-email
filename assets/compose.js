@@ -37,13 +37,14 @@ jQuery( function ( $ ) {
                 postIds.push( parseInt( $( this ).data( 'post-id' ) ) );
             });
 
+            const isHeader = $sec.data( 'is-header' ) === 1 || $sec.data( 'is-header' ) === '1';
             sections.push({
-                key:            $sec.data( 'section-key' ),
-                label:          $sec.find( '.lg-wd-compose-section-header strong' ).text(),
-                section_header: $sec.data( 'section-header' ) || '',
-                template:       $sec.data( 'section-template' ),
-                slug:           $sec.data( 'section-slug' ),
-                post_ids:       postIds,
+                key:       $sec.data( 'section-key' ),
+                label:     $sec.find( '.lg-wd-compose-section-header strong' ).text().replace( /^📌\s*/, '' ),
+                is_header: isHeader,
+                template:  $sec.data( 'section-template' ),
+                slug:      $sec.data( 'section-slug' ),
+                post_ids:  isHeader ? [] : postIds,
             });
         });
         return sections;
@@ -311,9 +312,14 @@ jQuery( function ( $ ) {
         const $opt     = $select.find( ':selected' );
         const label    = $opt.data( 'label' );
         const template = $opt.data( 'template' ) || 'card';
+        const isHeader = $opt.data( 'is-header' ) === 1 || $opt.data( 'is-header' ) === '1';
         const key      = val.replace( /[^a-z0-9_]/g, '_' );
 
-        addEmptySection( key, label, template, val );
+        if ( isHeader ) {
+            addHeaderDivider( key, label, val );
+        } else {
+            addEmptySection( key, label, template, val );
+        }
         $select.val( '' );
     });
 
@@ -330,6 +336,20 @@ jQuery( function ( $ ) {
         $( '#lg-wd-custom-label, #lg-wd-custom-key' ).val( '' );
         $( '#lg-wd-custom-section-modal' ).hide();
     });
+
+    function addHeaderDivider( key, label, slug ) {
+        const html = `
+            <div class="lg-wd-compose-section lg-wd-compose-header" data-section-key="${key}" data-section-template="header" data-section-slug="${slug}" data-is-header="1">
+              <div class="lg-wd-compose-section-header" style="background:#2B2318;color:#ECB351;border-left:4px solid #ECB351;">
+                <span class="lg-wd-drag-handle" title="Drag to reorder" style="color:#ECB351;">⠿</span>
+                <strong style="color:#ECB351;">📌 ${label}</strong>
+                <span class="lg-wd-section-type-badge" style="background:#ECB351;color:#2B2318;">GROUP HEADER</span>
+                <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section" style="color:#ECB351;">✕</button>
+              </div>
+            </div>
+        `;
+        $( '#lg-wd-sections-container' ).append( html );
+    }
 
     function addEmptySection( key, label, template, slug ) {
         const html = `
