@@ -231,6 +231,33 @@ jQuery( function ( $ ) {
         });
     });
 
+    // ── Clear Draft ─────────────────────────────────────────────────────────
+
+    $( '#lg-wd-clear-draft-btn' ).on( 'click', function () {
+        if ( ! confirm( 'Clear all sections and posts from this draft?' ) ) return;
+
+        $( '#lg-wd-sections-container' ).empty();
+
+        // Save the empty state
+        const issueId = $( '#lg-wd-issue-id' ).val();
+        if ( issueId ) {
+            $.post( ajaxUrl, {
+                action:   'lg_wd_compose_save',
+                nonce,
+                issue_id: issueId,
+                sections: JSON.stringify( [] ),
+                date_from: $( '#lg-wd-date-from' ).val(),
+                date_to:   $( '#lg-wd-date-to' ).val(),
+            }, function ( res ) {
+                if ( res.success ) {
+                    showResponse( '✓ Draft cleared.', 'success' );
+                } else {
+                    showResponse( '✗ ' + ( res.data || 'Clear failed.' ), 'error' );
+                }
+            });
+        }
+    });
+
     // ── Remove section ───────────────────────────────────────────────────────
 
     $( document ).on( 'click', '.lg-wd-remove-section-btn', function () {

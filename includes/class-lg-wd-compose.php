@@ -134,6 +134,9 @@ class LG_WD_Compose {
                 <button class="button lg-wd-btn-secondary" id="lg-wd-save-draft-btn">
                   Save Draft
                 </button>
+                <button class="button" id="lg-wd-clear-draft-btn" style="color:#a00;">
+                  Clear Draft
+                </button>
               </div>
             </div>
           </div>
