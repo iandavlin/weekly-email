@@ -31,7 +31,7 @@ class LG_WD_Query {
 
         // upcoming sort: future-first by event date meta (for event CPTs)
         if ( $sort_mode === 'upcoming' ) {
-            return self::fetch_upcoming( $slug, $max, $tag, $taxonomy );
+            return self::fetch_upcoming( $slug, $max, $date_from, $date_to, $tag, $taxonomy );
         }
 
         return self::fetch_cpt_posts( $slug, $max, $date_from, $date_to, $tag, $taxonomy );
@@ -154,10 +154,31 @@ class LG_WD_Query {
 
     /**
      * Upcoming sort: future-first by events_start_date_and_time_ meta.
+     * Respects date_from/date_to boundaries when provided.
      * Falls back to most recent past events if none upcoming.
      */
-    private static function fetch_upcoming( string $slug, int $max, string $tag = '', string $taxonomy = 'post_tag' ): array {
-        $today = current_time( 'Ymd' );
+    private static function fetch_upcoming( string $slug, int $max, string $date_from = '', string $date_to = '', string $tag = '', string $taxonomy = 'post_tag' ): array {
+        // Use date_from as lower bound, or today if not specified
+        $start = $date_from ? date( 'Ymd', strtotime( $date_from ) ) : current_time( 'Ymd' );
+
+        $meta_query = [
+            [
+                'key'     => 'events_start_date_and_time_',
+                'value'   => $start,
+                'compare' => '>=',
+                'type'    => 'DATE',
+            ],
+        ];
+
+        // Cap at date_to upper bound when provided
+        if ( $date_to ) {
+            $meta_query[] = [
+                'key'     => 'events_start_date_and_time_',
+                'value'   => date( 'Ymd', strtotime( $date_to ) ),
+                'compare' => '<=',
+                'type'    => 'DATE',
+            ];
+        }
 
         $args = [
             'post_type'      => $slug,
@@ -166,14 +187,7 @@ class LG_WD_Query {
             'meta_key'       => 'events_start_date_and_time_',
             'orderby'        => 'meta_value',
             'order'          => 'ASC',
-            'meta_query'     => [
-                [
-                    'key'     => 'events_start_date_and_time_',
-                    'value'   => $today,
-                    'compare' => '>=',
-                    'type'    => 'DATE',
-                ],
-            ],
+            'meta_query'     => $meta_query,
         ];
 
         if ( $tag && $taxonomy ) {
@@ -188,9 +202,16 @@ class LG_WD_Query {
 
         $posts = get_posts( $args );
 
-        // Fallback to most recent past events
-        if ( empty( $posts ) ) {
-            $args['meta_query'][0]['compare'] = '<';
+        // Fallback to most recent past events if none in range
+        if ( empty( $posts ) && LG_WD_Settings::get( 'fallback_enabled', true ) ) {
+            $args['meta_query'] = [
+                [
+                    'key'     => 'events_start_date_and_time_',
+                    'value'   => $start,
+                    'compare' => '<',
+                    'type'    => 'DATE',
+                ],
+            ];
             $args['order'] = 'DESC';
             $posts = get_posts( $args );
         }

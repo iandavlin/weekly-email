@@ -189,6 +189,7 @@ class LG_WD_Admin {
     // ── Tab: Settings ─────────────────────────────────────────────────────────
 
     private static function render_tab_settings( array $s ): void { ?>
+        <input type="hidden" name="_active_tab" value="settings">
         <div class="lg-wd-grid lg-wd-grid-2">
 
           <div class="lg-wd-card">
@@ -444,6 +445,7 @@ class LG_WD_Admin {
     // ── Tab: Email Design ─────────────────────────────────────────────────────
 
     private static function render_tab_design( array $s ): void { ?>
+        <input type="hidden" name="_active_tab" value="design">
         <div class="lg-wd-grid lg-wd-grid-2">
           <div class="lg-wd-card">
             <div class="lg-wd-card-header"><h3>Header Image</h3></div>
@@ -595,49 +597,63 @@ class LG_WD_Admin {
 
         $raw = $_POST;
 
-        // Validate footer_links JSON
-        $footer_links_raw = stripslashes( $raw['footer_links'] ?? '[]' );
-        $footer_links_arr = json_decode( $footer_links_raw, true );
-        if ( ! is_array( $footer_links_arr ) ) {
-            $footer_links_raw = '[]';
+        // Only save fields actually present in the request.
+        // Tabs render independently — absent fields should NOT be overwritten.
+        $data = [];
+
+        // Sanitizer map: field => [ type, default_if_missing ]
+        // Checkbox fields use 'bool' type — they are present when checked (value '1'),
+        // absent when unchecked. We only write them if their name was explicitly sent.
+        $text_fields = [
+            'send_day'         => 'sanitize_key',
+            'send_time'        => 'sanitize_text_field',
+            'header_image_url' => 'esc_url_raw',
+            'from_name'        => 'sanitize_text_field',
+            'from_email'       => 'sanitize_email',
+            'subject_template' => 'sanitize_text_field',
+            'signoff'          => 'sanitize_textarea_field',
+            'fcrm_list_id'     => 'absint',
+            'fcrm_tag'         => 'sanitize_text_field',
+            'review_notify_email' => 'sanitize_email',
+            'intro_text'       => 'sanitize_textarea_field',
+            'branding_tagline' => 'sanitize_text_field',
+            'utm_source'       => 'sanitize_text_field',
+            'utm_medium'       => 'sanitize_text_field',
+            'utm_campaign'     => 'sanitize_text_field',
+        ];
+
+        foreach ( $text_fields as $field => $sanitizer ) {
+            if ( isset( $raw[ $field ] ) ) {
+                $data[ $field ] = $sanitizer( $raw[ $field ] );
+            }
         }
 
-        $data = [
-            'enabled'          => ! empty( $raw['enabled'] ),
-            'send_day'         => sanitize_key( $raw['send_day'] ?? 'monday' ),
-            'send_time'        => sanitize_text_field( $raw['send_time'] ?? '09:00' ),
-            'header_image_url' => esc_url_raw( $raw['header_image_url'] ?? '' ),
-            'from_name'        => sanitize_text_field( $raw['from_name'] ?? '' ),
-            'from_email'       => sanitize_email( $raw['from_email'] ?? '' ),
-            'subject_template' => sanitize_text_field( $raw['subject_template'] ?? '' ),
-            'signoff'          => sanitize_textarea_field( $raw['signoff'] ?? '' ),
-            'show_excerpts'    => ! empty( $raw['show_excerpts'] ),
-            'show_thumbnails'  => ! empty( $raw['show_thumbnails'] ),
-            'skip_empty'       => ! empty( $raw['skip_empty'] ),
+        // Cron mode: validate against allowed values
+        if ( isset( $raw['cron_mode'] ) ) {
+            $data['cron_mode'] = in_array( $raw['cron_mode'], [ 'auto_send', 'draft_and_notify' ], true )
+                ? $raw['cron_mode'] : 'auto_send';
+        }
 
-            // FluentCRM targeting
-            'fcrm_list_id'        => absint( $raw['fcrm_list_id'] ?? 3 ),
-            'fcrm_tag'            => sanitize_text_field( $raw['fcrm_tag'] ?? 'all' ),
+        // Checkboxes: unchecked boxes aren't sent in POST, so we use _active_tab
+        // to know which tab's checkboxes should be set to false when absent.
+        $tab = sanitize_key( $raw['_active_tab'] ?? '' );
 
-            // Cron behavior
-            'cron_mode'           => in_array( ( $raw['cron_mode'] ?? '' ), [ 'auto_send', 'draft_and_notify' ], true )
-                                        ? $raw['cron_mode'] : 'auto_send',
-            'review_notify_email' => sanitize_email( $raw['review_notify_email'] ?? '' ),
-
-            // Email content
-            'intro_text'          => sanitize_textarea_field( $raw['intro_text'] ?? '' ),
-            'footer_links'        => $footer_links_raw,
-            'branding_tagline'    => sanitize_text_field( $raw['branding_tagline'] ?? '' ),
-
-            // UTM tracking
-            'utm_enabled'         => ! empty( $raw['utm_enabled'] ),
-            'utm_source'          => sanitize_text_field( $raw['utm_source'] ?? 'weekly-digest' ),
-            'utm_medium'          => sanitize_text_field( $raw['utm_medium'] ?? 'email' ),
-            'utm_campaign'        => sanitize_text_field( $raw['utm_campaign'] ?? '{{week_date}}' ),
-
-            // Content fallback
-            'fallback_enabled'    => ! empty( $raw['fallback_enabled'] ),
+        $tab_checkboxes = [
+            'settings' => [ 'enabled', 'show_excerpts', 'show_thumbnails', 'skip_empty', 'fallback_enabled' ],
+            'design'   => [ 'utm_enabled' ],
         ];
+
+        $active_checkboxes = $tab_checkboxes[ $tab ] ?? [];
+        foreach ( $active_checkboxes as $cb ) {
+            $data[ $cb ] = ! empty( $raw[ $cb ] );
+        }
+
+        // Footer links JSON
+        if ( isset( $raw['footer_links'] ) ) {
+            $footer_links_raw = stripslashes( $raw['footer_links'] );
+            $footer_links_arr = json_decode( $footer_links_raw, true );
+            $data['footer_links'] = is_array( $footer_links_arr ) ? $footer_links_raw : '[]';
+        }
 
         LG_WD_Settings::save( $data );
         do_action( 'lg_wd_settings_saved' );
