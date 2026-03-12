@@ -50,7 +50,16 @@ class LG_WD_Settings {
 
     public static function get_all(): array {
         $saved = get_option( LG_WD_OPTION_KEY, [] );
-        return wp_parse_args( $saved, self::$defaults );
+        $merged = wp_parse_args( $saved, self::$defaults );
+
+        // Self-heal: strip lingering slashes from values saved before the wp_unslash fix.
+        foreach ( [ 'intro_text', 'signoff', 'subject_template', 'branding_tagline' ] as $k ) {
+            if ( is_string( $merged[ $k ] ) && str_contains( $merged[ $k ], '\\' ) ) {
+                $merged[ $k ] = wp_unslash( $merged[ $k ] );
+            }
+        }
+
+        return $merged;
     }
 
     public static function get( string $key, $fallback = null ) {
