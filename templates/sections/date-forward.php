@@ -123,11 +123,11 @@ if ( $dt_start ) {
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:14px;margin-bottom:14px;">
   <tr>
     <?php if ( $img_url ) : ?>
-    <td class="event-thumb" width="140" valign="top" style="padding:0 14px 0 0;">
+    <td class="event-thumb" width="180" valign="top" style="padding:0 16px 0 0;">
       <a href="<?php echo $url; ?>" style="display:block;line-height:0;border:0;outline:none;text-decoration:none;">
         <img src="<?php echo esc_url( $img_url ); ?>"
-             width="140" height="79"
-             style="display:block;width:140px;height:79px;object-fit:cover;border-radius:4px;border:0;"
+             width="180" height="101"
+             style="display:block;width:180px;height:101px;object-fit:cover;border-radius:4px;border:0;"
              alt="">
       </a>
     </td>
@@ -145,7 +145,7 @@ if ( $dt_start ) {
           </td>
           <?php endif; ?>
           <td valign="top">
-            <a href="<?php echo $url; ?>" style="font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.3;margin-bottom:3px;"><?php echo $title; ?></a>
+            <a href="<?php echo $url; ?>" style="font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:3px;"><?php echo $title; ?></a>
             <p style="font-size:11px;color:#5C4E3A;margin:0 0 3px;">
               <?php echo esc_html( $display_date ); ?>
               <?php if ( $time_display ) : ?>
