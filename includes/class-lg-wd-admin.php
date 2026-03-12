@@ -720,7 +720,8 @@ class LG_WD_Admin {
 
         foreach ( $text_fields as $field => $sanitizer ) {
             if ( isset( $raw[ $field ] ) ) {
-                $data[ $field ] = $sanitizer( $raw[ $field ] );
+                // wp_unslash first: WordPress adds magic quotes to $_POST
+                $data[ $field ] = $sanitizer( wp_unslash( $raw[ $field ] ) );
             }
         }
 
