@@ -31,12 +31,17 @@ if ( $author_id ) {
     }
 }
 
-// Sponsor name: linked to sponsor URL, or plain text fallback
-if ( $sponsor_url ) {
+// Sponsor brand name from author's display name
+$sponsor_name = $author_id ? esc_html( get_the_author_meta( 'display_name', $author_id ) ) : '';
+
+// Sponsor label: brand name linked to sponsor URL, or plain text fallback
+if ( $sponsor_name && $sponsor_url ) {
     $sponsor_link = esc_url( LG_WD_Email_Builder::add_utm( $sponsor_url ) );
-    $partner_label = '<a href="' . $sponsor_link . '" style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ECB351;text-decoration:none;">' . $title . '</a>';
+    $partner_label = '<a href="' . $sponsor_link . '" style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ECB351;text-decoration:none;">' . $sponsor_name . '</a>';
+} elseif ( $sponsor_name ) {
+    $partner_label = '<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ECB351;">' . $sponsor_name . '</span>';
 } else {
-    $partner_label = '<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ECB351;">' . $title . '</span>';
+    $partner_label = '<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ECB351;">Partner</span>';
 }
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
