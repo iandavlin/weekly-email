@@ -6,7 +6,7 @@
 defined( 'ABSPATH' ) || exit;
 
 $header_img_url = esc_url( $settings['header_image_url'] ?? '' );
-$signoff        = nl2br( esc_html( $settings['signoff'] ?? '' ) );
+$signoff        = nl2br( esc_html( wp_unslash( $settings['signoff'] ?? '' ) ) );
 $site_url       = esc_url( home_url() );
 $unsubscribe    = '{{unsubscribe_url}}'; // FluentCRM smart code
 $from_name      = esc_html( $settings['from_name'] ?? 'The Looth Group' );
@@ -35,8 +35,10 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
         <tr>
           <td align="center" style="background-color:#2B2318;padding:28px 40px;">
             <?php if ( $header_img_url ) : ?>
-              <img src="<?php echo $header_img_url; ?>" alt="<?php echo $from_name; ?>"
-                   style="max-width:340px;width:100%;height:auto;display:block;margin:0 auto;">
+              <a href="<?php echo esc_url( home_url() ); ?>" style="text-decoration:none;border:0;">
+                <img src="<?php echo $header_img_url; ?>" alt="<?php echo $from_name; ?>"
+                     style="max-width:340px;width:100%;height:auto;display:block;margin:0 auto;border:0;outline:none;text-decoration:none;">
+              </a>
             <?php else : ?>
               <p style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;
                          color:#ECB351;letter-spacing:4px;text-transform:uppercase;margin:0 0 6px;">
@@ -75,7 +77,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
             <!-- Intro line -->
             <p style="font-size:14px;color:#5C4E3A;line-height:1.6;margin:0 0 20px;
                        padding-bottom:16px;border-bottom:2px solid #ECB351;">
-              <?php echo nl2br( esc_html( $settings['intro_text'] ?? '' ) ); ?>
+              <?php echo nl2br( esc_html( wp_unslash( $settings['intro_text'] ?? '' ) ) ); ?>
             </p>
 
             <?php foreach ( $payload as $key => $data ) : ?>

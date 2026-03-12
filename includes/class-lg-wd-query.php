@@ -52,7 +52,7 @@ class LG_WD_Query {
         $under_header = false; // Tracks whether we're under a group header
 
         foreach ( $sections as $section ) {
-            $is_header = ! empty( $section['is_header'] );
+            $is_header = ! empty( $section['is_header'] ) || str_starts_with( $section['slug'] ?? '', '_header' );
 
             // Group header entry — render as divider, subsequent sections get subheadings
             if ( $is_header ) {
