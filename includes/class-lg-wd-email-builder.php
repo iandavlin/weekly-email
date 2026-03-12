@@ -142,7 +142,9 @@ class LG_WD_Email_Builder {
     }
 
     /**
-     * Build an author HTML snippet linked to their author archive page.
+     * Build an author HTML snippet with a contextual link.
+     * - bbPress topics → link to user's bbPress topics page (/forums/users/{nicename}/topics/)
+     * - All other CPTs → link to author archive (/author/{nicename}/)
      * Returns "By <a>Author Name</a>" or "By <strong>Author Name</strong>".
      */
     public static function author_html( int $post_id ): string {
@@ -152,11 +154,23 @@ class LG_WD_Email_Builder {
         $name = esc_html( get_the_author_meta( 'display_name', $author_id ) );
         if ( ! $name ) return '';
 
-        // Link to author archive (e.g. /author/username/)
-        $archive_url = get_author_posts_url( $author_id );
-        if ( $archive_url ) {
-            $archive_url = esc_url( self::add_utm( $archive_url ) );
-            return 'By <a href="' . $archive_url . '" style="color:#87986A;font-weight:600;text-decoration:none;">' . $name . '</a>';
+        $post_type = get_post_type( $post_id );
+        $url       = '';
+
+        // bbPress topic → link to user's forum topics page
+        if ( $post_type === 'topic' && function_exists( 'bbp_get_user_profile_url' ) ) {
+            $nicename = get_the_author_meta( 'user_nicename', $author_id );
+            $url      = home_url( '/forums/users/' . $nicename . '/topics/' );
+        }
+
+        // Fallback: author archive
+        if ( ! $url ) {
+            $url = get_author_posts_url( $author_id );
+        }
+
+        if ( $url ) {
+            $url = esc_url( self::add_utm( $url ) );
+            return 'By <a href="' . $url . '" style="color:#87986A;font-weight:600;text-decoration:none;">' . $name . '</a>';
         }
 
         return 'By <strong style="color:#87986A;">' . $name . '</strong>';
