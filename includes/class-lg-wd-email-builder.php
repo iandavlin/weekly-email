@@ -157,10 +157,12 @@ class LG_WD_Email_Builder {
         $post_type = get_post_type( $post_id );
         $url       = '';
 
-        // bbPress topic → link to user's forum topics page
+        // bbPress topic → link to user's forum topics page via bbPress API
         if ( $post_type === 'topic' && function_exists( 'bbp_get_user_profile_url' ) ) {
-            $nicename = get_the_author_meta( 'user_nicename', $author_id );
-            $url      = home_url( '/forums/users/' . $nicename . '/topics/' );
+            $profile_url = bbp_get_user_profile_url( $author_id );
+            if ( $profile_url ) {
+                $url = trailingslashit( $profile_url ) . 'topics/';
+            }
         }
 
         // Fallback: author archive
