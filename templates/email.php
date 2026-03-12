@@ -76,7 +76,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
               <tr>
                 <td class="hero-left">
                   <span style="font-size:12px;font-weight:700;color:#2B2318;
-                               text-transform:uppercase;letter-spacing:1.5px;">Weekly Digest</span>
+                               text-transform:uppercase;letter-spacing:1.5px;">Loothgroup Weekly</span>
                 </td>
                 <td class="hero-right" align="right">
                   <span style="font-size:12px;color:#5C4E3A;">
