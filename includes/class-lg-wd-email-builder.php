@@ -142,9 +142,10 @@ class LG_WD_Email_Builder {
     }
 
     /**
-     * Build an author HTML snippet linked to their author archive page.
-     * Skips link for users with non-human usernames (e.g. Patreon-synced)
-     * to avoid broken profile pages.
+     * Build an author HTML snippet with contextual link.
+     * - bbPress topics → /forums/users/{nicename}/topics/ (if bbPress URL resolves)
+     * - Other CPTs → author archive (/author/{nicename}/)
+     * - Patreon/OAuth usernames → unlinked bold text
      * Returns "By <a>Author Name</a>" or "By <strong>Author Name</strong>".
      */
     public static function author_html( int $post_id ): string {
@@ -158,12 +159,28 @@ class LG_WD_Email_Builder {
         $nicename = get_the_author_meta( 'user_nicename', $author_id );
         $is_linkable = $nicename && ! preg_match( '/^(patreon_|oauth_)\d+$|^\d+$/', $nicename );
 
-        if ( $is_linkable ) {
-            $url = esc_url( self::add_utm( get_author_posts_url( $author_id ) ) );
-            return 'By <a href="' . $url . '" style="color:#87986A;font-weight:600;text-decoration:none;">' . $name . '</a>';
+        if ( ! $is_linkable ) {
+            return 'By <strong style="color:#87986A;">' . $name . '</strong>';
         }
 
-        return 'By <strong style="color:#87986A;">' . $name . '</strong>';
+        $url = '';
+
+        // bbPress topic → forum user topics page (only if URL is under /forums/, not /members/)
+        if ( get_post_type( $post_id ) === 'topic' && function_exists( 'bbp_get_user_profile_url' ) ) {
+            $forums_base = home_url( '/forums/' );
+            $profile_url = bbp_get_user_profile_url( $author_id );
+            if ( $profile_url && str_starts_with( $profile_url, $forums_base ) ) {
+                $url = trailingslashit( $profile_url ) . 'topics/';
+            }
+        }
+
+        // Fallback: author archive
+        if ( ! $url ) {
+            $url = get_author_posts_url( $author_id );
+        }
+
+        $url = esc_url( self::add_utm( $url ) );
+        return 'By <a href="' . $url . '" style="color:#87986A;font-weight:600;text-decoration:none;">' . $name . '</a>';
     }
 
     // ── Subject line builder ───────────────────────────────────────────────────
