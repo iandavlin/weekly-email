@@ -68,6 +68,47 @@ class LG_WD_CPT_Registry {
         return true;
     }
 
+    public static function update( string $slug, array $fields ): bool {
+        $all     = get_option( self::OPTION_KEY, [] );
+        $updated = false;
+
+        foreach ( $all as &$entry ) {
+            if ( $entry['slug'] !== $slug ) continue;
+            // Merge supplied fields into existing entry, then re-sanitize
+            $merged = array_merge( $entry, $fields, [ 'slug' => $slug ] );
+            $entry  = self::sanitize_entry( $merged );
+            $updated = true;
+            break;
+        }
+        unset( $entry );
+
+        if ( ! $updated ) return false;
+        update_option( self::OPTION_KEY, $all, false );
+        return true;
+    }
+
+    public static function reorder( array $slugs ): void {
+        $all    = get_option( self::OPTION_KEY, [] );
+        $keyed  = [];
+        foreach ( $all as $entry ) {
+            $keyed[ $entry['slug'] ] = $entry;
+        }
+
+        $sorted = [];
+        foreach ( $slugs as $slug ) {
+            if ( isset( $keyed[ $slug ] ) ) {
+                $sorted[] = $keyed[ $slug ];
+                unset( $keyed[ $slug ] );
+            }
+        }
+        // Append any entries not in the slug list (safety net)
+        foreach ( $keyed as $entry ) {
+            $sorted[] = $entry;
+        }
+
+        update_option( self::OPTION_KEY, $sorted, false );
+    }
+
     /**
      * Get all registered WP post types for the dropdown (excluding internal CPTs).
      */

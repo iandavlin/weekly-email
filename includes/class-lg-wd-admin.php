@@ -16,8 +16,10 @@ class LG_WD_Admin {
         add_action( 'admin_enqueue_scripts',  [ __CLASS__, 'enqueue_assets' ] );
         add_action( 'admin_init',             [ __CLASS__, 'handle_form_post' ] );
         add_action( 'wp_ajax_lg_wd_save',     [ __CLASS__, 'ajax_save' ] );
-        add_action( 'wp_ajax_lg_wd_registry_add',   [ __CLASS__, 'ajax_registry_add' ] );
-        add_action( 'wp_ajax_lg_wd_registry_remove', [ __CLASS__, 'ajax_registry_remove' ] );
+        add_action( 'wp_ajax_lg_wd_registry_add',     [ __CLASS__, 'ajax_registry_add' ] );
+        add_action( 'wp_ajax_lg_wd_registry_remove',  [ __CLASS__, 'ajax_registry_remove' ] );
+        add_action( 'wp_ajax_lg_wd_registry_update',  [ __CLASS__, 'ajax_registry_update' ] );
+        add_action( 'wp_ajax_lg_wd_registry_reorder', [ __CLASS__, 'ajax_registry_reorder' ] );
         add_action( 'admin_notices',          [ __CLASS__, 'admin_notices' ] );
     }
 
@@ -363,22 +365,37 @@ class LG_WD_Admin {
             <table class="widefat striped" id="lg-wd-registry-table">
               <thead>
                 <tr>
+                  <th style="width:20px;"></th>
                   <th>Label</th>
                   <th>Slug</th>
                   <th>Template</th>
+                  <th>Sort</th>
                   <th>Tag Filter</th>
                   <th>Max</th>
                   <th>Enabled</th>
-                  <th>Action</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                <?php foreach ( $registry as $entry ) : ?>
-                    <tr data-slug="<?php echo esc_attr( $entry['slug'] ); ?>">
-                      <td><?php echo esc_html( $entry['label'] ); ?></td>
+              <tbody id="lg-wd-registry-sortable">
+                <?php foreach ( $registry as $entry ) :
+                    $slug = esc_attr( $entry['slug'] );
+                    $tmpl = $entry['template'] ?? 'card';
+                    $sort = $entry['sort_mode'] ?? 'newest';
+                ?>
+                    <tr data-slug="<?php echo $slug; ?>"
+                        data-label="<?php echo esc_attr( $entry['label'] ); ?>"
+                        data-template="<?php echo esc_attr( $tmpl ); ?>"
+                        data-sort-mode="<?php echo esc_attr( $sort ); ?>"
+                        data-tag-filter="<?php echo esc_attr( $entry['tag_filter'] ?? '' ); ?>"
+                        data-tag-taxonomy="<?php echo esc_attr( $entry['tag_taxonomy'] ?? 'post_tag' ); ?>"
+                        data-max-items="<?php echo (int) $entry['max_items']; ?>"
+                        data-enabled="<?php echo $entry['enabled'] ? '1' : '0'; ?>">
+                      <td class="lg-wd-drag-handle" style="cursor:grab;text-align:center;color:#aaa;" title="Drag to reorder">☰</td>
+                      <td class="lg-wd-reg-label"><?php echo esc_html( $entry['label'] ); ?></td>
                       <td><code><?php echo esc_html( $entry['slug'] ); ?></code></td>
-                      <td><?php echo esc_html( $entry['template'] ?? 'card' ); ?></td>
-                      <td>
+                      <td class="lg-wd-reg-template"><?php echo esc_html( LG_WD_CPT_Registry::TEMPLATES[ $tmpl ] ?? $tmpl ); ?></td>
+                      <td class="lg-wd-reg-sort"><?php echo $sort === 'upcoming' ? 'Upcoming' : 'Newest'; ?></td>
+                      <td class="lg-wd-reg-tag">
                         <?php if ( ! empty( $entry['tag_filter'] ) ) : ?>
                           <code><?php echo esc_html( $entry['tag_filter'] ); ?></code>
                           <span style="color:#aaa;font-size:11px;">(<?php echo esc_html( $entry['tag_taxonomy'] ?? 'post_tag' ); ?>)</span>
@@ -386,10 +403,11 @@ class LG_WD_Admin {
                           <span style="color:#aaa;">—</span>
                         <?php endif; ?>
                       </td>
-                      <td><?php echo (int) $entry['max_items']; ?></td>
-                      <td><?php echo $entry['enabled'] ? 'Yes' : 'No'; ?></td>
-                      <td>
-                        <button class="button button-small lg-wd-registry-remove" data-slug="<?php echo esc_attr( $entry['slug'] ); ?>">Remove</button>
+                      <td class="lg-wd-reg-max"><?php echo (int) $entry['max_items']; ?></td>
+                      <td class="lg-wd-reg-enabled"><?php echo $entry['enabled'] ? 'Yes' : '<span style="color:#aaa;">No</span>'; ?></td>
+                      <td style="white-space:nowrap;">
+                        <button class="button button-small lg-wd-registry-edit" data-slug="<?php echo $slug; ?>">Edit</button>
+                        <button class="button button-small lg-wd-registry-remove" data-slug="<?php echo $slug; ?>" style="color:#d63638;">Remove</button>
                       </td>
                     </tr>
                 <?php endforeach; ?>
@@ -446,6 +464,58 @@ class LG_WD_Admin {
                   <button class="button button-primary" id="lg-wd-reg-add-btn">+ Add</button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div id="lg-wd-reg-edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100050;background:rgba(0,0,0,.45);align-items:center;justify-content:center;">
+          <div style="background:#fff;border-radius:8px;padding:24px 28px;max-width:480px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2);">
+            <h3 style="margin:0 0 16px;">Edit Content Type</h3>
+            <input type="hidden" id="lg-wd-edit-slug">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="lg-wd-form-group" style="margin:0;">
+                <label class="lg-wd-label">Display Label</label>
+                <input type="text" id="lg-wd-edit-label" class="lg-wd-input">
+              </div>
+              <div class="lg-wd-form-group" style="margin:0;">
+                <label class="lg-wd-label">Template</label>
+                <select id="lg-wd-edit-template" class="lg-wd-select">
+                  <?php foreach ( LG_WD_CPT_Registry::TEMPLATES as $tslug => $tname ) : ?>
+                    <option value="<?php echo esc_attr( $tslug ); ?>"><?php echo esc_html( $tname ); ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+              <div class="lg-wd-form-group" style="margin:0;">
+                <label class="lg-wd-label">Sort Mode</label>
+                <select id="lg-wd-edit-sort" class="lg-wd-select">
+                  <option value="newest">Newest first</option>
+                  <option value="upcoming">Upcoming (events)</option>
+                </select>
+              </div>
+              <div class="lg-wd-form-group" style="margin:0;">
+                <label class="lg-wd-label">Max Items</label>
+                <input type="number" id="lg-wd-edit-max" class="lg-wd-input" min="1" max="50">
+              </div>
+              <div class="lg-wd-form-group" style="margin:0;">
+                <label class="lg-wd-label">Tag Filter</label>
+                <input type="text" id="lg-wd-edit-tag" class="lg-wd-input" placeholder="e.g. weeklyyes">
+              </div>
+              <div class="lg-wd-form-group" style="margin:0;">
+                <label class="lg-wd-label">Tag Taxonomy</label>
+                <input type="text" id="lg-wd-edit-taxonomy" class="lg-wd-input" placeholder="post_tag">
+              </div>
+              <div class="lg-wd-form-group" style="margin:0;">
+                <label class="lg-wd-label">Enabled</label>
+                <select id="lg-wd-edit-enabled" class="lg-wd-select">
+                  <option value="1">Yes</option>
+                  <option value="0">No</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end;">
+              <button class="button" id="lg-wd-edit-cancel">Cancel</button>
+              <button class="button button-primary" id="lg-wd-edit-save">Save Changes</button>
             </div>
           </div>
         </div>
@@ -721,5 +791,45 @@ class LG_WD_Admin {
         } else {
             wp_send_json_error( 'Cannot remove built-in type or slug not found.' );
         }
+    }
+
+    // ── AJAX: Registry update ──────────────────────────────────────────────
+
+    public static function ajax_registry_update(): void {
+        check_ajax_referer( 'lg_wd_admin', 'nonce' );
+        if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
+
+        $slug = sanitize_key( $_POST['slug'] ?? '' );
+        if ( ! $slug ) wp_send_json_error( 'Missing slug.' );
+
+        $fields = [];
+        if ( isset( $_POST['label'] ) )        $fields['label']        = sanitize_text_field( $_POST['label'] );
+        if ( isset( $_POST['template'] ) )     $fields['template']     = sanitize_key( $_POST['template'] );
+        if ( isset( $_POST['sort_mode'] ) )    $fields['sort_mode']    = sanitize_key( $_POST['sort_mode'] );
+        if ( isset( $_POST['tag_filter'] ) )   $fields['tag_filter']   = sanitize_text_field( $_POST['tag_filter'] );
+        if ( isset( $_POST['tag_taxonomy'] ) ) $fields['tag_taxonomy'] = sanitize_key( $_POST['tag_taxonomy'] );
+        if ( isset( $_POST['max_items'] ) )    $fields['max_items']    = absint( $_POST['max_items'] );
+        if ( isset( $_POST['enabled'] ) )      $fields['enabled']      = $_POST['enabled'] === '1';
+
+        if ( LG_WD_CPT_Registry::update( $slug, $fields ) ) {
+            wp_send_json_success( [ 'message' => 'Content type updated.' ] );
+        } else {
+            wp_send_json_error( 'Slug not found.' );
+        }
+    }
+
+    // ── AJAX: Registry reorder ─────────────────────────────────────────────
+
+    public static function ajax_registry_reorder(): void {
+        check_ajax_referer( 'lg_wd_admin', 'nonce' );
+        if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
+
+        $order = $_POST['order'] ?? [];
+        if ( ! is_array( $order ) ) wp_send_json_error( 'Invalid order data.' );
+
+        $slugs = array_map( 'sanitize_key', $order );
+        LG_WD_CPT_Registry::reorder( $slugs );
+
+        wp_send_json_success( [ 'message' => 'Order saved.' ] );
     }
 }

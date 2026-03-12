@@ -162,6 +162,82 @@ jQuery( function ( $ ) {
         });
     });
 
+    // ── CPT Registry: Edit (modal) ────────────────────────────────────────────
+
+    const $modal = $( '#lg-wd-reg-edit-modal' );
+
+    $( document ).on( 'click', '.lg-wd-registry-edit', function () {
+        const $row = $( this ).closest( 'tr' );
+        $( '#lg-wd-edit-slug' ).val( $row.data( 'slug' ) );
+        $( '#lg-wd-edit-label' ).val( $row.data( 'label' ) );
+        $( '#lg-wd-edit-template' ).val( $row.data( 'template' ) );
+        $( '#lg-wd-edit-sort' ).val( $row.data( 'sort-mode' ) );
+        $( '#lg-wd-edit-tag' ).val( $row.data( 'tag-filter' ) );
+        $( '#lg-wd-edit-taxonomy' ).val( $row.data( 'tag-taxonomy' ) );
+        $( '#lg-wd-edit-max' ).val( $row.data( 'max-items' ) );
+        $( '#lg-wd-edit-enabled' ).val( $row.data( 'enabled' ) );
+        $modal.css( 'display', 'flex' );
+    });
+
+    $( '#lg-wd-edit-cancel' ).on( 'click', () => $modal.hide() );
+    $modal.on( 'click', function ( e ) {
+        if ( e.target === this ) $modal.hide();
+    });
+
+    $( '#lg-wd-edit-save' ).on( 'click', function () {
+        const $btn = $( this );
+        const slug = $( '#lg-wd-edit-slug' ).val();
+        setLoading( $btn, true );
+
+        $.post( ajaxUrl, {
+            action:       'lg_wd_registry_update',
+            nonce,
+            slug,
+            label:        $( '#lg-wd-edit-label' ).val(),
+            template:     $( '#lg-wd-edit-template' ).val(),
+            sort_mode:    $( '#lg-wd-edit-sort' ).val(),
+            tag_filter:   $( '#lg-wd-edit-tag' ).val(),
+            tag_taxonomy: $( '#lg-wd-edit-taxonomy' ).val(),
+            max_items:    $( '#lg-wd-edit-max' ).val(),
+            enabled:      $( '#lg-wd-edit-enabled' ).val(),
+        }, function ( res ) {
+            setLoading( $btn, false );
+            if ( res.success ) {
+                showResponse( '✓ ' + res.data.message, 'success' );
+                $modal.hide();
+                location.reload();
+            } else {
+                showResponse( '✗ ' + ( res.data || 'Failed to update.' ), 'error' );
+            }
+        });
+    });
+
+    // ── CPT Registry: Drag-and-drop reorder ───────────────────────────────────
+
+    if ( $.fn.sortable && $( '#lg-wd-registry-sortable' ).length ) {
+        $( '#lg-wd-registry-sortable' ).sortable({
+            handle: '.lg-wd-drag-handle',
+            axis: 'y',
+            containment: 'parent',
+            placeholder: 'lg-wd-sortable-placeholder',
+            update: function () {
+                const order = [];
+                $( '#lg-wd-registry-sortable tr[data-slug]' ).each( function () {
+                    order.push( $( this ).data( 'slug' ) );
+                });
+                $.post( ajaxUrl, {
+                    action: 'lg_wd_registry_reorder',
+                    nonce,
+                    order,
+                }, function ( res ) {
+                    if ( res.success ) {
+                        showResponse( '✓ Order saved.', 'success' );
+                    }
+                });
+            },
+        });
+    }
+
     // ── Footer Links Repeater ────────────────────────────────────────────────
 
     const $footerList = $( '#lg-wd-footer-links-list' );
