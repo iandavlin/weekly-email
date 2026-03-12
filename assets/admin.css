@@ -537,6 +537,16 @@ code { background: #f0ebe2; padding: 1px 4px; border-radius: 3px; font-size: 11p
   background: rgba(236,179,81,0.05);
 }
 
+.lg-wd-registry-placeholder {
+  background: rgba(236,179,81,0.08);
+}
+.lg-wd-registry-placeholder td { height: 40px; }
+
+#lg-wd-registry-sortable tr.ui-sortable-helper {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+
 .lg-wd-compose-section-header {
   display: flex;
   align-items: center;

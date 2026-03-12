@@ -222,8 +222,16 @@ jQuery( function ( $ ) {
         $( '#lg-wd-registry-sortable' ).sortable({
             handle: '.lg-wd-drag-handle',
             axis: 'y',
-            containment: 'parent',
-            placeholder: 'lg-wd-sortable-placeholder',
+            helper: function ( e, tr ) {
+                // Preserve column widths while dragging
+                const $originals = tr.children();
+                const $helper = tr.clone();
+                $helper.children().each( function ( i ) {
+                    $( this ).width( $originals.eq( i ).width() );
+                });
+                return $helper;
+            },
+            placeholder: 'lg-wd-registry-placeholder',
             update: function () {
                 const order = [];
                 $( '#lg-wd-registry-sortable tr[data-slug]' ).each( function () {
