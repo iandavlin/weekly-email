@@ -99,7 +99,8 @@ jQuery( function ( $ ) {
 
     // ── CPT Registry: Add ────────────────────────────────────────────────────
 
-    $( '#lg-wd-reg-add-btn' ).on( 'click', function () {
+    $( '#lg-wd-reg-add-btn' ).on( 'click', function ( e ) {
+        e.preventDefault();
         const $btn       = $( this );
         const slug       = $( '#lg-wd-reg-slug' ).val();
         const label      = $( '#lg-wd-reg-label' ).val().trim();
@@ -139,7 +140,8 @@ jQuery( function ( $ ) {
 
     // ── CPT Registry: Remove ─────────────────────────────────────────────────
 
-    $( document ).on( 'click', '.lg-wd-registry-remove', function () {
+    $( document ).on( 'click', '.lg-wd-registry-remove', function ( e ) {
+        e.preventDefault();
         if ( ! confirm( 'Remove this content type from the registry?' ) ) return;
 
         const $btn = $( this );
@@ -166,7 +168,8 @@ jQuery( function ( $ ) {
 
     const $modal = $( '#lg-wd-reg-edit-modal' );
 
-    $( document ).on( 'click', '.lg-wd-registry-edit', function () {
+    $( document ).on( 'click', '.lg-wd-registry-edit', function ( e ) {
+        e.preventDefault();
         const $row = $( this ).closest( 'tr' );
         $( '#lg-wd-edit-slug' ).val( $row.data( 'slug' ) );
         $( '#lg-wd-edit-label' ).val( $row.data( 'label' ) );
@@ -179,12 +182,13 @@ jQuery( function ( $ ) {
         $modal.css( 'display', 'flex' );
     });
 
-    $( '#lg-wd-edit-cancel' ).on( 'click', () => $modal.hide() );
+    $( '#lg-wd-edit-cancel' ).on( 'click', function ( e ) { e.preventDefault(); $modal.hide(); } );
     $modal.on( 'click', function ( e ) {
         if ( e.target === this ) $modal.hide();
     });
 
-    $( '#lg-wd-edit-save' ).on( 'click', function () {
+    $( '#lg-wd-edit-save' ).on( 'click', function ( e ) {
+        e.preventDefault();
         const $btn = $( this );
         const slug = $( '#lg-wd-edit-slug' ).val();
         setLoading( $btn, true );
