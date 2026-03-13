@@ -314,9 +314,10 @@ class LG_WD_Query {
     }
 
     private static function clean_excerpt( \WP_Post $post ): string {
+        $word_count = ( $post->post_type === 'topic' ) ? 40 : 20;
         $text = ! empty( $post->post_excerpt )
             ? wp_strip_all_tags( $post->post_excerpt )
-            : wp_trim_words( wp_strip_all_tags( $post->post_content ), 20, '…' );
+            : wp_trim_words( wp_strip_all_tags( $post->post_content ), $word_count, '…' );
 
         // Strip any URLs (YouTube, etc.) from the excerpt
         $text = preg_replace( '#https?://\S+#i', '', $text );
