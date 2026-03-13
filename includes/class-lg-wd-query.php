@@ -70,6 +70,22 @@ class LG_WD_Query {
                 continue;
             }
 
+            // HTML block sections — single synthetic item with raw HTML content
+            $html_content = $section['html_content'] ?? '';
+            if ( ( $section['template'] ?? '' ) === 'html-block' && $html_content ) {
+                $payload[ $section['key'] ] = [
+                    'section' => [
+                        'key'      => $section['key'],
+                        'label'    => $section['label'],
+                        'template' => 'html-block',
+                    ],
+                    'items'        => [ [ 'id' => 0, 'html_content' => $html_content ] ],
+                    'is_archive'   => false,
+                    'under_header' => $under_header,
+                ];
+                continue;
+            }
+
             $post_ids     = $section['post_ids'] ?? [];
             $manual_items = $section['manual_items'] ?? [];
 

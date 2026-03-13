@@ -29,6 +29,7 @@ class LG_WD_CPT_Registry {
         'date-forward' => 'Date-forward (events)',
         'sponsor'      => 'Sponsor / Partner',
         'full-text'    => 'Full Text (WYSIWYG)',
+        'html-block'   => 'HTML Block (custom message)',
     ];
 
     // ── Public API ───────────────────────────────────────────────────────────

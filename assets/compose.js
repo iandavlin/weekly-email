@@ -51,16 +51,24 @@ jQuery( function ( $ ) {
                 });
             });
 
-            const isHeader = $sec.data( 'is-header' ) === 1 || $sec.data( 'is-header' ) === '1';
-            sections.push({
+            const isHeader    = $sec.data( 'is-header' ) === 1 || $sec.data( 'is-header' ) === '1';
+            const isHtmlBlock = $sec.data( 'section-template' ) === 'html-block';
+
+            const entry = {
                 key:          $sec.data( 'section-key' ),
                 label:        $sec.find( '.lg-wd-compose-section-header strong' ).text().replace( /^📌\s*/, '' ),
                 is_header:    isHeader,
                 template:     $sec.data( 'section-template' ),
                 slug:         $sec.data( 'section-slug' ),
-                post_ids:     isHeader ? [] : postIds,
-                manual_items: isHeader ? [] : manualItems,
-            });
+                post_ids:     isHeader || isHtmlBlock ? [] : postIds,
+                manual_items: isHeader || isHtmlBlock ? [] : manualItems,
+            };
+
+            if ( isHtmlBlock ) {
+                entry.html_content = $sec.find( '.lg-wd-html-content' ).val() || '';
+            }
+
+            sections.push( entry );
         });
         return sections;
     }
@@ -387,6 +395,33 @@ jQuery( function ( $ ) {
               </div>
               <div class="lg-wd-compose-section-body">
                 <p class="lg-wd-empty-section">No posts in this section. Use search or + External to add items.</p>
+              </div>
+            </div>
+        `;
+        $( '#lg-wd-sections-container' ).append( html );
+    }
+
+    // ── HTML Block ──────────────────────────────────────────────────────────
+
+    $( '#lg-wd-add-html-block-btn' ).on( 'click', function () {
+        const key   = 'html_block_' + Date.now();
+        const label = 'HTML Block';
+        addHtmlBlock( key, label, '' );
+        showResponse( '✓ HTML block added. Enter your HTML content below.', 'success' );
+    });
+
+    function addHtmlBlock( key, label, content ) {
+        const esc = str => $( '<div>' ).text( str ).html();
+        const html = `
+            <div class="lg-wd-compose-section lg-wd-compose-html-block" data-section-key="${key}" data-section-template="html-block" data-section-slug="" data-is-header="0">
+              <div class="lg-wd-compose-section-header">
+                <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
+                <strong>${esc(label)}</strong>
+                <span class="lg-wd-section-type-badge" style="background:#87986A;color:#fff;">HTML</span>
+                <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
+              </div>
+              <div class="lg-wd-compose-section-body" style="padding:12px;">
+                <textarea class="lg-wd-html-content" rows="8" style="width:100%;font-family:monospace;font-size:13px;padding:8px;border:1px solid #ddd;border-radius:4px;">${esc(content)}</textarea>
               </div>
             </div>
         `;

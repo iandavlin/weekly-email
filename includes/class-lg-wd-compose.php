@@ -185,6 +185,11 @@ class LG_WD_Compose {
                 </div>
               </div>
 
+              <div class="lg-wd-form-group" style="margin-bottom:0;margin-left:16px;border-left:1px solid #ddd;padding-left:16px;">
+                <label class="lg-wd-label">Custom HTML</label>
+                <button class="button" id="lg-wd-add-html-block-btn">+ HTML Block</button>
+              </div>
+
               <div style="margin-left:auto;display:flex;gap:8px;align-items:flex-end;">
                 <div class="lg-wd-form-group" style="margin-bottom:0;">
                   <label class="lg-wd-label">Search Posts</label>
@@ -318,6 +323,9 @@ class LG_WD_Compose {
         $manual_items  = $section['manual_items'] ?? [];
         $total_items   = count( $post_ids ) + count( $manual_items );
 
+        $html_content  = $section['html_content'] ?? '';
+        $is_html_block = $template === 'html-block';
+
         // Group header — visual divider, no posts
         if ( $is_header ) : ?>
         <div class="lg-wd-compose-section lg-wd-compose-header" data-section-key="<?php echo $key; ?>" data-section-template="header" data-section-slug="<?php echo $slug; ?>" data-is-header="1">
@@ -328,6 +336,19 @@ class LG_WD_Compose {
             <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section" style="color:#ECB351;">✕</button>
           </div>
         </div>
+        <?php elseif ( $is_html_block ) : ?>
+        <div class="lg-wd-compose-section lg-wd-compose-html-block" data-section-key="<?php echo $key; ?>" data-section-template="html-block" data-section-slug="" data-is-header="0">
+          <div class="lg-wd-compose-section-header">
+            <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
+            <strong><?php echo $label; ?></strong>
+            <span class="lg-wd-section-type-badge" style="background:#87986A;color:#fff;">HTML</span>
+            <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
+          </div>
+          <div class="lg-wd-compose-section-body" style="padding:12px;">
+            <textarea class="lg-wd-html-content" rows="8" style="width:100%;font-family:monospace;font-size:13px;padding:8px;border:1px solid #ddd;border-radius:4px;"><?php echo esc_textarea( $html_content ); ?></textarea>
+          </div>
+        </div>
+
         <?php else : ?>
         <div class="lg-wd-compose-section" data-section-key="<?php echo $key; ?>" data-section-template="<?php echo $template; ?>" data-section-slug="<?php echo $slug; ?>" data-is-header="0">
           <div class="lg-wd-compose-section-header">
@@ -422,7 +443,7 @@ class LG_WD_Compose {
                 ];
             }
 
-            $sections[] = [
+            $entry = [
                 'key'          => sanitize_key( $s['key'] ?? '' ),
                 'label'        => sanitize_text_field( $s['label'] ?? '' ),
                 'is_header'    => ! empty( $s['is_header'] ),
@@ -431,6 +452,13 @@ class LG_WD_Compose {
                 'post_ids'     => array_map( 'absint', $s['post_ids'] ?? [] ),
                 'manual_items' => $manual_items,
             ];
+
+            // HTML block sections store their content directly
+            if ( ( $s['template'] ?? '' ) === 'html-block' && isset( $s['html_content'] ) ) {
+                $entry['html_content'] = wp_kses_post( $s['html_content'] );
+            }
+
+            $sections[] = $entry;
         }
 
         $data = LG_WD_Issue::get_data( $issue_id );
@@ -606,7 +634,7 @@ class LG_WD_Compose {
                 $data = LG_WD_Issue::get_data( $issue_id );
                 $data['sections'] = [];
                 foreach ( $raw_sections as $s ) {
-                    $data['sections'][] = [
+                    $entry = [
                         'key'       => sanitize_key( $s['key'] ?? '' ),
                         'label'     => sanitize_text_field( $s['label'] ?? '' ),
                         'is_header' => ! empty( $s['is_header'] ),
@@ -614,6 +642,12 @@ class LG_WD_Compose {
                         'template'  => sanitize_key( $s['template'] ?? 'card' ),
                         'post_ids'  => array_map( 'absint', $s['post_ids'] ?? [] ),
                     ];
+
+                    if ( ( $s['template'] ?? '' ) === 'html-block' && isset( $s['html_content'] ) ) {
+                        $entry['html_content'] = wp_kses_post( $s['html_content'] );
+                    }
+
+                    $data['sections'][] = $entry;
                 }
                 if ( ! empty( $_POST['date_from'] ) ) {
                     $data['date_from'] = sanitize_text_field( $_POST['date_from'] );
