@@ -23,7 +23,7 @@ if ( ! $img_url ) {
     }
 }
 if ( has_post_thumbnail( $item['id'] ) ) {
-    $img_url = get_the_post_thumbnail_url( $item['id'], 'medium' );
+    $img_url = get_the_post_thumbnail_url( $item['id'], 'large' );
 }
 
 // Parse event date
