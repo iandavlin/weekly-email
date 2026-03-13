@@ -1,7 +1,10 @@
 <?php
 /**
- * Section template: Sponsor / Partner
- * Gold-bordered card with featured image, partner label, and sponsor name.
+ * Section template: Sponsor / Partner (2-column fluid hybrid)
+ * Desktop: Thumbnail (left) | Partner label + title + excerpt (right)
+ * Mobile:  Stacks naturally — image full-width, then details below.
+ * Gold border preserved around the whole card.
+ *
  * Variables: $item (array), $settings (array)
  */
 defined( 'ABSPATH' ) || exit;
@@ -43,29 +46,66 @@ if ( $sponsor_name && $sponsor_url ) {
 } else {
     $partner_label = '<span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#2B2318;">Partner</span>';
 }
+
+// Column widths
+$thumb_width  = 200;
+$gutter       = 16;
+$detail_width = 488; // slightly less to account for card padding
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="background:#FFF8EC;border:1px solid #ECB351;border-radius:8px;margin-bottom:12px;">
-  <?php if ( $img_url ) : ?>
-  <tr>
-    <td align="left" style="padding:0;line-height:0;">
-      <a href="<?php echo $url; ?>" class="sponsor-img" style="line-height:0;border:0;outline:none;text-decoration:none;">
-        <img src="<?php echo esc_url( $img_url ); ?>"
-             width="720" class="img-cap"
-             style="max-width:100%;max-height:405px;width:auto;height:auto;border-radius:8px 8px 0 0;border:0;"
-             alt="">
-      </a>
-    </td>
-  </tr>
-  <?php endif; ?>
   <tr>
     <td style="padding:18px 20px;">
-      <p style="margin:0 0 6px;"><?php echo $partner_label; ?></p>
-      <p style="font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:700;color:#2B2318;margin:0 0 8px;line-height:1.35;"><?php echo $title; ?></p>
-      <?php if ( $excerpt ) : ?>
-      <p style="font-size:15px;color:#5C4E3A;margin:0 0 12px;line-height:1.55;"><?php echo $excerpt; ?></p>
+
+      <!--[if mso]>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <?php if ( $img_url ) : ?>
+      <td width="<?php echo $thumb_width; ?>" valign="top">
       <?php endif; ?>
-      <a href="<?php echo $url; ?>" style="font-size:13px;font-weight:600;color:#ECB351;text-decoration:none;">Learn more &#8594;</a>
+      <![endif]-->
+
+      <?php if ( $img_url ) : ?>
+      <table class="event-col-thumb" width="<?php echo $thumb_width; ?>" cellpadding="0" cellspacing="0" border="0"
+             align="left" style="width:<?php echo $thumb_width; ?>px;max-width:<?php echo $thumb_width; ?>px;">
+        <tr>
+          <td style="padding:0 <?php echo $gutter; ?>px 12px 0;line-height:0;">
+            <a href="<?php echo $url; ?>" style="display:block;line-height:0;">
+              <img src="<?php echo esc_url( $img_url ); ?>"
+                   width="<?php echo $thumb_width; ?>" class="event-img"
+                   style="width:<?php echo $thumb_width; ?>px;max-width:100%;height:auto;border-radius:6px;display:block;"
+                   alt="<?php echo $title; ?>">
+            </a>
+          </td>
+        </tr>
+      </table>
+      <?php endif; ?>
+
+      <!--[if mso]>
+      <?php if ( $img_url ) : ?>
+      </td>
+      <?php endif; ?>
+      <td width="<?php echo $img_url ? $detail_width : '100%'; ?>" valign="top">
+      <![endif]-->
+
+      <table class="event-col-details" width="<?php echo $img_url ? $detail_width : '100%'; ?>" cellpadding="0" cellspacing="0" border="0"
+             align="left" style="width:<?php echo $img_url ? $detail_width . 'px' : '100%'; ?>;max-width:<?php echo $img_url ? $detail_width . 'px' : '100%'; ?>;">
+        <tr>
+          <td valign="top" style="padding:0;">
+            <p style="margin:0 0 6px;"><?php echo $partner_label; ?></p>
+            <p style="font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:700;color:#2B2318;margin:0 0 8px;line-height:1.35;"><?php echo $title; ?></p>
+            <?php if ( $excerpt ) : ?>
+            <p style="font-size:15px;color:#5C4E3A;margin:0 0 12px;line-height:1.55;"><?php echo $excerpt; ?></p>
+            <?php endif; ?>
+            <a href="<?php echo $url; ?>" style="font-size:13px;font-weight:600;color:#ECB351;text-decoration:none;">Learn more &#8594;</a>
+          </td>
+        </tr>
+      </table>
+
+      <!--[if mso]>
+      </td>
+      </tr></table>
+      <![endif]-->
+
     </td>
   </tr>
 </table>

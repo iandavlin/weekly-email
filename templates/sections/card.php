@@ -1,7 +1,9 @@
 <?php
 /**
- * Section template: Card
- * Full-width 16:9 image on top, title + excerpt + meta below.
+ * Section template: Card (2-column fluid hybrid)
+ * Desktop: Thumbnail (left) | Title + excerpt + meta (right)
+ * Mobile:  Stacks naturally — image full-width, then details below.
+ *
  * Variables: $item (array), $settings (array), $hide_type_label (bool)
  */
 defined( 'ABSPATH' ) || exit;
@@ -35,31 +37,69 @@ $meta_parts = [];
 if ( $author_html ) $meta_parts[] = $author_html;
 if ( $date ) $meta_parts[] = $date;
 $meta_html = implode( ' &middot; ', $meta_parts );
+
+// Image
+$img_url = ( $show_thumb && ! empty( $item['thumb_url'] ) ) ? $item['thumb_url'] : '';
+
+// Column widths
+$thumb_width  = 200;
+$gutter       = 16;
+$detail_width = 504;
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:16px;margin-bottom:16px;">
   <tr>
     <td>
-      <?php if ( $show_thumb && ! empty( $item['thumb_url'] ) ) : ?>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;">
+
+      <!--[if mso]>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <?php if ( $img_url ) : ?>
+      <td width="<?php echo $thumb_width; ?>" valign="top">
+      <?php endif; ?>
+      <![endif]-->
+
+      <?php if ( $img_url ) : ?>
+      <table class="event-col-thumb" width="<?php echo $thumb_width; ?>" cellpadding="0" cellspacing="0" border="0"
+             align="left" style="width:<?php echo $thumb_width; ?>px;max-width:<?php echo $thumb_width; ?>px;">
         <tr>
-          <td align="left" style="line-height:0;">
-            <a href="<?php echo $url; ?>" style="line-height:0;">
-              <img src="<?php echo esc_url( $item['thumb_url'] ); ?>"
-                   width="720" class="img-cap"
-                   style="max-width:100%;max-height:405px;width:auto;height:auto;border-radius:6px;"
-                   alt="">
+          <td style="padding:0 <?php echo $gutter; ?>px 12px 0;line-height:0;">
+            <a href="<?php echo $url; ?>" style="display:block;line-height:0;">
+              <img src="<?php echo esc_url( $img_url ); ?>"
+                   width="<?php echo $thumb_width; ?>" class="event-img"
+                   style="width:<?php echo $thumb_width; ?>px;max-width:100%;height:auto;border-radius:6px;display:block;"
+                   alt="<?php echo $title; ?>">
             </a>
           </td>
         </tr>
       </table>
       <?php endif; ?>
-      <?php if ( empty( $hide_type_label ) ) : ?>
-      <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;margin:0 0 3px;"><?php echo $type_label; ?></p>
+
+      <!--[if mso]>
+      <?php if ( $img_url ) : ?>
+      </td>
       <?php endif; ?>
-      <a href="<?php echo $url; ?>" class="card-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:4px;"><?php echo $title; ?></a>
-      <?php echo $excerpt; ?>
-      <p class="card-meta" style="font-size:13px;color:#aaa;margin:6px 0 0;"><?php echo $meta_html; ?></p>
+      <td width="<?php echo $img_url ? $detail_width : '100%'; ?>" valign="top">
+      <![endif]-->
+
+      <table class="event-col-details" width="<?php echo $img_url ? $detail_width : '100%'; ?>" cellpadding="0" cellspacing="0" border="0"
+             align="left" style="width:<?php echo $img_url ? $detail_width . 'px' : '100%'; ?>;max-width:<?php echo $img_url ? $detail_width . 'px' : '100%'; ?>;">
+        <tr>
+          <td valign="top" style="padding:0;">
+            <?php if ( empty( $hide_type_label ) ) : ?>
+            <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;margin:0 0 3px;"><?php echo $type_label; ?></p>
+            <?php endif; ?>
+            <a href="<?php echo $url; ?>" class="card-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:4px;"><?php echo $title; ?></a>
+            <?php echo $excerpt; ?>
+            <p class="card-meta" style="font-size:13px;color:#aaa;margin:6px 0 0;"><?php echo $meta_html; ?></p>
+          </td>
+        </tr>
+      </table>
+
+      <!--[if mso]>
+      </td>
+      </tr></table>
+      <![endif]-->
+
     </td>
   </tr>
 </table>

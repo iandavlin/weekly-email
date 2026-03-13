@@ -1,11 +1,8 @@
 <?php
 /**
  * Section template: Date-forward (2-column fluid hybrid)
- * Desktop: Thumbnail (left) | Date badge + details (right)
+ * Desktop: Thumbnail (left) | Event details (right)
  * Mobile:  Stacks naturally — image full-width, then details below.
- *
- * Uses align="left" ghost-table pattern for bulletproof email client support.
- * MSO conditional comments handle Outlook's fixed-width rendering.
  *
  * Variables: $item (array), $settings (array)
  */
@@ -31,16 +28,12 @@ if ( has_post_thumbnail( $item['id'] ) ) {
 
 // Parse event date
 $display_date = '';
-$month_short  = '';
-$day_num      = '';
 $dt_start     = null;
 
 if ( $date_raw ) {
     $tz = new DateTimeZone( LG_WD_TIMEZONE );
     $ts = DateTime::createFromFormat( 'Ymd', $date_raw, $tz );
     if ( $ts ) {
-        $month_short  = strtoupper( $ts->format( 'M' ) );
-        $day_num      = $ts->format( 'j' );
         $display_date = $ts->format( 'l, F j, Y' );
         $dt_start     = $ts;
     }
@@ -117,10 +110,10 @@ if ( $dt_start ) {
     $gcal_url = 'https://calendar.google.com/calendar/render?' . http_build_query( $gcal_params );
 }
 
-// Column widths for the hybrid layout
-$thumb_width   = 200; // px — thumbnail column
-$gutter        = 16;  // px — gap between columns
-$detail_width  = 504; // px — remaining space in 720px container
+// Column widths
+$thumb_width  = 200;
+$gutter       = 16;
+$detail_width = 504;
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:16px;margin-bottom:16px;">
@@ -157,24 +150,9 @@ $detail_width  = 504; // px — remaining space in 720px container
              align="left" style="width:<?php echo $detail_width; ?>px;max-width:<?php echo $detail_width; ?>px;">
         <tr>
           <td valign="top" style="padding:0;">
-
-            <!-- Date badge (inline) -->
-            <?php if ( $month_short && $day_num ) : ?>
-            <table cellpadding="0" cellspacing="0" border="0" align="left"
-                   style="margin:0 12px 8px 0;">
-              <tr>
-                <td align="center" style="background:#2B2318;border-radius:6px;width:46px;padding:6px 0;">
-                  <span style="display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;font-family:Arial,Helvetica,sans-serif;"><?php echo esc_html( $month_short ); ?></span>
-                  <span style="display:block;font-size:20px;font-weight:700;font-family:Georgia,serif;color:#ECB351;line-height:1.1;"><?php echo esc_html( $day_num ); ?></span>
-                </td>
-              </tr>
-            </table>
-            <?php endif; ?>
-
-            <!-- Title + meta (flows beside badge) -->
             <a href="<?php echo $url; ?>" class="event-title"
                style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:4px;"><?php echo $title; ?></a>
-            <p class="event-date" style="font-size:14px;color:#5C4E3A;margin:0 0 4px;clear:left;">
+            <p class="event-date" style="font-size:14px;color:#5C4E3A;margin:0 0 4px;">
               <?php echo esc_html( $display_date ); ?>
               <?php if ( $time_display ) : ?>
                 &middot; <?php echo $time_display; ?>
@@ -194,7 +172,6 @@ $detail_width  = 504; // px — remaining space in 720px container
                  target="_blank">&#128197; Add to Calendar</a>
             </div>
             <?php endif; ?>
-
           </td>
         </tr>
       </table>

@@ -1,7 +1,10 @@
 <?php
 /**
- * Section template: Forum
- * Featured or first content image, title, excerpt, author + reply count.
+ * Section template: Forum (2-column fluid hybrid)
+ * Desktop: Thumbnail (left) | Title + excerpt + meta (right)
+ * Mobile:  Stacks naturally — image full-width, then details below.
+ * Falls back to text-only row when no image is available.
+ *
  * Variables: $item (array), $settings (array)
  */
 defined( 'ABSPATH' ) || exit;
@@ -36,28 +39,63 @@ if ( $author_html ) $meta[] = $author_html;
 if ( $reply_count ) $meta[] = $reply_count . ( $reply_count === 1 ? ' reply' : ' replies' );
 $meta[] = $date;
 $meta_html = implode( ' &middot; ', $meta );
+
+// Column widths
+$thumb_width  = 200;
+$gutter       = 16;
+$detail_width = 504;
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:16px;margin-bottom:16px;">
   <tr>
     <td>
+
+      <!--[if mso]>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
       <?php if ( $img_url ) : ?>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;">
+      <td width="<?php echo $thumb_width; ?>" valign="top">
+      <?php endif; ?>
+      <![endif]-->
+
+      <?php if ( $img_url ) : ?>
+      <table class="event-col-thumb" width="<?php echo $thumb_width; ?>" cellpadding="0" cellspacing="0" border="0"
+             align="left" style="width:<?php echo $thumb_width; ?>px;max-width:<?php echo $thumb_width; ?>px;">
         <tr>
-          <td align="left" style="line-height:0;">
-            <a href="<?php echo $url; ?>" style="line-height:0;">
+          <td style="padding:0 <?php echo $gutter; ?>px 12px 0;line-height:0;">
+            <a href="<?php echo $url; ?>" style="display:block;line-height:0;">
               <img src="<?php echo esc_url( $img_url ); ?>"
-                   width="720" class="img-cap"
-                   style="max-width:100%;max-height:405px;width:auto;height:auto;border-radius:6px;"
-                   alt="">
+                   width="<?php echo $thumb_width; ?>" class="event-img"
+                   style="width:<?php echo $thumb_width; ?>px;max-width:100%;height:auto;border-radius:6px;display:block;"
+                   alt="<?php echo $title; ?>">
             </a>
           </td>
         </tr>
       </table>
       <?php endif; ?>
-      <a href="<?php echo $url; ?>" class="card-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;"><?php echo $title; ?></a>
-      <?php echo $excerpt; ?>
-      <p class="card-meta" style="font-size:13px;color:#aaa;margin:6px 0 0;"><?php echo $meta_html; ?></p>
+
+      <!--[if mso]>
+      <?php if ( $img_url ) : ?>
+      </td>
+      <?php endif; ?>
+      <td width="<?php echo $img_url ? $detail_width : '100%'; ?>" valign="top">
+      <![endif]-->
+
+      <table class="event-col-details" width="<?php echo $img_url ? $detail_width : '100%'; ?>" cellpadding="0" cellspacing="0" border="0"
+             align="left" style="width:<?php echo $img_url ? $detail_width . 'px' : '100%'; ?>;max-width:<?php echo $img_url ? $detail_width . 'px' : '100%'; ?>;">
+        <tr>
+          <td valign="top" style="padding:0;">
+            <a href="<?php echo $url; ?>" class="card-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;"><?php echo $title; ?></a>
+            <?php echo $excerpt; ?>
+            <p class="card-meta" style="font-size:13px;color:#aaa;margin:6px 0 0;"><?php echo $meta_html; ?></p>
+          </td>
+        </tr>
+      </table>
+
+      <!--[if mso]>
+      </td>
+      </tr></table>
+      <![endif]-->
+
     </td>
   </tr>
 </table>
