@@ -120,14 +120,18 @@ if ( $dt_start ) {
   <tr>
     <td>
       <?php if ( $img_url ) : ?>
-      <div class="img-crop" style="overflow:hidden;max-height:405px;border-radius:6px;margin:0 0 10px;line-height:0;">
-        <a href="<?php echo $url; ?>" style="display:block;line-height:0;">
-          <img src="<?php echo esc_url( $img_url ); ?>"
-               width="720"
-               style="display:block;width:100%;height:auto;"
-               alt="">
-        </a>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;">
+        <tr>
+          <td align="center" style="line-height:0;">
+            <a href="<?php echo $url; ?>" style="line-height:0;">
+              <img src="<?php echo esc_url( $img_url ); ?>"
+                   width="720" class="img-cap"
+                   style="max-width:100%;max-height:405px;width:auto;height:auto;border-radius:6px;"
+                   alt="">
+            </a>
+          </td>
+        </tr>
+      </table>
       <?php endif; ?>
       <!-- Date badge + title row -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0">

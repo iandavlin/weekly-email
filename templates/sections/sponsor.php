@@ -48,15 +48,13 @@ if ( $sponsor_name && $sponsor_url ) {
        style="background:#FFF8EC;border:1px solid #ECB351;border-radius:8px;margin-bottom:12px;">
   <?php if ( $img_url ) : ?>
   <tr>
-    <td style="padding:0;line-height:0;">
-      <div class="img-crop" style="overflow:hidden;max-height:405px;line-height:0;">
-        <a href="<?php echo $url; ?>" class="sponsor-img" style="display:block;line-height:0;border:0;outline:none;text-decoration:none;">
-          <img src="<?php echo esc_url( $img_url ); ?>"
-               width="720"
-               style="display:block;width:100%;height:auto;border-radius:8px 8px 0 0;border:0;"
-               alt="">
-        </a>
-      </div>
+    <td align="center" style="padding:0;line-height:0;">
+      <a href="<?php echo $url; ?>" class="sponsor-img" style="line-height:0;border:0;outline:none;text-decoration:none;">
+        <img src="<?php echo esc_url( $img_url ); ?>"
+             width="720" class="img-cap"
+             style="max-width:100%;max-height:405px;width:auto;height:auto;border-radius:8px 8px 0 0;border:0;"
+             alt="">
+      </a>
     </td>
   </tr>
   <?php endif; ?>
