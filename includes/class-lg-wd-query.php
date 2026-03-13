@@ -75,7 +75,8 @@ class LG_WD_Query {
 
             if ( empty( $post_ids ) && empty( $manual_items ) && $skip_empty ) continue;
 
-            $items = self::normalize_posts_by_ids( $post_ids );
+            $excerpt_length = (int) ( $section['excerpt_length'] ?? 20 );
+            $items = self::normalize_posts_by_ids( $post_ids, $excerpt_length );
 
             // Append manual (external) items
             foreach ( $manual_items as $mi ) {
@@ -262,7 +263,7 @@ class LG_WD_Query {
 
     // ── Normalizers ──────────────────────────────────────────────────────────
 
-    private static function normalize_posts_by_ids( array $post_ids ): array {
+    private static function normalize_posts_by_ids( array $post_ids, int $excerpt_length = 20 ): array {
         if ( empty( $post_ids ) ) return [];
 
         // Use explicit post types from registry + 'any' to catch all registered CPTs.
@@ -278,10 +279,10 @@ class LG_WD_Query {
             'post_status'    => [ 'publish', 'closed', 'open' ],
         ] );
 
-        return array_map( [ __CLASS__, 'normalize_post' ], $posts );
+        return array_map( fn( $p ) => self::normalize_post( $p, $excerpt_length ), $posts );
     }
 
-    public static function normalize_post( \WP_Post $post ): array {
+    public static function normalize_post( \WP_Post $post, int $excerpt_length = 20 ): array {
         $thumb_url = has_post_thumbnail( $post->ID )
             ? get_the_post_thumbnail_url( $post->ID, 'large' )
             : '';
@@ -290,7 +291,7 @@ class LG_WD_Query {
             'id'         => $post->ID,
             'title'      => get_the_title( $post ),
             'url'        => get_permalink( $post ),
-            'excerpt'    => self::clean_excerpt( $post ),
+            'excerpt'    => self::clean_excerpt( $post, $excerpt_length ),
             'thumb_url'  => $thumb_url,
             'date'       => get_the_date( 'M j', $post ),
             'post_type'  => $post->post_type,
@@ -313,8 +314,8 @@ class LG_WD_Query {
         };
     }
 
-    private static function clean_excerpt( \WP_Post $post ): string {
-        $word_count = ( $post->post_type === 'topic' ) ? 40 : 20;
+    private static function clean_excerpt( \WP_Post $post, int $word_count = 20 ): string {
+        if ( $word_count === 0 ) return '';
         $text = ! empty( $post->post_excerpt )
             ? wp_strip_all_tags( $post->post_excerpt )
             : wp_trim_words( wp_strip_all_tags( $post->post_content ), $word_count, '…' );

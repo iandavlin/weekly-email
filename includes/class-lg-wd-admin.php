@@ -392,6 +392,7 @@ class LG_WD_Admin {
                         data-tag-filter="<?php echo esc_attr( $entry['tag_filter'] ?? '' ); ?>"
                         data-tag-taxonomy="<?php echo esc_attr( $entry['tag_taxonomy'] ?? 'post_tag' ); ?>"
                         data-max-items="<?php echo (int) $entry['max_items']; ?>"
+                        data-excerpt-length="<?php echo (int) ( $entry['excerpt_length'] ?? 20 ); ?>"
                         data-enabled="<?php echo $entry['enabled'] ? '1' : '0'; ?>"
                         <?php if ( $is_header ) echo 'style="background:#FFF8E8;"'; ?>>
                       <td class="lg-wd-drag-handle" style="cursor:grab;text-align:center;color:#aaa;" title="Drag to reorder">☰</td>
@@ -483,6 +484,10 @@ class LG_WD_Admin {
                   <label class="lg-wd-label">Max Items</label>
                   <input type="number" id="lg-wd-reg-max" class="lg-wd-input" value="5" min="1" max="20" style="width:60px;">
                 </div>
+                <div class="lg-wd-form-group" style="margin-bottom:0;">
+                  <label class="lg-wd-label">Excerpt Words</label>
+                  <input type="number" id="lg-wd-reg-excerpt-length" class="lg-wd-input" value="20" min="0" max="100" style="width:60px;">
+                </div>
                 <div style="padding-bottom:2px;">
                   <button class="button button-primary" id="lg-wd-reg-add-btn">+ Add</button>
                 </div>
@@ -520,6 +525,10 @@ class LG_WD_Admin {
               <div class="lg-wd-form-group lg-wd-edit-cpt-only" style="margin:0;">
                 <label class="lg-wd-label">Max Items</label>
                 <input type="number" id="lg-wd-edit-max" class="lg-wd-input" min="1" max="50">
+              </div>
+              <div class="lg-wd-form-group lg-wd-edit-cpt-only" style="margin:0;">
+                <label class="lg-wd-label">Excerpt Words</label>
+                <input type="number" id="lg-wd-edit-excerpt-length" class="lg-wd-input" min="0" max="100">
               </div>
               <div class="lg-wd-form-group lg-wd-edit-cpt-only" style="margin:0;">
                 <label class="lg-wd-label">Tag Filter</label>

@@ -109,6 +109,7 @@ jQuery( function ( $ ) {
         const tag_filter = $( '#lg-wd-reg-tag' ).val().trim();
         const taxonomy   = $( '#lg-wd-reg-taxonomy' ).val().trim() || 'post_tag';
         const max        = parseInt( $( '#lg-wd-reg-max' ).val() ) || 5;
+        const excerpt_length = parseInt( $( '#lg-wd-reg-excerpt-length' ).val() ) || 20;
 
         if ( slug === '_header' ) {
             // Group headers only need a label
@@ -131,8 +132,9 @@ jQuery( function ( $ ) {
             template,
             sort_mode,
             tag_filter,
-            tag_taxonomy: taxonomy,
-            max_items:    max,
+            tag_taxonomy:   taxonomy,
+            max_items:      max,
+            excerpt_length: excerpt_length,
         }, function ( res ) {
             setLoading( $btn, false );
             if ( res.success ) {
@@ -194,6 +196,7 @@ jQuery( function ( $ ) {
         $( '#lg-wd-edit-tag' ).val( $row.data( 'tag-filter' ) );
         $( '#lg-wd-edit-taxonomy' ).val( $row.data( 'tag-taxonomy' ) );
         $( '#lg-wd-edit-max' ).val( $row.data( 'max-items' ) );
+        $( '#lg-wd-edit-excerpt-length' ).val( $row.data( 'excerpt-length' ) || 20 );
         $( '#lg-wd-edit-enabled' ).val( $row.data( 'enabled' ) );
         // Show/hide CPT-only fields for group headers
         $modal.find( '.lg-wd-edit-cpt-only' ).toggle( ! isHeader );
@@ -220,8 +223,9 @@ jQuery( function ( $ ) {
             sort_mode:    $( '#lg-wd-edit-sort' ).val(),
             tag_filter:   $( '#lg-wd-edit-tag' ).val(),
             tag_taxonomy: $( '#lg-wd-edit-taxonomy' ).val(),
-            max_items:    $( '#lg-wd-edit-max' ).val(),
-            enabled:      $( '#lg-wd-edit-enabled' ).val(),
+            max_items:      $( '#lg-wd-edit-max' ).val(),
+            excerpt_length: $( '#lg-wd-edit-excerpt-length' ).val(),
+            enabled:        $( '#lg-wd-edit-enabled' ).val(),
         }, function ( res ) {
             setLoading( $btn, false );
             if ( res.success ) {

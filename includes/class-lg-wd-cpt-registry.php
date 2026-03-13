@@ -150,15 +150,16 @@ class LG_WD_CPT_Registry {
         }
 
         return [
-            'slug'         => sanitize_key( $s['slug'] ?? '' ),
-            'label'        => sanitize_text_field( $s['label'] ?? '' ),
-            'is_header'    => ! empty( $s['is_header'] ),
-            'max_items'    => absint( $s['max_items'] ?? 5 ),
-            'enabled'      => ! empty( $s['enabled'] ),
-            'template'     => $template,
-            'tag_filter'   => sanitize_text_field( $s['tag_filter'] ?? '' ),
-            'tag_taxonomy' => sanitize_key( $s['tag_taxonomy'] ?? 'post_tag' ),
-            'sort_mode'    => $sort_mode,
+            'slug'           => sanitize_key( $s['slug'] ?? '' ),
+            'label'          => sanitize_text_field( $s['label'] ?? '' ),
+            'is_header'      => ! empty( $s['is_header'] ),
+            'max_items'      => absint( $s['max_items'] ?? 5 ),
+            'enabled'        => ! empty( $s['enabled'] ),
+            'template'       => $template,
+            'tag_filter'     => sanitize_text_field( $s['tag_filter'] ?? '' ),
+            'tag_taxonomy'   => sanitize_key( $s['tag_taxonomy'] ?? 'post_tag' ),
+            'sort_mode'      => $sort_mode,
+            'excerpt_length' => max( 0, min( 100, absint( $s['excerpt_length'] ?? 20 ) ) ),
         ];
     }
 }

@@ -50,12 +50,12 @@ if ( $sponsor_name && $sponsor_url ) {
 // Column widths
 $thumb_width  = 240;
 $gutter       = 16;
-$detail_width = 608; // slightly less to account for card padding
+$detail_width = 624;
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
-       style="background:#FFF8EC;border:1px solid #ECB351;border-radius:8px;margin-bottom:12px;">
+       style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:16px;margin-bottom:16px;">
   <tr>
-    <td style="padding:18px 20px;">
+    <td>
 
       <!--[if mso]>
       <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
