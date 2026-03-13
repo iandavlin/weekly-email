@@ -90,6 +90,36 @@ jQuery( function ( $ ) {
         tolerance: 'pointer',
         items: '.lg-wd-compose-section',
         placeholder: 'lg-wd-sortable-placeholder',
+        cancel: 'input,textarea,button,select,option,.mce-container,.wp-editor-wrap',
+        start: function ( e, ui ) {
+            // TinyMCE iframes break during drag — remove editors temporarily
+            ui.item.find( '.lg-wd-compose-html-block, &.lg-wd-compose-html-block' ).addBack().filter( '.lg-wd-compose-html-block' ).each( function () {
+                const edId = $( this ).data( 'editor-id' );
+                if ( edId && typeof tinyMCE !== 'undefined' && tinyMCE.get( edId ) ) {
+                    tinyMCE.get( edId ).save();
+                    wp.editor.remove( edId );
+                }
+            });
+        },
+        stop: function ( e, ui ) {
+            // Re-initialize TinyMCE editors after drag completes
+            ui.item.find( '.lg-wd-compose-html-block, &.lg-wd-compose-html-block' ).addBack().filter( '.lg-wd-compose-html-block' ).each( function () {
+                const edId = $( this ).data( 'editor-id' );
+                if ( edId && typeof wp !== 'undefined' && wp.editor ) {
+                    wp.editor.initialize( edId, {
+                        tinymce: {
+                            wpautop: true,
+                            toolbar1: 'formatselect,bold,italic,underline,strikethrough,separator,bullist,numlist,separator,blockquote,hr,separator,alignleft,aligncenter,alignright,separator,link,unlink,separator,wp_more,wp_adv',
+                            toolbar2: 'fontsizeselect,forecolor,backcolor,separator,pastetext,removeformat,separator,charmap,separator,outdent,indent,separator,undo,redo,separator,wp_help',
+                            block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Preformatted=pre',
+                            content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
+                        },
+                        quicktags: true,
+                        mediaButtons: true,
+                    });
+                }
+            });
+        },
     });
 
     // ── New Issue ─────────────────────────────────────────────────────────────
@@ -448,20 +478,22 @@ jQuery( function ( $ ) {
         `;
         $( '#lg-wd-sections-container' ).append( html );
 
-        // Initialize WP editor (TinyMCE + quicktags)
-        if ( typeof wp !== 'undefined' && wp.editor ) {
-            wp.editor.initialize( editorId, {
-                tinymce: {
-                    wpautop: true,
-                    toolbar1: 'formatselect,bold,italic,underline,strikethrough,separator,bullist,numlist,separator,blockquote,hr,separator,alignleft,aligncenter,alignright,separator,link,unlink,separator,wp_more,wp_adv',
-                    toolbar2: 'fontsizeselect,forecolor,backcolor,separator,pastetext,removeformat,separator,charmap,separator,outdent,indent,separator,undo,redo,separator,wp_help',
-                    block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Preformatted=pre',
-                    content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
-                },
-                quicktags: true,
-                mediaButtons: true,
-            });
-        }
+        // Initialize WP editor (TinyMCE + quicktags) — defer to let DOM settle
+        setTimeout( function () {
+            if ( typeof wp !== 'undefined' && wp.editor ) {
+                wp.editor.initialize( editorId, {
+                    tinymce: {
+                        wpautop: true,
+                        toolbar1: 'formatselect,bold,italic,underline,strikethrough,separator,bullist,numlist,separator,blockquote,hr,separator,alignleft,aligncenter,alignright,separator,link,unlink,separator,wp_more,wp_adv',
+                        toolbar2: 'fontsizeselect,forecolor,backcolor,separator,pastetext,removeformat,separator,charmap,separator,outdent,indent,separator,undo,redo,separator,wp_help',
+                        block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Preformatted=pre',
+                        content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
+                    },
+                    quicktags: true,
+                    mediaButtons: true,
+                });
+            }
+        }, 100 );
     }
 
     // ── Archive Search ───────────────────────────────────────────────────────
