@@ -72,7 +72,7 @@ $detail_width = 624;
             <a href="<?php echo $url; ?>" style="display:block;line-height:0;">
               <img src="<?php echo esc_url( $img_url ); ?>"
                    width="<?php echo $thumb_width; ?>" class="event-img"
-                   style="width:<?php echo $thumb_width; ?>px;max-width:100%;height:auto;border-radius:6px;display:block;"
+                   style="width:100%;height:auto;border-radius:6px;display:block;"
                    alt="<?php echo $title; ?>">
             </a>
           </td>
