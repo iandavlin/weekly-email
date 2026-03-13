@@ -146,25 +146,27 @@ if ( $dt_start ) {
           <?php endif; ?>
           <td valign="top">
             <a href="<?php echo $url; ?>" class="event-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:4px;"><?php echo $title; ?></a>
-            <p class="event-date" style="font-size:13px;color:#5C4E3A;margin:0 0 4px;">
+            <p class="event-date" style="font-size:14px;color:#5C4E3A;margin:0 0 4px;">
               <?php echo esc_html( $display_date ); ?>
               <?php if ( $time_display ) : ?>
                 &middot; <?php echo $time_display; ?>
               <?php endif; ?>
             </p>
-            <p class="event-meta" style="font-size:12px;color:#aaa;margin:0 0 6px;">
+            <p class="event-meta" style="font-size:13px;color:#aaa;margin:0;">
               <?php echo $tier_html; ?>
               <span style="color:#87986A;"><?php echo esc_html( $location ); ?></span>
               <?php if ( $author_html ) : ?>
                 &middot; <?php echo $author_html; ?>
               <?php endif; ?>
             </p>
-            <?php if ( $gcal_url ) : ?>
+          </td>
+          <?php if ( $gcal_url ) : ?>
+          <td valign="top" align="right" style="white-space:nowrap;padding-left:10px;">
             <a href="<?php echo esc_url( $gcal_url ); ?>"
                style="display:inline-block;font-size:12px;font-weight:600;color:#ECB351;text-decoration:none;padding:4px 12px;border:1px solid #ECB351;border-radius:12px;line-height:1.4;"
                target="_blank">&#128197; Add to Calendar</a>
-            <?php endif; ?>
           </td>
+          <?php endif; ?>
         </tr>
       </table>
     </td>
