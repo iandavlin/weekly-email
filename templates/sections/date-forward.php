@@ -122,17 +122,15 @@ if ( $dt_start ) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:14px;margin-bottom:14px;">
   <tr>
-    <?php if ( $img_url ) : ?>
-    <td class="event-thumb" width="300" valign="top" style="padding:0 24px 0 0;">
-      <a href="<?php echo $url; ?>" style="display:block;line-height:0;border:0;outline:none;text-decoration:none;">
+    <td>
+      <?php if ( $img_url ) : ?>
+      <a href="<?php echo $url; ?>" style="display:block;margin-bottom:8px;line-height:0;">
         <img src="<?php echo esc_url( $img_url ); ?>"
-             width="300" height="169"
-             style="display:block;width:300px;height:169px;object-fit:cover;border-radius:6px;border:0;"
+             width="820" height="461"
+             style="display:block;width:100%;max-width:820px;height:auto;object-fit:cover;border-radius:6px;"
              alt="">
       </a>
-    </td>
-    <?php endif; ?>
-    <td class="event-content" valign="top" style="padding:0;">
+      <?php endif; ?>
       <!-- Date badge + title row -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
@@ -145,8 +143,8 @@ if ( $dt_start ) {
           </td>
           <?php endif; ?>
           <td valign="top">
-            <a href="<?php echo $url; ?>" class="event-title" style="font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:3px;"><?php echo $title; ?></a>
-            <p class="event-date" style="font-size:11px;color:#5C4E3A;margin:0 0 3px;">
+            <a href="<?php echo $url; ?>" class="event-title" style="font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.4;margin-bottom:3px;"><?php echo $title; ?></a>
+            <p class="event-date" style="font-size:12px;color:#5C4E3A;margin:0 0 3px;">
               <?php echo esc_html( $display_date ); ?>
               <?php if ( $time_display ) : ?>
                 &middot; <?php echo $time_display; ?>
