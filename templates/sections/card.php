@@ -31,9 +31,9 @@ $excerpt      = $show_excerpt && ! empty( $item['excerpt'] )
 $thumb_cell = '';
 if ( $show_thumb && ! empty( $item['thumb_url'] ) ) {
     $thumb_url  = esc_url( $item['thumb_url'] );
-    $thumb_cell = '<td class="card-thumb" width="280" valign="top" style="padding:0 20px 0 0;">'
+    $thumb_cell = '<td class="card-thumb" width="360" valign="top" style="padding:0 24px 0 0;">'
         . '<a href="' . $url . '" style="display:block;line-height:0;border:0;outline:none;text-decoration:none;">'
-        . '<img src="' . $thumb_url . '" width="280" height="158" style="display:block;border-radius:6px;object-fit:cover;border:0;" alt="">'
+        . '<img src="' . $thumb_url . '" width="360" height="202" style="display:block;border-radius:6px;object-fit:cover;border:0;" alt="">'
         . '</a>'
         . '</td>';
 }

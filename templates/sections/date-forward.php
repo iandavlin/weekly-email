@@ -123,11 +123,11 @@ if ( $dt_start ) {
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:14px;margin-bottom:14px;">
   <tr>
     <?php if ( $img_url ) : ?>
-    <td class="event-thumb" width="240" valign="top" style="padding:0 20px 0 0;">
+    <td class="event-thumb" width="300" valign="top" style="padding:0 24px 0 0;">
       <a href="<?php echo $url; ?>" style="display:block;line-height:0;border:0;outline:none;text-decoration:none;">
         <img src="<?php echo esc_url( $img_url ); ?>"
-             width="240" height="135"
-             style="display:block;width:240px;height:135px;object-fit:cover;border-radius:6px;border:0;"
+             width="300" height="169"
+             style="display:block;width:300px;height:169px;object-fit:cover;border-radius:6px;border:0;"
              alt="">
       </a>
     </td>
