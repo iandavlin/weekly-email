@@ -161,7 +161,7 @@ if ( $dt_start ) {
             </p>
           </td>
           <?php if ( $gcal_url ) : ?>
-          <td valign="top" align="right" style="white-space:nowrap;padding-left:10px;">
+          <td class="gcal-cell" valign="top" align="right" style="white-space:nowrap;padding-left:10px;">
             <a href="<?php echo esc_url( $gcal_url ); ?>"
                style="display:inline-block;font-size:12px;font-weight:600;color:#ECB351;text-decoration:none;padding:4px 12px;border:1px solid #ECB351;border-radius:12px;line-height:1.4;"
                target="_blank">&#128197; Add to Calendar</a>
