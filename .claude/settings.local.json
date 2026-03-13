@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "WebSearch",
+      "WebFetch(domain:developers.fluentcrm.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:fluentcrm.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:blog.patreon.com)",
+      "WebFetch(domain:news.patreon.com)",
+      "WebFetch(domain:www.royalroad.com)"
+    ]
+  }
+}

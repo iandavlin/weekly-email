@@ -181,36 +181,6 @@ jQuery( function ( $ ) {
         });
     });
 
-    // ── Export for Patreon ─────────────────────────────────────────────────
-
-    $( '#lg-wd-export-patreon-btn' ).on( 'click', function () {
-        const $btn    = $( this );
-        const issueId = $( '#lg-wd-issue-id' ).val();
-        if ( ! issueId ) return;
-
-        // Save draft first so export reads current state
-        setLoading( $btn, true );
-
-        $.post( ajaxUrl, {
-            action:    'lg_wd_compose_save',
-            nonce,
-            issue_id:  issueId,
-            title:     $( '#lg-wd-issue-title' ).val(),
-            date_from: $( '#lg-wd-date-from' ).val(),
-            date_to:   $( '#lg-wd-date-to' ).val(),
-            sections:  JSON.stringify( collectSections() ),
-        }, function ( res ) {
-            setLoading( $btn, false );
-            if ( res.success ) {
-                // Open export in a new window
-                const exportUrl = ajaxUrl + '?action=lg_wd_compose_export_patreon&nonce=' + nonce + '&issue_id=' + issueId;
-                window.open( exportUrl, '_blank', 'width=800,height=700,scrollbars=yes' );
-            } else {
-                showResponse( '✗ Save failed: ' + ( res.data || '' ), 'error' );
-            }
-        });
-    });
-
     // Close modal
     $( document ).on( 'click', '.lg-wd-modal-overlay, .lg-wd-modal-close', function () {
         $( '#lg-wd-preview-modal, #lg-wd-custom-section-modal, #lg-wd-external-card-modal' ).hide();

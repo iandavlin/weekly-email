@@ -30,7 +30,6 @@ require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-email-builder.php';
 require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-sender.php';
 require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-admin.php';
 require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-compose.php';
-require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-patreon-export.php';
 require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-cron.php';
 
 // ─────────────────────────────────────────────
@@ -40,7 +39,6 @@ add_action( 'plugins_loaded', function () {
     LG_WD_Issue::init();
     LG_WD_Admin::init();
     LG_WD_Compose::init();
-    LG_WD_Patreon_Export::init();
     LG_WD_Cron::init();
 } );
 

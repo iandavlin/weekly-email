@@ -210,7 +210,6 @@ class LG_WD_Compose {
           <div class="lg-wd-card" style="margin-top:16px;">
             <div class="lg-wd-card-body" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <button class="button lg-wd-btn-secondary" id="lg-wd-preview-btn">Preview Email</button>
-              <button class="button lg-wd-btn-secondary" id="lg-wd-export-patreon-btn" title="Export formatted text for Patreon">Export for Patreon</button>
 
               <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
                 <input type="email" id="lg-wd-test-email" placeholder="test@email.com"
