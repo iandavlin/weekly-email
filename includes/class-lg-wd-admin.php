@@ -820,15 +820,16 @@ class LG_WD_Admin {
         }
 
         $entry = [
-            'slug'         => $raw_slug,
-            'label'        => sanitize_text_field( $_POST['label'] ?? '' ),
-            'is_header'    => $is_header,
-            'max_items'    => absint( $_POST['max_items'] ?? 5 ),
-            'enabled'      => true,
-            'template'     => sanitize_key( $_POST['template'] ?? 'card' ),
-            'tag_filter'   => sanitize_text_field( $_POST['tag_filter'] ?? '' ),
-            'tag_taxonomy' => sanitize_key( $_POST['tag_taxonomy'] ?? 'post_tag' ),
-            'sort_mode'    => in_array( $_POST['sort_mode'] ?? '', [ 'newest', 'upcoming' ], true ) ? $_POST['sort_mode'] : 'newest',
+            'slug'           => $raw_slug,
+            'label'          => sanitize_text_field( $_POST['label'] ?? '' ),
+            'is_header'      => $is_header,
+            'max_items'      => absint( $_POST['max_items'] ?? 5 ),
+            'enabled'        => true,
+            'template'       => sanitize_key( $_POST['template'] ?? 'card' ),
+            'tag_filter'     => sanitize_text_field( $_POST['tag_filter'] ?? '' ),
+            'tag_taxonomy'   => sanitize_key( $_POST['tag_taxonomy'] ?? 'post_tag' ),
+            'sort_mode'      => in_array( $_POST['sort_mode'] ?? '', [ 'newest', 'upcoming' ], true ) ? $_POST['sort_mode'] : 'newest',
+            'excerpt_length' => absint( $_POST['excerpt_length'] ?? 20 ),
         ];
 
         if ( LG_WD_CPT_Registry::add( $entry ) ) {
@@ -868,8 +869,9 @@ class LG_WD_Admin {
         if ( isset( $_POST['sort_mode'] ) )    $fields['sort_mode']    = sanitize_key( $_POST['sort_mode'] );
         if ( isset( $_POST['tag_filter'] ) )   $fields['tag_filter']   = sanitize_text_field( $_POST['tag_filter'] );
         if ( isset( $_POST['tag_taxonomy'] ) ) $fields['tag_taxonomy'] = sanitize_key( $_POST['tag_taxonomy'] );
-        if ( isset( $_POST['max_items'] ) )    $fields['max_items']    = absint( $_POST['max_items'] );
-        if ( isset( $_POST['enabled'] ) )      $fields['enabled']      = $_POST['enabled'] === '1';
+        if ( isset( $_POST['max_items'] ) )      $fields['max_items']      = absint( $_POST['max_items'] );
+        if ( isset( $_POST['excerpt_length'] ) ) $fields['excerpt_length'] = absint( $_POST['excerpt_length'] );
+        if ( isset( $_POST['enabled'] ) )      $fields['enabled']        = $_POST['enabled'] === '1';
 
         if ( LG_WD_CPT_Registry::update( $slug, $fields ) ) {
             wp_send_json_success( [ 'message' => 'Content type updated.' ] );
