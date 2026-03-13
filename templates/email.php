@@ -32,7 +32,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     .hero-left, .hero-right { display: block !important; width: 100% !important; text-align: center !important; }
     .hero-right { padding-top: 2px !important; }
     .img-cap { max-height: none !important; width: 100% !important; }
-    .gcal-cell { display: block !important; width: 100% !important; text-align: left !important; padding: 8px 0 0 0 !important; white-space: normal !important; }
+    .gcal-wrap { text-align: left !important; }
   }
   /* Phone */
   @media only screen and (max-width: 480px) {
