@@ -2,7 +2,6 @@
 /**
  * Section template: List
  * Compact rows, no image. Works well for forum topics.
- * Pulls bbPress reply count and author if available.
  * Variables: $item (array), $settings (array)
  */
 defined( 'ABSPATH' ) || exit;
@@ -24,11 +23,11 @@ $meta[] = $date;
 $meta_html = implode( ' &middot; ', $meta );
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
-       style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:8px;margin-bottom:8px;">
+       style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:10px;margin-bottom:10px;">
   <tr>
     <td>
-      <a href="<?php echo $url; ?>" style="font-size:13px;font-weight:500;color:#2B2318;text-decoration:none;display:block;margin-bottom:3px;"><?php echo $title; ?></a>
-      <p style="font-size:11px;color:#aaa;margin:0;"><?php echo $meta_html; ?></p>
+      <a href="<?php echo $url; ?>" style="font-size:15px;font-weight:500;color:#2B2318;text-decoration:none;display:block;margin-bottom:3px;line-height:1.4;"><?php echo $title; ?></a>
+      <p style="font-size:12px;color:#aaa;margin:0;"><?php echo $meta_html; ?></p>
     </td>
   </tr>
 </table>

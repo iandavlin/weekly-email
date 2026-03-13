@@ -1,7 +1,7 @@
 <?php
 /**
  * Section template: Date-forward
- * Compact layout: thumbnail + date badge + title/time/tier + calendar link.
+ * Full-width image, date badge + title/time/tier row, calendar link.
  * Variables: $item (array), $settings (array)
  */
 defined( 'ABSPATH' ) || exit;
@@ -40,7 +40,7 @@ if ( $date_raw ) {
         $day_num      = $ts->format( 'j' );
         $day_of_week  = $ts->format( 'l' );
         $display_date = $ts->format( 'l, F j, Y' );
-        $dt_start     = $ts; // keep for calendar link
+        $dt_start     = $ts;
     }
 }
 
@@ -55,20 +55,17 @@ if ( $time_raw && $date_raw ) {
     $tz_utc     = new DateTimeZone( 'UTC' );
     $datetime_str = $date_raw . ' ' . $time_raw;
 
-    // Try common time formats from the meta field
     $formats = [ 'Ymd H:i:s', 'Ymd H:i', 'Ymd g:ia', 'Ymd g:i a', 'Ymd h:iA', 'Ymd h:i A' ];
     foreach ( $formats as $fmt ) {
         $dt = DateTime::createFromFormat( $fmt, $datetime_str, $tz_eastern );
         if ( $dt ) {
-            $dt_start = clone $dt; // update with time for calendar
+            $dt_start = clone $dt;
 
-            // Eastern time — use timezone abbreviation (EST/EDT)
             $eastern_abbr = $dt->format( 'T' );
             $eastern_str  = strtolower( $dt->format( 'g' ) ) . $dt->format( ':i' );
             $eastern_str  = str_replace( ':00', '', $eastern_str );
             $eastern_str .= strtolower( $dt->format( 'A' ) ) . ' ' . $eastern_abbr;
 
-            // UTC conversion
             $dt->setTimezone( $tz_utc );
             $utc_str  = strtolower( $dt->format( 'g' ) ) . $dt->format( ':i' );
             $utc_str  = str_replace( ':00', '', $utc_str );
@@ -94,17 +91,16 @@ $tier_html   = $tier
     ? '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' . $tier_bg . ';color:' . $tier_color . ';' . $tier_border . 'margin-right:6px;">' . esc_html( $tier ) . '</span>'
     : '';
 
-// Author (linked to BuddyBoss profile if available)
+// Author
 $author_html = LG_WD_Email_Builder::author_html( $item['id'] );
 
-// ── Google Calendar link ──────────────────────────────────────────────────
+// Google Calendar link
 $gcal_url = '';
 if ( $dt_start ) {
     $dt_utc_start = clone $dt_start;
     $dt_utc_start->setTimezone( new DateTimeZone( 'UTC' ) );
     $gcal_start = $dt_utc_start->format( 'Ymd\THis\Z' );
 
-    // Default 1-hour duration
     $dt_utc_end = clone $dt_utc_start;
     $dt_utc_end->modify( '+1 hour' );
     $gcal_end = $dt_utc_end->format( 'Ymd\THis\Z' );
@@ -120,14 +116,14 @@ if ( $dt_start ) {
 }
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
-       style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:14px;margin-bottom:14px;">
+       style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:16px;margin-bottom:16px;">
   <tr>
     <td>
       <?php if ( $img_url ) : ?>
-      <a href="<?php echo $url; ?>" style="display:block;margin:0 auto 8px;line-height:0;max-width:820px;max-height:461px;overflow:hidden;border-radius:6px;text-align:center;">
+      <a href="<?php echo $url; ?>" style="display:block;margin:0 0 10px;line-height:0;border-radius:6px;overflow:hidden;">
         <img src="<?php echo esc_url( $img_url ); ?>"
-             width="820"
-             style="display:block;width:100%;max-width:820px;height:auto;border-radius:6px;margin:0 auto;"
+             width="600"
+             style="display:block;width:100%;height:auto;border-radius:6px;"
              alt="">
       </a>
       <?php endif; ?>
@@ -135,31 +131,31 @@ if ( $dt_start ) {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <?php if ( $month_short && $day_num ) : ?>
-          <td class="date-badge" width="48" valign="top" style="padding:0 10px 0 0;">
-            <div style="background:#2B2318;border-radius:6px;width:42px;text-align:center;padding:5px 0;">
-              <span style="display:block;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;"><?php echo esc_html( $month_short ); ?></span>
-              <span style="display:block;font-size:18px;font-weight:700;font-family:Georgia,serif;color:#ECB351;line-height:1.1;"><?php echo esc_html( $day_num ); ?></span>
+          <td class="date-badge" width="52" valign="top" style="padding:0 12px 0 0;">
+            <div style="background:#2B2318;border-radius:6px;width:46px;text-align:center;padding:6px 0;">
+              <span style="display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;"><?php echo esc_html( $month_short ); ?></span>
+              <span style="display:block;font-size:20px;font-weight:700;font-family:Georgia,serif;color:#ECB351;line-height:1.1;"><?php echo esc_html( $day_num ); ?></span>
             </div>
           </td>
           <?php endif; ?>
           <td valign="top">
-            <a href="<?php echo $url; ?>" class="event-title" style="font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.4;margin-bottom:3px;"><?php echo $title; ?></a>
-            <p class="event-date" style="font-size:12px;color:#5C4E3A;margin:0 0 3px;">
+            <a href="<?php echo $url; ?>" class="event-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:4px;"><?php echo $title; ?></a>
+            <p class="event-date" style="font-size:13px;color:#5C4E3A;margin:0 0 4px;">
               <?php echo esc_html( $display_date ); ?>
               <?php if ( $time_display ) : ?>
                 &middot; <?php echo $time_display; ?>
               <?php endif; ?>
             </p>
-            <p class="event-meta" style="font-size:11px;color:#aaa;margin:0 0 4px;">
+            <p class="event-meta" style="font-size:12px;color:#aaa;margin:0 0 6px;">
               <?php echo $tier_html; ?>
-              <span style="font-size:11px;color:#87986A;"><?php echo esc_html( $location ); ?></span>
+              <span style="color:#87986A;"><?php echo esc_html( $location ); ?></span>
               <?php if ( $author_html ) : ?>
                 &middot; <?php echo $author_html; ?>
               <?php endif; ?>
             </p>
             <?php if ( $gcal_url ) : ?>
             <a href="<?php echo esc_url( $gcal_url ); ?>"
-               style="display:inline-block;font-size:11px;font-weight:600;color:#ECB351;text-decoration:none;padding:3px 10px;border:1px solid #ECB351;border-radius:12px;line-height:1.4;"
+               style="display:inline-block;font-size:12px;font-weight:600;color:#ECB351;text-decoration:none;padding:4px 12px;border:1px solid #ECB351;border-radius:12px;line-height:1.4;"
                target="_blank">&#128197; Add to Calendar</a>
             <?php endif; ?>
           </td>

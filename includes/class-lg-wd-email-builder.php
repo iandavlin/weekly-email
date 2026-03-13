@@ -36,11 +36,11 @@ class LG_WD_Email_Builder {
      */
     public static function render_group_header( string $label ): string {
         $label = self::strip_emoji( $label );
-        return '<div style="margin-bottom:6px;margin-top:36px;">'
+        return '<div style="margin-bottom:8px;margin-top:36px;">'
             . '<table width="100%" cellpadding="0" cellspacing="0" border="0">'
             . '<tr>'
             . '<td style="padding:0;white-space:nowrap;">'
-            . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:18px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:2px;">' . esc_html( $label ) . '</span>'
+            . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:20px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:2px;">' . esc_html( $label ) . '</span>'
             . '</td>'
             . '<td width="100%" style="padding-left:14px;">'
             . '<div style="height:2px;background:#ECB351;"></div>'
@@ -90,13 +90,13 @@ class LG_WD_Email_Builder {
 
         if ( $under_header ) {
             // Subheading style (mint, smaller) — appears under a group header
-            $html .= '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:14px;font-weight:600;color:#87986A;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">' . $label . '</p>';
+            $html .= '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:15px;font-weight:600;color:#87986A;text-transform:uppercase;letter-spacing:1px;margin:0 0 14px;">' . $label . '</p>';
         } else {
             // Full section header (gold line)
             $html .= '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">'
                 . '<tr>'
                 . '<td style="padding:0;white-space:nowrap;">'
-                . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:18px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:2px;">' . $label . '</span>'
+                . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:20px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:2px;">' . $label . '</span>'
                 . '</td>'
                 . '<td width="100%" style="padding-left:14px;">'
                 . '<div style="height:2px;background:#ECB351;"></div>'

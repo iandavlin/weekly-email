@@ -29,9 +29,9 @@ $allowed = [
 $content     = wp_kses( apply_filters( 'the_content', $post->post_content ), $allowed );
 $author_html = LG_WD_Email_Builder::author_html( $item['id'] );
 ?>
-<div style="font-size:14px;color:#5C4E3A;line-height:1.7;margin-bottom:10px;">
+<div style="font-size:15px;color:#5C4E3A;line-height:1.65;margin-bottom:12px;">
   <?php echo $content; ?>
   <?php if ( $author_html ) : ?>
-    <p style="font-size:11px;color:#aaa;margin:8px 0 0;"><?php echo $author_html; ?></p>
+    <p style="font-size:12px;color:#aaa;margin:10px 0 0;"><?php echo $author_html; ?></p>
   <?php endif; ?>
 </div>
