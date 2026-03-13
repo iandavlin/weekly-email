@@ -75,7 +75,14 @@ class LG_WD_Query {
 
             if ( empty( $post_ids ) && empty( $manual_items ) && $skip_empty ) continue;
 
-            $excerpt_length = (int) ( $section['excerpt_length'] ?? 20 );
+            // Excerpt length: check issue data first, fall back to registry setting
+            $excerpt_length = $section['excerpt_length'] ?? null;
+            if ( $excerpt_length === null ) {
+                $reg = LG_WD_CPT_Registry::get_by_slug( $section['slug'] ?? '' );
+                $excerpt_length = (int) ( $reg['excerpt_length'] ?? 20 );
+            } else {
+                $excerpt_length = (int) $excerpt_length;
+            }
             $items = self::normalize_posts_by_ids( $post_ids, $excerpt_length );
 
             // Append manual (external) items
