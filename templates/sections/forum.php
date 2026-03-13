@@ -42,12 +42,14 @@ $meta_html = implode( ' &middot; ', $meta );
   <tr>
     <td>
       <?php if ( $img_url ) : ?>
-      <a href="<?php echo $url; ?>" style="display:block;margin:0 0 10px;line-height:0;border-radius:6px;overflow:hidden;">
-        <img src="<?php echo esc_url( $img_url ); ?>"
-             width="720"
-             style="display:block;width:100%;height:auto;border-radius:6px;"
-             alt="">
-      </a>
+      <div class="img-crop" style="overflow:hidden;max-height:405px;border-radius:6px;margin:0 0 10px;line-height:0;">
+        <a href="<?php echo $url; ?>" style="display:block;line-height:0;">
+          <img src="<?php echo esc_url( $img_url ); ?>"
+               width="720"
+               style="display:block;width:100%;height:auto;"
+               alt="">
+        </a>
+      </div>
       <?php endif; ?>
       <a href="<?php echo $url; ?>" class="card-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;"><?php echo $title; ?></a>
       <?php echo $excerpt; ?>

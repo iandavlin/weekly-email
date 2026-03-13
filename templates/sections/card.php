@@ -41,12 +41,14 @@ $meta_html = implode( ' &middot; ', $meta_parts );
   <tr>
     <td>
       <?php if ( $show_thumb && ! empty( $item['thumb_url'] ) ) : ?>
-      <a href="<?php echo $url; ?>" style="display:block;margin:0 0 10px;line-height:0;border-radius:6px;overflow:hidden;">
-        <img src="<?php echo esc_url( $item['thumb_url'] ); ?>"
-             width="720"
-             style="display:block;width:100%;height:auto;border-radius:6px;"
-             alt="">
-      </a>
+      <div class="img-crop" style="overflow:hidden;max-height:405px;border-radius:6px;margin:0 0 10px;line-height:0;">
+        <a href="<?php echo $url; ?>" style="display:block;line-height:0;">
+          <img src="<?php echo esc_url( $item['thumb_url'] ); ?>"
+               width="720"
+               style="display:block;width:100%;height:auto;"
+               alt="">
+        </a>
+      </div>
       <?php endif; ?>
       <?php if ( empty( $hide_type_label ) ) : ?>
       <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;margin:0 0 3px;"><?php echo $type_label; ?></p>

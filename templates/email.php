@@ -31,6 +31,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     .email-footer { padding: 20px 28px !important; }
     .hero-left, .hero-right { display: block !important; width: 100% !important; text-align: center !important; }
     .hero-right { padding-top: 2px !important; }
+    .img-crop { max-height: none !important; }
   }
   /* Phone */
   @media only screen and (max-width: 480px) {
