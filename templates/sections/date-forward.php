@@ -122,7 +122,7 @@ if ( $dt_start ) {
       <?php if ( $img_url ) : ?>
       <a href="<?php echo $url; ?>" style="display:block;margin:0 0 10px;line-height:0;border-radius:6px;overflow:hidden;">
         <img src="<?php echo esc_url( $img_url ); ?>"
-             width="600"
+             width="720"
              style="display:block;width:100%;height:auto;border-radius:6px;"
              alt="">
       </a>

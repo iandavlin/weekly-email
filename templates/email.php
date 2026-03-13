@@ -21,23 +21,23 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><?php echo esc_html( LG_WD_Email_Builder::build_subject( $payload ) ); ?></title>
 <style>
-  /* Tablet / small laptop */
-  @media only screen and (max-width: 720px) {
-    .email-container { width: 100% !important; }
-    .email-body { padding: 20px 24px 8px !important; }
-    .email-header { padding: 24px !important; }
-    .email-hero { padding: 10px 24px !important; }
-    .email-signoff { padding: 8px 24px 20px !important; }
-    .email-footer { padding: 20px 24px !important; }
+  /* Tablet */
+  @media only screen and (max-width: 768px) {
+    .email-container { width: 100% !important; max-width: 100% !important; }
+    .email-body { padding: 24px 28px 8px !important; }
+    .email-header { padding: 24px 28px !important; }
+    .email-hero { padding: 10px 28px !important; }
+    .email-signoff { padding: 8px 28px 24px !important; }
+    .email-footer { padding: 20px 28px !important; }
     .hero-left, .hero-right { display: block !important; width: 100% !important; text-align: center !important; }
     .hero-right { padding-top: 2px !important; }
   }
   /* Phone */
   @media only screen and (max-width: 480px) {
-    .email-body { padding: 16px 16px 8px !important; }
+    .email-body { padding: 20px 16px 8px !important; }
     .email-header { padding: 20px 16px !important; }
     .email-hero { padding: 8px 16px !important; }
-    .email-signoff { padding: 8px 16px 16px !important; }
+    .email-signoff { padding: 8px 16px 20px !important; }
     .email-footer { padding: 16px !important; }
     .card-row { display: block !important; width: 100% !important; }
     .date-badge { display: none !important; width: 0 !important; height: 0 !important; overflow: hidden !important; }
@@ -57,8 +57,8 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     <td align="center" style="padding:24px 16px;">
 
       <!-- Email container -->
-      <table class="email-container" width="680" cellpadding="0" cellspacing="0" border="0"
-             style="max-width:680px;width:100%;background-color:#FAF6EE;border-radius:8px;overflow:hidden;">
+      <table class="email-container" width="800" cellpadding="0" cellspacing="0" border="0"
+             style="max-width:800px;width:100%;background-color:#FAF6EE;border-radius:8px;overflow:hidden;">
 
         <!-- HEADER -->
         <tr>

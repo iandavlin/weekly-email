@@ -51,7 +51,7 @@ if ( $sponsor_name && $sponsor_url ) {
     <td style="padding:0;line-height:0;">
       <a href="<?php echo $url; ?>" class="sponsor-img" style="display:block;line-height:0;border:0;outline:none;text-decoration:none;">
         <img src="<?php echo esc_url( $img_url ); ?>"
-             width="600"
+             width="720"
              style="display:block;width:100%;height:auto;border-radius:8px 8px 0 0;border:0;"
              alt="">
       </a>

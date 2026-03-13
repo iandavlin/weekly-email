@@ -43,7 +43,7 @@ $meta_html = implode( ' &middot; ', $meta_parts );
       <?php if ( $show_thumb && ! empty( $item['thumb_url'] ) ) : ?>
       <a href="<?php echo $url; ?>" style="display:block;margin:0 0 10px;line-height:0;border-radius:6px;overflow:hidden;">
         <img src="<?php echo esc_url( $item['thumb_url'] ); ?>"
-             width="600"
+             width="720"
              style="display:block;width:100%;height:auto;border-radius:6px;"
              alt="">
       </a>
