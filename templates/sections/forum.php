@@ -42,7 +42,7 @@ $meta_html = implode( ' &middot; ', $meta );
   <tr>
     <td>
       <?php if ( $img_url ) : ?>
-      <a href="<?php echo $url; ?>" style="display:block;margin-bottom:8px;line-height:0;max-width:820px;max-height:461px;overflow:hidden;border-radius:6px;">
+      <a href="<?php echo $url; ?>" style="display:block;margin:0 auto 8px;line-height:0;max-width:820px;max-height:461px;overflow:hidden;border-radius:6px;text-align:center;">
         <img src="<?php echo esc_url( $img_url ); ?>"
              width="820"
              style="display:block;width:100%;max-width:820px;height:auto;border-radius:6px;"
