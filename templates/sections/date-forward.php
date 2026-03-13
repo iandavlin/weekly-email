@@ -137,7 +137,7 @@ if ( $dt_start ) {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <?php if ( $month_short && $day_num ) : ?>
-          <td width="48" valign="top" style="padding:0 10px 0 0;">
+          <td class="date-badge" width="48" valign="top" style="padding:0 10px 0 0;">
             <div style="background:#2B2318;border-radius:6px;width:42px;text-align:center;padding:5px 0;">
               <span style="display:block;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;"><?php echo esc_html( $month_short ); ?></span>
               <span style="display:block;font-size:18px;font-weight:700;font-family:Georgia,serif;color:#ECB351;line-height:1.1;"><?php echo esc_html( $day_num ); ?></span>
@@ -145,14 +145,14 @@ if ( $dt_start ) {
           </td>
           <?php endif; ?>
           <td valign="top">
-            <a href="<?php echo $url; ?>" style="font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:3px;"><?php echo $title; ?></a>
-            <p style="font-size:11px;color:#5C4E3A;margin:0 0 3px;">
+            <a href="<?php echo $url; ?>" class="event-title" style="font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:3px;"><?php echo $title; ?></a>
+            <p class="event-date" style="font-size:11px;color:#5C4E3A;margin:0 0 3px;">
               <?php echo esc_html( $display_date ); ?>
               <?php if ( $time_display ) : ?>
                 &middot; <?php echo $time_display; ?>
               <?php endif; ?>
             </p>
-            <p style="font-size:11px;color:#aaa;margin:0 0 4px;">
+            <p class="event-meta" style="font-size:11px;color:#aaa;margin:0 0 4px;">
               <?php echo $tier_html; ?>
               <span style="font-size:11px;color:#87986A;"><?php echo esc_html( $location ); ?></span>
               <?php if ( $author_html ) : ?>

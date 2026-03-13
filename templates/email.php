@@ -34,6 +34,13 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     .event-thumb { display: block !important; width: 100% !important; padding: 0 0 10px 0 !important; }
     .event-thumb img { width: 100% !important; height: auto !important; max-width: 100% !important; }
     .event-content { display: block !important; width: 100% !important; }
+    .date-badge { display: none !important; width: 0 !important; height: 0 !important; overflow: hidden !important; }
+    .card-title { font-size: 18px !important; line-height: 1.4 !important; }
+    .event-title { font-size: 18px !important; line-height: 1.4 !important; }
+    .card-excerpt { font-size: 14px !important; }
+    .card-meta { font-size: 12px !important; }
+    .event-date { font-size: 13px !important; }
+    .event-meta { font-size: 12px !important; }
     .sponsor-img img { max-width: 100% !important; height: auto !important; }
     .hero-left, .hero-right { display: block !important; width: 100% !important; text-align: center !important; }
   }

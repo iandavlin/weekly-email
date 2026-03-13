@@ -25,7 +25,7 @@ if ( ! empty( $item['id'] ) ) {
     $author_html = '';
 }
 $excerpt      = $show_excerpt && ! empty( $item['excerpt'] )
-    ? '<p style="font-size:13px;color:#5C4E3A;margin:4px 0 0;line-height:1.6;">' . esc_html( $item['excerpt'] ) . '</p>'
+    ? '<p class="card-excerpt" style="font-size:13px;color:#5C4E3A;margin:4px 0 0;line-height:1.6;">' . esc_html( $item['excerpt'] ) . '</p>'
     : '';
 
 $thumb_cell = '';
@@ -52,9 +52,9 @@ $meta_html = implode( ' &middot; ', $meta_parts );
       <?php if ( empty( $hide_type_label ) ) : ?>
       <p style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;margin:0 0 2px;"><?php echo $type_label; ?></p>
       <?php endif; ?>
-      <a href="<?php echo $url; ?>" style="font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.4;margin-bottom:4px;"><?php echo $title; ?></a>
+      <a href="<?php echo $url; ?>" class="card-title" style="font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.4;margin-bottom:4px;"><?php echo $title; ?></a>
       <?php echo $excerpt; ?>
-      <p style="font-size:11px;color:#aaa;margin:4px 0 0;"><?php echo $meta_html; ?></p>
+      <p class="card-meta" style="font-size:11px;color:#aaa;margin:4px 0 0;"><?php echo $meta_html; ?></p>
     </td>
   </tr>
 </table>
