@@ -47,13 +47,12 @@ if ( $sponsor_name && $sponsor_url ) {
     $partner_label = '<span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#2B2318;">Partner</span>';
 }
 
-// Column widths
+// Column widths — thumbnail is fixed, detail is fluid
 $thumb_width  = 240;
 $gutter       = 16;
-$detail_width = 624;
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
-       style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:16px;margin-bottom:16px;">
+       style="border-bottom:1px solid #EAE5DC;padding-bottom:16px;margin-bottom:16px;">
   <tr>
     <td>
 
@@ -84,11 +83,11 @@ $detail_width = 624;
       <?php if ( $img_url ) : ?>
       </td>
       <?php endif; ?>
-      <td width="<?php echo $img_url ? $detail_width : '100%'; ?>" valign="top">
+      <td width="<?php echo $img_url ? 624 : '100%'; ?>" valign="top">
       <![endif]-->
 
-      <table class="event-col-details" width="<?php echo $img_url ? $detail_width : '100%'; ?>" cellpadding="0" cellspacing="0" border="0"
-             align="left" style="width:<?php echo $img_url ? $detail_width . 'px' : '100%'; ?>;max-width:<?php echo $img_url ? $detail_width . 'px' : '100%'; ?>;">
+      <table class="event-col-details" width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="width:100%;">
         <tr>
           <td valign="top" style="padding:0;">
             <p style="margin:0 0 6px;"><?php echo $partner_label; ?></p>
