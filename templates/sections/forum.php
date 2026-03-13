@@ -42,11 +42,10 @@ $meta_html = implode( ' &middot; ', $meta );
   <tr>
     <td>
       <?php if ( $img_url ) : ?>
-      <!-- 16:9 image block — 520px wide × 293px tall -->
       <a href="<?php echo $url; ?>" style="display:block;margin-bottom:8px;line-height:0;">
         <img src="<?php echo esc_url( $img_url ); ?>"
-             width="520" height="293"
-             style="display:block;width:100%;max-width:520px;height:293px;object-fit:cover;border-radius:4px;"
+             width="820" height="461"
+             style="display:block;width:100%;max-width:820px;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px;"
              alt="">
       </a>
       <?php endif; ?>

@@ -20,9 +20,9 @@ if ( ! $img_url ) {
         $img_url = $m[1];
     }
 }
-// Use medium size for compact layout
+// Use large size for full-width layout
 if ( has_post_thumbnail( $item['id'] ) ) {
-    $img_url = get_the_post_thumbnail_url( $item['id'], 'medium' );
+    $img_url = get_the_post_thumbnail_url( $item['id'], 'large' );
 }
 
 // Parse event date
@@ -127,7 +127,7 @@ if ( $dt_start ) {
       <a href="<?php echo $url; ?>" style="display:block;margin-bottom:8px;line-height:0;">
         <img src="<?php echo esc_url( $img_url ); ?>"
              width="820" height="461"
-             style="display:block;width:100%;max-width:820px;height:auto;object-fit:cover;border-radius:6px;"
+             style="display:block;width:100%;max-width:820px;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px;"
              alt="">
       </a>
       <?php endif; ?>

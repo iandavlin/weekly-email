@@ -42,7 +42,7 @@ $meta_html = implode( ' &middot; ', $meta_parts );
       <a href="<?php echo $url; ?>" style="display:block;margin-bottom:8px;line-height:0;">
         <img src="<?php echo esc_url( $item['thumb_url'] ); ?>"
              width="820" height="461"
-             style="display:block;width:100%;max-width:820px;height:auto;object-fit:cover;border-radius:6px;"
+             style="display:block;width:100%;max-width:820px;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px;"
              alt="">
       </a>
       <?php endif; ?>
