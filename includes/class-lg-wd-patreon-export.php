@@ -103,7 +103,15 @@ class LG_WD_Patreon_Export {
        letter-spacing: 1px; margin: 24px 0 12px; }
 
   .item { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(92,78,58,0.12); }
-  .item img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin-bottom: 8px; }
+  .item img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin-bottom: 4px; }
+  .img-wrap { position: relative; margin-bottom: 8px; }
+  .img-copy-btn {
+    display: inline-block; font-size: 11px; font-weight: 600; color: #87986A;
+    background: #2B2318; border: 1px solid #87986A; border-radius: 4px;
+    padding: 2px 8px; cursor: pointer; margin-bottom: 4px;
+  }
+  .img-copy-btn:hover { background: #3d3225; }
+  .img-note { font-size: 11px; color: #aaa; font-style: italic; margin: 0 0 16px; }
   .item:last-child { border-bottom: none; }
   .item-title { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
   .item-title a { color: #2B2318; text-decoration: none; }
@@ -128,7 +136,7 @@ class LG_WD_Patreon_Export {
 <div class="toolbar">
   <span>Patreon Export</span>
   <button onclick="selectAndCopy()">📋 Select All & Copy</button>
-  <span class="status" id="copy-status">Click the button or Ctrl+A → Ctrl+C</span>
+  <span class="status" id="copy-status">Text + links copy. Images: use 📋 buttons below → Patreon's Image button.</span>
 </div>
 
 <div id="export-content">
@@ -153,13 +161,22 @@ function selectAndCopy() {
 
   try {
     document.execCommand('copy');
-    document.getElementById('copy-status').textContent = '✓ Copied! Paste into Patreon.';
+    document.getElementById('copy-status').textContent = '✓ Text copied! Images: use 📋 buttons → Patreon Image button.';
     setTimeout(() => {
-      document.getElementById('copy-status').textContent = 'Click the button or Ctrl+A → Ctrl+C';
-    }, 3000);
+      document.getElementById('copy-status').textContent = 'Text + links copy. Images: use 📋 buttons below → Patreon\'s Image button.';
+    }, 4000);
   } catch (e) {
     document.getElementById('copy-status').textContent = 'Use Ctrl+C to copy the selection.';
   }
+}
+
+function copyImgUrl(btn, url) {
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.color = '#ECB351';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+  });
 }
 </script>
 
@@ -227,14 +244,20 @@ HTML;
         $url  = esc_url( $item['url'] ?? '' );
         $alt  = esc_attr( $item['title'] ?? '' );
         $src  = esc_url( $img_url );
+        $src_js = esc_attr( $img_url ); // for JS onclick
 
-        $img = '<img src="' . $src . '" alt="' . $alt . '" style="max-width:100%;height:auto;border-radius:6px;display:block;margin-bottom:8px;">';
+        $img = '<img src="' . $src . '" alt="' . $alt . '">';
 
+        $html  = '<div class="img-wrap">' . "\n";
         if ( $url ) {
-            return '<a href="' . $url . '" style="display:block;line-height:0;">' . $img . '</a>' . "\n";
+            $html .= '  <a href="' . $url . '" style="display:block;line-height:0;">' . $img . '</a>' . "\n";
+        } else {
+            $html .= '  ' . $img . "\n";
         }
+        $html .= '  <button class="img-copy-btn" onclick="copyImgUrl(this, \'' . $src_js . '\')" type="button">📋 Copy image URL</button>' . "\n";
+        $html .= '</div>' . "\n";
 
-        return $img . "\n";
+        return $html;
     }
 
     private static function render_card_item( array $item ): string {
