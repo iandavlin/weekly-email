@@ -32,8 +32,6 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     .hero-left, .hero-right { display: block !important; width: 100% !important; text-align: center !important; }
     .hero-right { padding-top: 2px !important; }
     .img-cap { max-height: none !important; width: 100% !important; }
-    .event-img-col { width: 160px !important; }
-    .event-img { width: 160px !important; }
   }
   /* Phone */
   @media only screen and (max-width: 480px) {
@@ -43,9 +41,6 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     .email-signoff { padding: 8px 16px 20px !important; }
     .email-footer { padding: 16px !important; }
     .card-row { display: block !important; width: 100% !important; }
-    .event-img-col { width: 100% !important; margin-right: 0 !important; }
-    .event-img { width: 100% !important; }
-    .date-badge { display: none !important; width: 0 !important; height: 0 !important; overflow: hidden !important; }
     .card-title, .event-title { font-size: 17px !important; }
     .card-excerpt { font-size: 14px !important; }
     .card-meta { font-size: 12px !important; }

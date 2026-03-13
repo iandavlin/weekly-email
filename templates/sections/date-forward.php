@@ -1,7 +1,7 @@
 <?php
 /**
- * Section template: Date-forward (3-column layout)
- * Thumbnail | Date badge | Event details
+ * Section template: Date-forward (card layout)
+ * Full-width image on top, event title + date/time + meta below.
  * Variables: $item (array), $settings (array)
  */
 defined( 'ABSPATH' ) || exit;
@@ -20,25 +20,18 @@ if ( ! $img_url ) {
         $img_url = $m[1];
     }
 }
-// Use medium size for thumbnail column
 if ( has_post_thumbnail( $item['id'] ) ) {
-    $img_url = get_the_post_thumbnail_url( $item['id'], 'medium' );
+    $img_url = get_the_post_thumbnail_url( $item['id'], 'large' );
 }
 
 // Parse event date
 $display_date = '';
-$month_short  = '';
-$day_num      = '';
-$day_of_week  = '';
 $dt_start     = null;
 
 if ( $date_raw ) {
     $tz = new DateTimeZone( LG_WD_TIMEZONE );
     $ts = DateTime::createFromFormat( 'Ymd', $date_raw, $tz );
     if ( $ts ) {
-        $month_short  = strtoupper( $ts->format( 'M' ) );
-        $day_num      = $ts->format( 'j' );
-        $day_of_week  = $ts->format( 'l' );
         $display_date = $ts->format( 'l, F j, Y' );
         $dt_start     = $ts;
     }
@@ -118,80 +111,42 @@ if ( $dt_start ) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:16px;margin-bottom:16px;">
   <tr>
-    <td style="padding:0;">
-      <!--[if mso]>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <?php if ( $img_url ) : ?><td width="200" valign="top" style="padding:0 14px 0 0;"><?php endif; ?>
-      <![endif]-->
-
+    <td>
       <?php if ( $img_url ) : ?>
-      <!-- Thumbnail column — fluid hybrid: align=left wraps naturally on narrow viewports -->
-      <table class="event-img-col" align="left" cellpadding="0" cellspacing="0" border="0"
-             style="margin:0 14px 10px 0;" width="200">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;">
         <tr>
-          <td style="padding:0;line-height:0;">
-            <a href="<?php echo $url; ?>" style="display:block;line-height:0;">
+          <td align="left" style="line-height:0;">
+            <a href="<?php echo $url; ?>" style="line-height:0;">
               <img src="<?php echo esc_url( $img_url ); ?>"
-                   width="200" class="event-img"
-                   style="width:200px;max-width:100%;height:auto;border-radius:6px;display:block;"
-                   alt="<?php echo $title; ?>">
+                   width="720" class="img-cap"
+                   style="max-width:100%;max-height:405px;width:auto;height:auto;border-radius:6px;"
+                   alt="">
             </a>
           </td>
         </tr>
       </table>
       <?php endif; ?>
-
-      <!--[if mso]>
-      <?php if ( $img_url ) : ?></td><?php endif; ?>
-      <?php if ( $month_short && $day_num ) : ?><td width="52" valign="top" style="padding:0 12px 0 0;"><?php endif; ?>
-      <![endif]-->
-
-      <?php if ( $month_short && $day_num ) : ?>
-      <!-- Date badge column -->
-      <table class="date-badge" align="left" cellpadding="0" cellspacing="0" border="0"
-             style="margin:0 12px 10px 0;" width="46">
-        <tr>
-          <td style="padding:0;">
-            <div style="background:#2B2318;border-radius:6px;width:46px;text-align:center;padding:6px 0;">
-              <span style="display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#87986A;"><?php echo esc_html( $month_short ); ?></span>
-              <span style="display:block;font-size:20px;font-weight:700;font-family:Georgia,serif;color:#ECB351;line-height:1.1;"><?php echo esc_html( $day_num ); ?></span>
-            </div>
-          </td>
-        </tr>
-      </table>
-      <?php endif; ?>
-
-      <!--[if mso]>
-      <?php if ( $month_short && $day_num ) : ?></td><?php endif; ?>
-      <td valign="top">
-      <![endif]-->
-
-      <!-- Event details — fills remaining width -->
-      <div style="display:inline-block;vertical-align:top;width:100%;max-width:480px;">
-        <a href="<?php echo $url; ?>" class="event-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:4px;"><?php echo $title; ?></a>
-        <p class="event-date" style="font-size:14px;color:#5C4E3A;margin:0 0 4px;">
-          <?php echo esc_html( $display_date ); ?>
-          <?php if ( $time_display ) : ?>
-            &middot; <?php echo $time_display; ?>
-          <?php endif; ?>
-        </p>
-        <p class="event-meta" style="font-size:13px;color:#aaa;margin:0 0 6px;">
-          <?php echo $tier_html; ?>
-          <span style="color:#87986A;"><?php echo esc_html( $location ); ?></span>
-          <?php if ( $author_html ) : ?>
-            &middot; <?php echo $author_html; ?>
-          <?php endif; ?>
-        </p>
-        <?php if ( $gcal_url ) : ?>
-        <div style="margin-top:6px;">
-          <a href="<?php echo esc_url( $gcal_url ); ?>"
-             style="display:inline-block;font-size:12px;font-weight:600;color:#ECB351;text-decoration:none;padding:4px 12px;border:1px solid #ECB351;border-radius:12px;line-height:1.4;"
-             target="_blank">&#128197; Add to Calendar</a>
-        </div>
+      <a href="<?php echo $url; ?>" class="event-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:4px;"><?php echo $title; ?></a>
+      <p class="event-date" style="font-size:14px;color:#5C4E3A;margin:0 0 4px;">
+        <?php echo esc_html( $display_date ); ?>
+        <?php if ( $time_display ) : ?>
+          &middot; <?php echo $time_display; ?>
         <?php endif; ?>
+      </p>
+      <p class="event-meta" style="font-size:13px;color:#aaa;margin:0 0 6px;">
+        <?php echo $tier_html; ?>
+        <span style="color:#87986A;"><?php echo esc_html( $location ); ?></span>
+        <?php if ( $author_html ) : ?>
+          &middot; <?php echo $author_html; ?>
+        <?php endif; ?>
+      </p>
+      <?php if ( $gcal_url ) : ?>
+      <div style="margin-top:6px;">
+        <a href="<?php echo esc_url( $gcal_url ); ?>"
+           style="display:inline-block;font-size:12px;font-weight:600;color:#ECB351;text-decoration:none;padding:4px 12px;border:1px solid #ECB351;border-radius:12px;line-height:1.4;"
+           target="_blank">&#128197; Add to Calendar</a>
       </div>
-
-      <!--[if mso]></td></tr></table><![endif]-->
+      <?php endif; ?>
     </td>
   </tr>
 </table>
