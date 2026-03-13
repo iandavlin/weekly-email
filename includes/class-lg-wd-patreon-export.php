@@ -104,11 +104,12 @@ class LG_WD_Patreon_Export {
 
   .item { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(92,78,58,0.12); }
   .item img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin-bottom: 4px; }
-  .img-wrap { position: relative; margin-bottom: 8px; }
+  .img-wrap { position: relative; margin-bottom: 8px; -webkit-user-select: none; user-select: none; }
   .img-copy-btn {
     display: inline-block; font-size: 11px; font-weight: 600; color: #2B2318;
     background: #ECB351; border: 1px solid #ECB351; border-radius: 4px;
     padding: 3px 10px; cursor: pointer; margin-bottom: 4px; font-family: inherit;
+    -webkit-user-select: none; user-select: none;
   }
   .img-copy-btn:hover { background: #d9a345; }
   .img-note { font-size: 11px; color: #aaa; font-style: italic; margin: 0 0 16px; }
@@ -153,6 +154,10 @@ class LG_WD_Patreon_Export {
 <script>
 function selectAndCopy() {
   const el = document.getElementById('export-content');
+  // Temporarily hide image wrappers (buttons + images) so they don't leak into clipboard
+  const imgWraps = el.querySelectorAll('.img-wrap');
+  imgWraps.forEach(w => w.style.display = 'none');
+
   const range = document.createRange();
   range.selectNodeContents(el);
   const sel = window.getSelection();
@@ -168,6 +173,10 @@ function selectAndCopy() {
   } catch (e) {
     document.getElementById('copy-status').textContent = 'Use Ctrl+C to copy the selection.';
   }
+
+  // Restore image wrappers
+  imgWraps.forEach(w => w.style.display = '');
+  sel.removeAllRanges();
 }
 
 async function copyImage(btn, url) {
