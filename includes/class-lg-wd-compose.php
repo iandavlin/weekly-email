@@ -336,8 +336,10 @@ class LG_WD_Compose {
             <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section" style="color:#ECB351;">✕</button>
           </div>
         </div>
-        <?php elseif ( $is_html_block ) : ?>
-        <div class="lg-wd-compose-section lg-wd-compose-html-block" data-section-key="<?php echo $key; ?>" data-section-template="html-block" data-section-slug="" data-is-header="0">
+        <?php elseif ( $is_html_block ) :
+            $editor_id = 'lg_wd_html_' . $key;
+        ?>
+        <div class="lg-wd-compose-section lg-wd-compose-html-block" data-section-key="<?php echo $key; ?>" data-section-template="html-block" data-section-slug="" data-is-header="0" data-editor-id="<?php echo esc_attr( $editor_id ); ?>">
           <div class="lg-wd-compose-section-header">
             <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
             <strong><?php echo $label; ?></strong>
@@ -345,7 +347,20 @@ class LG_WD_Compose {
             <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
           </div>
           <div class="lg-wd-compose-section-body" style="padding:12px;">
-            <textarea class="lg-wd-html-content" rows="8" style="width:100%;font-family:monospace;font-size:13px;padding:8px;border:1px solid #ddd;border-radius:4px;"><?php echo esc_textarea( $html_content ); ?></textarea>
+            <?php
+            wp_editor( $html_content, $editor_id, [
+                'textarea_name' => $editor_id,
+                'textarea_rows' => 8,
+                'media_buttons' => true,
+                'teeny'         => false,
+                'quicktags'     => true,
+                'tinymce'       => [
+                    'toolbar1'      => 'bold,italic,underline,separator,bullist,numlist,separator,link,unlink,separator,alignleft,aligncenter,separator,forecolor,separator,undo,redo',
+                    'toolbar2'      => '',
+                    'content_style' => 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
+                ],
+            ] );
+            ?>
           </div>
         </div>
 

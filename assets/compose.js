@@ -27,6 +27,11 @@ jQuery( function ( $ ) {
      * Returns a JSON-serializable array.
      */
     function collectSections() {
+        // Sync all TinyMCE editors to their textareas before collecting
+        if ( typeof tinyMCE !== 'undefined' ) {
+            tinyMCE.triggerSave();
+        }
+
         const sections = [];
         $( '#lg-wd-sections-container .lg-wd-compose-section' ).each( function () {
             const $sec = $( this );
@@ -65,7 +70,10 @@ jQuery( function ( $ ) {
             };
 
             if ( isHtmlBlock ) {
-                entry.html_content = $sec.find( '.lg-wd-html-content' ).val() || '';
+                const editorId = $sec.data( 'editor-id' );
+                // Try TinyMCE first (visual mode), fall back to textarea (text mode)
+                const editor = typeof tinyMCE !== 'undefined' ? tinyMCE.get( editorId ) : null;
+                entry.html_content = editor ? editor.getContent() : $( '#' + editorId ).val() || '';
             }
 
             sections.push( entry );
@@ -281,7 +289,13 @@ jQuery( function ( $ ) {
 
     $( document ).on( 'click', '.lg-wd-remove-section-btn', function () {
         if ( confirm( 'Remove this section from the issue?' ) ) {
-            $( this ).closest( '.lg-wd-compose-section' ).fadeOut( 200, function () {
+            const $section = $( this ).closest( '.lg-wd-compose-section' );
+            // Clean up TinyMCE editor if this is an HTML block
+            const editorId = $section.data( 'editor-id' );
+            if ( editorId && typeof wp !== 'undefined' && wp.editor ) {
+                wp.editor.remove( editorId );
+            }
+            $section.fadeOut( 200, function () {
                 $( this ).remove();
             });
         }
@@ -404,16 +418,17 @@ jQuery( function ( $ ) {
     // ── HTML Block ──────────────────────────────────────────────────────────
 
     $( '#lg-wd-add-html-block-btn' ).on( 'click', function () {
-        const key   = 'html_block_' + Date.now();
-        const label = 'HTML Block';
-        addHtmlBlock( key, label, '' );
-        showResponse( '✓ HTML block added. Enter your HTML content below.', 'success' );
+        const key      = 'html_block_' + Date.now();
+        const editorId = 'lg_wd_html_' + key;
+        const label    = 'HTML Block';
+        addHtmlBlock( key, editorId, label, '' );
+        showResponse( '✓ HTML block added.', 'success' );
     });
 
-    function addHtmlBlock( key, label, content ) {
+    function addHtmlBlock( key, editorId, label, content ) {
         const esc = str => $( '<div>' ).text( str ).html();
         const html = `
-            <div class="lg-wd-compose-section lg-wd-compose-html-block" data-section-key="${key}" data-section-template="html-block" data-section-slug="" data-is-header="0">
+            <div class="lg-wd-compose-section lg-wd-compose-html-block" data-section-key="${key}" data-section-template="html-block" data-section-slug="" data-is-header="0" data-editor-id="${editorId}">
               <div class="lg-wd-compose-section-header">
                 <span class="lg-wd-drag-handle" title="Drag to reorder">⠿</span>
                 <strong>${esc(label)}</strong>
@@ -421,11 +436,25 @@ jQuery( function ( $ ) {
                 <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
               </div>
               <div class="lg-wd-compose-section-body" style="padding:12px;">
-                <textarea class="lg-wd-html-content" rows="8" style="width:100%;font-family:monospace;font-size:13px;padding:8px;border:1px solid #ddd;border-radius:4px;">${esc(content)}</textarea>
+                <textarea id="${editorId}" class="lg-wd-html-content" rows="8">${esc(content)}</textarea>
               </div>
             </div>
         `;
         $( '#lg-wd-sections-container' ).append( html );
+
+        // Initialize WP editor (TinyMCE + quicktags)
+        if ( typeof wp !== 'undefined' && wp.editor ) {
+            wp.editor.initialize( editorId, {
+                tinymce: {
+                    wpautop: true,
+                    toolbar1: 'bold,italic,underline,separator,bullist,numlist,separator,link,unlink,separator,alignleft,aligncenter,separator,forecolor,separator,undo,redo',
+                    toolbar2: '',
+                    content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
+                },
+                quicktags: true,
+                mediaButtons: true,
+            });
+        }
     }
 
     // ── Archive Search ───────────────────────────────────────────────────────
