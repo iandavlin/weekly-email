@@ -39,10 +39,10 @@ $meta_html = implode( ' &middot; ', $meta_parts );
   <tr>
     <td>
       <?php if ( $show_thumb && ! empty( $item['thumb_url'] ) ) : ?>
-      <a href="<?php echo $url; ?>" style="display:block;margin-bottom:8px;line-height:0;">
+      <a href="<?php echo $url; ?>" style="display:block;margin-bottom:8px;line-height:0;max-width:820px;max-height:461px;overflow:hidden;border-radius:6px;">
         <img src="<?php echo esc_url( $item['thumb_url'] ); ?>"
-             width="820" height="461"
-             style="display:block;width:100%;max-width:820px;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:6px;"
+             width="820"
+             style="display:block;width:100%;max-width:820px;height:auto;border-radius:6px;"
              alt="">
       </a>
       <?php endif; ?>
