@@ -251,25 +251,19 @@ jQuery( function ( $ ) {
     // ── Clear Draft ─────────────────────────────────────────────────────────
 
     $( '#lg-wd-clear-draft-btn' ).on( 'click', function () {
-        if ( ! confirm( 'Clear all sections and posts from this draft?' ) ) return;
+        if ( ! confirm( 'Delete this draft and start fresh?' ) ) return;
 
-        $( '#lg-wd-sections-container' ).empty();
-
-        // Save the empty state
         const issueId = $( '#lg-wd-issue-id' ).val();
         if ( issueId ) {
             $.post( ajaxUrl, {
-                action:   'lg_wd_compose_save',
+                action:   'lg_wd_compose_delete_draft',
                 nonce,
                 issue_id: issueId,
-                sections: JSON.stringify( [] ),
-                date_from: $( '#lg-wd-date-from' ).val(),
-                date_to:   $( '#lg-wd-date-to' ).val(),
             }, function ( res ) {
-                if ( res.success ) {
-                    showResponse( '✓ Draft cleared.', 'success' );
+                if ( res.success && res.data.redirect ) {
+                    window.location.href = res.data.redirect;
                 } else {
-                    showResponse( '✗ ' + ( res.data || 'Clear failed.' ), 'error' );
+                    showResponse( '✗ ' + ( res.data || 'Delete failed.' ), 'error' );
                 }
             });
         }

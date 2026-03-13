@@ -18,6 +18,7 @@ class LG_WD_Compose {
         add_action( 'wp_ajax_lg_wd_compose_test_send',   [ __CLASS__, 'ajax_test_send' ] );
         add_action( 'wp_ajax_lg_wd_compose_send',        [ __CLASS__, 'ajax_send' ] );
         add_action( 'wp_ajax_lg_wd_compose_new_issue',   [ __CLASS__, 'ajax_new_issue' ] );
+        add_action( 'wp_ajax_lg_wd_compose_delete_draft', [ __CLASS__, 'ajax_delete_draft' ] );
     }
 
     // ── Assets ────────────────────────────────────────────────────────────────
@@ -561,6 +562,35 @@ class LG_WD_Compose {
         wp_send_json_success( [
             'issue_id' => $issue_id,
             'redirect' => admin_url( 'admin.php?page=' . self::PAGE_SLUG . '&issue_id=' . $issue_id ),
+        ] );
+    }
+
+    /**
+     * Delete the current draft issue (move to trash).
+     */
+    public static function ajax_delete_draft(): void {
+        check_ajax_referer( 'lg_wd_compose', 'nonce' );
+        if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
+
+        $issue_id = (int) ( $_POST['issue_id'] ?? 0 );
+        if ( ! $issue_id ) {
+            wp_send_json_error( 'No issue ID.' );
+        }
+
+        $post = get_post( $issue_id );
+        if ( ! $post || $post->post_type !== 'weekly_email' ) {
+            wp_send_json_error( 'Invalid issue.' );
+        }
+
+        // Only allow deleting drafts, not sent issues
+        if ( $post->post_status === 'publish' ) {
+            wp_send_json_error( 'Cannot delete a sent issue.' );
+        }
+
+        wp_trash_post( $issue_id );
+
+        wp_send_json_success( [
+            'redirect' => admin_url( 'admin.php?page=' . self::PAGE_SLUG ),
         ] );
     }
 
