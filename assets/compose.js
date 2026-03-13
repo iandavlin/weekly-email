@@ -115,7 +115,7 @@ jQuery( function ( $ ) {
                             content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
                         },
                         quicktags: true,
-                        mediaButtons: true,
+                        mediaButtons: false,
                     });
                 }
             });
@@ -490,7 +490,7 @@ jQuery( function ( $ ) {
                         content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
                     },
                     quicktags: true,
-                    mediaButtons: true,
+                    mediaButtons: false,
                 });
             }
         }, 100 );

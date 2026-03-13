@@ -357,7 +357,7 @@ class LG_WD_Compose {
             wp_editor( $html_content, $editor_id, [
                 'textarea_name' => $editor_id,
                 'textarea_rows' => 12,
-                'media_buttons' => true,
+                'media_buttons' => false,
                 'teeny'         => false,
                 'quicktags'     => true,
                 'tinymce'       => [
