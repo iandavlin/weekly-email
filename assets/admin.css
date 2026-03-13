@@ -432,7 +432,9 @@ code { background: #f0ebe2; padding: 1px 4px; border-radius: 3px; font-size: 11p
 
 /* ── Preview Modal ───────────────────────────────────────────── */
 
-#lg-wd-preview-modal {
+#lg-wd-preview-modal,
+#lg-wd-custom-section-modal,
+#lg-wd-external-card-modal {
   position: fixed;
   inset: 0;
   z-index: 100000;
