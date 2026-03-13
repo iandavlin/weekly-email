@@ -47,6 +47,11 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     .event-date { font-size: 13px !important; }
     .event-meta { font-size: 12px !important; }
     .sponsor-img img { max-width: 100% !important; height: auto !important; }
+    /* Event hybrid columns — stack on mobile */
+    .event-col-thumb,
+    .event-col-details { width: 100% !important; max-width: 100% !important; display: block !important; }
+    .event-col-thumb td { padding-right: 0 !important; }
+    .event-img { width: 100% !important; }
   }
 </style>
 </head>
