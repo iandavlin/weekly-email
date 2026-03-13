@@ -103,6 +103,7 @@ class LG_WD_Patreon_Export {
        letter-spacing: 1px; margin: 24px 0 12px; }
 
   .item { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(92,78,58,0.12); }
+  .item img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin-bottom: 8px; }
   .item:last-child { border-bottom: none; }
   .item-title { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
   .item-title a { color: #2B2318; text-decoration: none; }
@@ -206,6 +207,36 @@ HTML;
 
     // ── Item renderers ────────────────────────────────────────────────────────
 
+    /**
+     * Render an item's featured image as an <img> tag.
+     * Returns empty string if no image available.
+     */
+    private static function render_item_image( array $item ): string {
+        $img_url = $item['thumb_url'] ?? '';
+
+        // For WP posts, also check for first <img> in content as fallback
+        if ( ! $img_url && ! empty( $item['id'] ) ) {
+            $post = get_post( $item['id'] );
+            if ( $post && preg_match( '/<img[^>]+src=["\']([^"\']+)["\']/', $post->post_content, $m ) ) {
+                $img_url = $m[1];
+            }
+        }
+
+        if ( ! $img_url ) return '';
+
+        $url  = esc_url( $item['url'] ?? '' );
+        $alt  = esc_attr( $item['title'] ?? '' );
+        $src  = esc_url( $img_url );
+
+        $img = '<img src="' . $src . '" alt="' . $alt . '" style="max-width:100%;height:auto;border-radius:6px;display:block;margin-bottom:8px;">';
+
+        if ( $url ) {
+            return '<a href="' . $url . '" style="display:block;line-height:0;">' . $img . '</a>' . "\n";
+        }
+
+        return $img . "\n";
+    }
+
     private static function render_card_item( array $item ): string {
         $title   = esc_html( $item['title'] );
         $url     = esc_url( $item['url'] );
@@ -214,6 +245,7 @@ HTML;
         $type    = esc_html( $item['type_label'] ?? '' );
 
         $html  = '<div class="item">' . "\n";
+        $html .= self::render_item_image( $item );
         $html .= '  <p class="item-title"><a href="' . $url . '"><strong>' . $title . '</strong></a></p>' . "\n";
         if ( $type ) {
             $html .= '  <p class="item-meta">' . $type . '</p>' . "\n";
@@ -285,6 +317,7 @@ HTML;
         $author = self::plain_author( $item );
 
         $html  = '<div class="item">' . "\n";
+        $html .= self::render_item_image( $item );
         $html .= '  <p class="item-title"><a href="' . $url . '"><strong>' . $title . '</strong></a></p>' . "\n";
         $html .= '  <p class="event-date">' . esc_html( $display_date );
         if ( $time_display ) {
@@ -317,6 +350,7 @@ HTML;
         }
 
         $html  = '<div class="item">' . "\n";
+        $html .= self::render_item_image( $item );
         $html .= '  <p class="item-title"><a href="' . $url . '"><strong>' . $title . '</strong></a></p>' . "\n";
 
         $meta_parts = [];
@@ -340,6 +374,7 @@ HTML;
 
         $html  = '<div class="item">' . "\n";
         $html .= '  <p class="sponsor-label">Partner Spotlight</p>' . "\n";
+        $html .= self::render_item_image( $item );
         $html .= '  <p class="item-title"><a href="' . $url . '"><strong>' . $title . '</strong></a></p>' . "\n";
         if ( $excerpt ) {
             $html .= '  <p class="item-excerpt">' . $excerpt . '</p>' . "\n";
@@ -355,6 +390,7 @@ HTML;
         $content = $post ? wp_strip_all_tags( apply_filters( 'the_content', $post->post_content ) ) : '';
 
         $html  = '<div class="item">' . "\n";
+        $html .= self::render_item_image( $item );
         $html .= '  <p class="item-title"><a href="' . $url . '"><strong>' . $title . '</strong></a></p>' . "\n";
         if ( $content ) {
             // Trim to a reasonable length for Patreon
