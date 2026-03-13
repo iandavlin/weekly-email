@@ -220,6 +220,16 @@ jQuery( function ( $ ) {
                 doc.open();
                 doc.write( res.data.html );
                 doc.close();
+                // Suppress Chrome image download button in preview
+                doc.querySelectorAll( 'img' ).forEach( function( img ) {
+                    var wrap = doc.createElement( 'span' );
+                    wrap.style.cssText = 'position:relative;display:inline-block;';
+                    var overlay = doc.createElement( 'span' );
+                    overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;';
+                    img.parentNode.insertBefore( wrap, img );
+                    wrap.appendChild( img );
+                    wrap.appendChild( overlay );
+                });
                 $( '#lg-wd-preview-modal' ).show();
                 $( 'body' ).css( 'overflow', 'hidden' );
             } else {
