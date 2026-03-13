@@ -106,11 +106,11 @@ class LG_WD_Patreon_Export {
   .item img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin-bottom: 4px; }
   .img-wrap { position: relative; margin-bottom: 8px; }
   .img-copy-btn {
-    display: inline-block; font-size: 11px; font-weight: 600; color: #87986A;
-    background: #2B2318; border: 1px solid #87986A; border-radius: 4px;
-    padding: 2px 8px; cursor: pointer; margin-bottom: 4px;
+    display: inline-block; font-size: 11px; font-weight: 600; color: #2B2318;
+    background: #ECB351; border: 1px solid #ECB351; border-radius: 4px;
+    padding: 3px 10px; cursor: pointer; margin-bottom: 4px; font-family: inherit;
   }
-  .img-copy-btn:hover { background: #3d3225; }
+  .img-copy-btn:hover { background: #d9a345; }
   .img-note { font-size: 11px; color: #aaa; font-style: italic; margin: 0 0 16px; }
   .item:last-child { border-bottom: none; }
   .item-title { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
@@ -136,7 +136,7 @@ class LG_WD_Patreon_Export {
 <div class="toolbar">
   <span>Patreon Export</span>
   <button onclick="selectAndCopy()">📋 Select All & Copy</button>
-  <span class="status" id="copy-status">Text + links copy. Images: use 📋 buttons below → Patreon's Image button.</span>
+  <span class="status" id="copy-status">1) Copy text → paste. 2) Copy each image → paste where you want it.</span>
 </div>
 
 <div id="export-content">
@@ -161,21 +161,60 @@ function selectAndCopy() {
 
   try {
     document.execCommand('copy');
-    document.getElementById('copy-status').textContent = '✓ Text copied! Images: use 📋 buttons → Patreon Image button.';
+    document.getElementById('copy-status').textContent = '✓ Text copied! Now copy & paste each image.';
     setTimeout(() => {
-      document.getElementById('copy-status').textContent = 'Text + links copy. Images: use 📋 buttons below → Patreon\'s Image button.';
+      document.getElementById('copy-status').textContent = '1) Copy text → paste. 2) Copy each image → paste where you want it.';
     }, 4000);
   } catch (e) {
     document.getElementById('copy-status').textContent = 'Use Ctrl+C to copy the selection.';
   }
 }
 
-function copyImgUrl(btn, url) {
-  navigator.clipboard.writeText(url).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copied!';
-    btn.style.color = '#ECB351';
-    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+async function copyImage(btn, url) {
+  const orig = btn.textContent;
+  btn.textContent = 'Loading…';
+  btn.disabled = true;
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    // Convert to PNG for clipboard compatibility (clipboard API requires image/png)
+    const pngBlob = await toPng(blob);
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': pngBlob })
+    ]);
+    btn.textContent = '✓ Copied! Paste into Patreon.';
+    btn.style.background = '#87986A';
+    btn.style.borderColor = '#87986A';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+    }, 3000);
+  } catch (e) {
+    // Fallback: copy URL as text
+    await navigator.clipboard.writeText(url);
+    btn.textContent = '✓ URL copied (image copy unsupported)';
+    setTimeout(() => { btn.textContent = orig; }, 3000);
+  }
+  btn.disabled = false;
+}
+
+// Convert any image blob to PNG via canvas (clipboard API needs image/png)
+function toPng(blob) {
+  return new Promise((resolve, reject) => {
+    if (blob.type === 'image/png') { resolve(blob); return; }
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      c.getContext('2d').drawImage(img, 0, 0);
+      c.toBlob(b => b ? resolve(b) : reject('Canvas toBlob failed'), 'image/png');
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = () => reject('Image load failed');
+    img.crossOrigin = 'anonymous';
+    img.src = URL.createObjectURL(blob);
   });
 }
 </script>
@@ -254,7 +293,7 @@ HTML;
         } else {
             $html .= '  ' . $img . "\n";
         }
-        $html .= '  <button class="img-copy-btn" onclick="copyImgUrl(this, \'' . $src_js . '\')" type="button">📋 Copy image URL</button>' . "\n";
+        $html .= '  <button class="img-copy-btn" onclick="copyImage(this, \'' . $src_js . '\')" type="button">📋 Copy Image</button>' . "\n";
         $html .= '</div>' . "\n";
 
         return $html;
