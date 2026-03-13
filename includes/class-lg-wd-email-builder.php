@@ -166,9 +166,9 @@ class LG_WD_Email_Builder {
             }
         }
 
-        // Other CPTs → author archive
+        // Other CPTs → Search & Filter archive by author
         if ( ! $url && $nicename ) {
-            $url = home_url( '/author/' . $nicename . '/' );
+            $url = home_url( '/archive/?_post_author=' . $nicename );
         }
 
         // No valid URL → unlinked bold name
