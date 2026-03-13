@@ -73,15 +73,17 @@ class LG_WD_Query {
             // HTML block sections — single synthetic item with raw HTML content
             $html_content = $section['html_content'] ?? '';
             if ( ( $section['template'] ?? '' ) === 'html-block' && $html_content ) {
+                $html_header = $section['html_header'] ?? '';
                 $payload[ $section['key'] ] = [
                     'section' => [
                         'key'      => $section['key'],
-                        'label'    => $section['label'],
+                        'label'    => $html_header ?: $section['label'],
                         'template' => 'html-block',
                     ],
                     'items'        => [ [ 'id' => 0, 'html_content' => $html_content ] ],
                     'is_archive'   => false,
                     'under_header' => $under_header,
+                    'hide_header'  => empty( $html_header ),
                 ];
                 continue;
             }

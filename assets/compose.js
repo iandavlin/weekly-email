@@ -74,6 +74,7 @@ jQuery( function ( $ ) {
                 // Try TinyMCE first (visual mode), fall back to textarea (text mode)
                 const editor = typeof tinyMCE !== 'undefined' ? tinyMCE.get( editorId ) : null;
                 entry.html_content = editor ? editor.getContent() : $( '#' + editorId ).val() || '';
+                entry.html_header  = $sec.find( '.lg-wd-html-header-input' ).val() || '';
             }
 
             sections.push( entry );
@@ -425,7 +426,8 @@ jQuery( function ( $ ) {
         showResponse( '✓ HTML block added.', 'success' );
     });
 
-    function addHtmlBlock( key, editorId, label, content ) {
+    function addHtmlBlock( key, editorId, label, content, header ) {
+        header = header || '';
         const esc = str => $( '<div>' ).text( str ).html();
         const html = `
             <div class="lg-wd-compose-section lg-wd-compose-html-block" data-section-key="${key}" data-section-template="html-block" data-section-slug="" data-is-header="0" data-editor-id="${editorId}">
@@ -436,6 +438,10 @@ jQuery( function ( $ ) {
                 <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
               </div>
               <div class="lg-wd-compose-section-body" style="padding:12px;">
+                <div class="lg-wd-html-header-row" style="margin-bottom:10px;">
+                  <label style="font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#87986A;">Subsection Header <span style="font-weight:400;color:#999;">(optional)</span></label>
+                  <input type="text" class="lg-wd-html-header-input" value="${esc(header)}" placeholder="e.g. A Note From The Editor" style="width:100%;margin-top:4px;padding:6px 10px;border:1px solid #ccc;border-radius:4px;" />
+                </div>
                 <textarea id="${editorId}" class="lg-wd-html-content" rows="8">${esc(content)}</textarea>
               </div>
             </div>

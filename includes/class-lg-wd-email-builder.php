@@ -60,6 +60,7 @@ class LG_WD_Email_Builder {
         $items        = $data['items'];
         $is_arch      = $data['is_archive'];
         $under_header = ! empty( $data['under_header'] );
+        $hide_header  = ! empty( $data['hide_header'] );
 
         if ( empty( $items ) ) return '';
 
@@ -88,21 +89,23 @@ class LG_WD_Email_Builder {
         $label = esc_html( self::strip_emoji( $section['label'] ) );
         $html  = '<div style="margin-bottom:28px;">' . $archive_notice;
 
-        if ( $under_header ) {
-            // Subheading style (mint, smaller) — appears under a group header
-            $html .= '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:15px;font-weight:600;color:#87986A;text-transform:uppercase;letter-spacing:1px;margin:0 0 14px;">' . $label . '</p>';
-        } else {
-            // Full section header (gold line)
-            $html .= '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">'
-                . '<tr>'
-                . '<td style="padding:0;white-space:nowrap;">'
-                . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:20px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:2px;">' . $label . '</span>'
-                . '</td>'
-                . '<td width="100%" style="padding-left:14px;">'
-                . '<div style="height:2px;background:#ECB351;"></div>'
-                . '</td>'
-                . '</tr>'
-                . '</table>';
+        if ( ! $hide_header ) {
+            if ( $under_header ) {
+                // Subheading style (mint, smaller) — appears under a group header
+                $html .= '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:15px;font-weight:600;color:#87986A;text-transform:uppercase;letter-spacing:1px;margin:0 0 14px;">' . $label . '</p>';
+            } else {
+                // Full section header (gold line)
+                $html .= '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">'
+                    . '<tr>'
+                    . '<td style="padding:0;white-space:nowrap;">'
+                    . '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:20px;font-weight:700;color:#2B2318;text-transform:uppercase;letter-spacing:2px;">' . $label . '</span>'
+                    . '</td>'
+                    . '<td width="100%" style="padding-left:14px;">'
+                    . '<div style="height:2px;background:#ECB351;"></div>'
+                    . '</td>'
+                    . '</tr>'
+                    . '</table>';
+            }
         }
 
         $html .= $rows . '</div>';

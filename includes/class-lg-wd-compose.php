@@ -324,6 +324,7 @@ class LG_WD_Compose {
         $total_items   = count( $post_ids ) + count( $manual_items );
 
         $html_content  = $section['html_content'] ?? '';
+        $html_header   = $section['html_header'] ?? '';
         $is_html_block = $template === 'html-block';
 
         // Group header — visual divider, no posts
@@ -347,6 +348,10 @@ class LG_WD_Compose {
             <button type="button" class="button button-small lg-wd-remove-section-btn" title="Remove section">✕</button>
           </div>
           <div class="lg-wd-compose-section-body" style="padding:12px;">
+            <div class="lg-wd-html-header-row" style="margin-bottom:10px;">
+              <label style="font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#87986A;">Subsection Header <span style="font-weight:400;color:#999;">(optional)</span></label>
+              <input type="text" class="lg-wd-html-header-input" value="<?php echo esc_attr( $html_header ); ?>" placeholder="e.g. A Note From The Editor" style="width:100%;margin-top:4px;padding:6px 10px;border:1px solid #ccc;border-radius:4px;" />
+            </div>
             <?php
             wp_editor( $html_content, $editor_id, [
                 'textarea_name' => $editor_id,
@@ -470,8 +475,13 @@ class LG_WD_Compose {
             ];
 
             // HTML block sections store their content directly
-            if ( ( $s['template'] ?? '' ) === 'html-block' && isset( $s['html_content'] ) ) {
-                $entry['html_content'] = wp_kses_post( $s['html_content'] );
+            if ( ( $s['template'] ?? '' ) === 'html-block' ) {
+                if ( isset( $s['html_content'] ) ) {
+                    $entry['html_content'] = wp_kses_post( $s['html_content'] );
+                }
+                if ( ! empty( $s['html_header'] ) ) {
+                    $entry['html_header'] = sanitize_text_field( $s['html_header'] );
+                }
             }
 
             $sections[] = $entry;
