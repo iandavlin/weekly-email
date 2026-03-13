@@ -48,9 +48,9 @@ if ( $sponsor_name && $sponsor_url ) {
 }
 
 // Column widths
-$thumb_width  = 200;
+$thumb_width  = 240;
 $gutter       = 16;
-$detail_width = 488; // slightly less to account for card padding
+$detail_width = 608; // slightly less to account for card padding
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="background:#FFF8EC;border:1px solid #ECB351;border-radius:8px;margin-bottom:12px;">

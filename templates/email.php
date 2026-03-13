@@ -62,8 +62,8 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     <td align="center" style="padding:24px 16px;">
 
       <!-- Email container -->
-      <table class="email-container" width="800" cellpadding="0" cellspacing="0" border="0"
-             style="max-width:800px;width:100%;background-color:#FAF6EE;border-radius:8px;overflow:hidden;">
+      <table class="email-container" width="960" cellpadding="0" cellspacing="0" border="0"
+             style="max-width:960px;width:100%;background-color:#FAF6EE;border-radius:8px;overflow:hidden;">
 
         <!-- HEADER -->
         <tr>

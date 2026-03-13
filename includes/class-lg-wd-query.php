@@ -323,6 +323,11 @@ class LG_WD_Query {
         // Collapse multiple spaces left behind
         $text = trim( preg_replace( '/\s{2,}/', ' ', $text ) );
 
+        // Ensure excerpt ends with ellipsis
+        if ( $text !== '' && ! preg_match( '/[…\.\!\?]$/', $text ) ) {
+            $text .= '…';
+        }
+
         return $text;
     }
 

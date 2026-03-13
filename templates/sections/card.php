@@ -42,9 +42,9 @@ $meta_html = implode( ' &middot; ', $meta_parts );
 $img_url = ( $show_thumb && ! empty( $item['thumb_url'] ) ) ? $item['thumb_url'] : '';
 
 // Column widths
-$thumb_width  = 200;
+$thumb_width  = 240;
 $gutter       = 16;
-$detail_width = 504;
+$detail_width = 624;
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="border-bottom:1px solid rgba(92,78,58,0.1);padding-bottom:16px;margin-bottom:16px;">
