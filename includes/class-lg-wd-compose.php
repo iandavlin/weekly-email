@@ -25,6 +25,7 @@ class LG_WD_Compose {
 
     public static function enqueue_assets(): void {
         wp_enqueue_media();
+        wp_enqueue_editor();
 
         wp_enqueue_style(
             'lg-wd-admin',
@@ -36,7 +37,7 @@ class LG_WD_Compose {
         wp_enqueue_script(
             'lg-wd-compose',
             LG_WD_PLUGIN_URL . 'assets/compose.js',
-            [ 'jquery', 'jquery-ui-sortable' ],
+            [ 'jquery', 'jquery-ui-sortable', 'editor' ],
             LG_WD_VERSION,
             true
         );
