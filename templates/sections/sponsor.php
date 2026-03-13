@@ -48,7 +48,7 @@ if ( $sponsor_name && $sponsor_url ) {
        style="background:#FFF8EC;border:1px solid #ECB351;border-radius:8px;margin-bottom:12px;">
   <?php if ( $img_url ) : ?>
   <tr>
-    <td align="center" style="padding:0;line-height:0;">
+    <td align="left" style="padding:0;line-height:0;">
       <a href="<?php echo $url; ?>" class="sponsor-img" style="line-height:0;border:0;outline:none;text-decoration:none;">
         <img src="<?php echo esc_url( $img_url ); ?>"
              width="720" class="img-cap"

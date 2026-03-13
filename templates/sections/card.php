@@ -43,7 +43,7 @@ $meta_html = implode( ' &middot; ', $meta_parts );
       <?php if ( $show_thumb && ! empty( $item['thumb_url'] ) ) : ?>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;">
         <tr>
-          <td align="center" style="line-height:0;">
+          <td align="left" style="line-height:0;">
             <a href="<?php echo $url; ?>" style="line-height:0;">
               <img src="<?php echo esc_url( $item['thumb_url'] ); ?>"
                    width="720" class="img-cap"
