@@ -25,7 +25,7 @@ if ( ! $img_url ) {
 // Excerpt
 $show_excerpt = LG_WD_Settings::get( 'show_excerpts' );
 $excerpt      = $show_excerpt && ! empty( $item['excerpt'] )
-    ? '<p style="font-size:15px;color:#5C4E3A;margin:6px 0 0;line-height:1.55;">' . esc_html( $item['excerpt'] ) . '</p>'
+    ? '<p class="card-excerpt" style="font-size:17px;color:#5C4E3A;margin:6px 0 0;line-height:1.55;">' . esc_html( $item['excerpt'] ) . '</p>'
     : '';
 
 // bbPress meta
@@ -86,7 +86,7 @@ $detail_width = 624;
           <td valign="top" style="padding:0;">
             <a href="<?php echo $url; ?>" class="card-title" style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;"><?php echo $title; ?></a>
             <?php echo $excerpt; ?>
-            <p class="card-meta" style="font-size:13px;color:#aaa;margin:6px 0 0;"><?php echo $meta_html; ?></p>
+            <p class="card-meta" style="font-size:15px;color:#aaa;margin:6px 0 0;"><?php echo $meta_html; ?></p>
           </td>
         </tr>
       </table>

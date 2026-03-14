@@ -152,13 +152,13 @@ $detail_width = 624;
           <td valign="top" style="padding:0;">
             <a href="<?php echo $url; ?>" class="event-title"
                style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:600;color:#2B2318;text-decoration:none;display:block;line-height:1.35;margin-bottom:4px;"><?php echo $title; ?></a>
-            <p class="event-date" style="font-size:14px;color:#5C4E3A;margin:0 0 4px;">
+            <p class="event-date" style="font-size:16px;color:#5C4E3A;margin:0 0 4px;">
               <?php echo esc_html( $display_date ); ?>
               <?php if ( $time_display ) : ?>
                 &middot; <?php echo $time_display; ?>
               <?php endif; ?>
             </p>
-            <p class="event-meta" style="font-size:13px;color:#aaa;margin:0 0 6px;">
+            <p class="event-meta" style="font-size:15px;color:#aaa;margin:0 0 6px;">
               <?php echo $tier_html; ?>
               <span style="color:#87986A;"><?php echo esc_html( $location ); ?></span>
               <?php if ( $author_html ) : ?>

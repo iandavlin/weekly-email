@@ -94,9 +94,9 @@ $detail_width = 624;
             <p style="margin:0 0 6px;"><?php echo $partner_label; ?></p>
             <p style="font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:700;color:#2B2318;margin:0 0 8px;line-height:1.35;"><?php echo $title; ?></p>
             <?php if ( $excerpt ) : ?>
-            <p style="font-size:15px;color:#5C4E3A;margin:0 0 12px;line-height:1.55;"><?php echo $excerpt; ?></p>
+            <p class="card-excerpt" style="font-size:17px;color:#5C4E3A;margin:0 0 12px;line-height:1.55;"><?php echo $excerpt; ?></p>
             <?php endif; ?>
-            <a href="<?php echo $url; ?>" style="font-size:13px;font-weight:600;color:#ECB351;text-decoration:none;">Learn more &#8594;</a>
+            <a href="<?php echo $url; ?>" style="font-size:15px;font-weight:600;color:#ECB351;text-decoration:none;">Learn more &#8594;</a>
           </td>
         </tr>
       </table>

@@ -43,10 +43,10 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
     .email-footer { padding: 16px !important; }
     .card-row { display: block !important; width: 100% !important; }
     .card-title, .event-title { font-size: 17px !important; }
-    .card-excerpt { font-size: 14px !important; }
-    .card-meta { font-size: 12px !important; }
-    .event-date { font-size: 13px !important; }
-    .event-meta { font-size: 12px !important; }
+    .card-excerpt { font-size: 19px !important; }
+    .card-meta { font-size: 17px !important; }
+    .event-date { font-size: 18px !important; }
+    .event-meta { font-size: 17px !important; }
     .sponsor-img img { max-width: 100% !important; height: auto !important; }
     /* Hybrid columns — stack on mobile */
     .event-col-thumb,
@@ -110,7 +110,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
           <td class="email-body" style="padding:28px 24px 8px;">
 
             <!-- Intro line -->
-            <p style="font-size:15px;color:#5C4E3A;line-height:1.6;margin:0 0 24px;
+            <p class="card-excerpt" style="font-size:17px;color:#5C4E3A;line-height:1.6;margin:0 0 24px;
                        padding-bottom:16px;border-bottom:2px solid #ECB351;">
               <?php echo nl2br( esc_html( wp_unslash( $settings['intro_text'] ?? '' ) ) ); ?>
             </p>
@@ -142,7 +142,7 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
               <tr>
                 <td style="border-top:1px solid #E2DDD3;padding-top:20px;
                             text-align:center;">
-                  <p style="font-size:14px;color:#5C4E3A;font-style:italic;line-height:1.6;margin:0;">
+                  <p style="font-size:16px;color:#5C4E3A;font-style:italic;line-height:1.6;margin:0;">
                     <?php echo $signoff; ?>
                   </p>
                 </td>
@@ -172,10 +172,10 @@ $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $paylo
               foreach ( $footer_links as $fl ) :
                   $fl_url = esc_url( LG_WD_Email_Builder::add_utm( $fl['url'] ) );
               ?>
-              <a href="<?php echo $fl_url; ?>" style="color:#87986A;font-size:12px;text-decoration:none;margin:0 8px;"><?php echo esc_html( $fl['label'] ); ?></a>
+              <a href="<?php echo $fl_url; ?>" style="color:#87986A;font-size:14px;text-decoration:none;margin:0 8px;"><?php echo esc_html( $fl['label'] ); ?></a>
               <?php endforeach; ?>
             </p>
-            <p style="font-size:11px;color:#5C4E3A;margin:0;line-height:1.6;">
+            <p style="font-size:13px;color:#5C4E3A;margin:0;line-height:1.6;">
               You&rsquo;re receiving this because you subscribed to the Looth Group weekly digest.<br>
               <a href="<?php echo $unsubscribe; ?>" style="color:#87986A;text-decoration:underline;">Unsubscribe</a>
               &nbsp;&middot;&nbsp; <?php echo $from_name; ?> &nbsp;&middot;&nbsp; loothgroup.com

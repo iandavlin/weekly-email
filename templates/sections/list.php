@@ -26,8 +26,8 @@ $meta_html = implode( ' &middot; ', $meta );
        style="border-bottom:1px solid #EAE5DC;padding-bottom:10px;margin-bottom:10px;">
   <tr>
     <td>
-      <a href="<?php echo $url; ?>" style="font-size:15px;font-weight:500;color:#2B2318;text-decoration:none;display:block;margin-bottom:3px;line-height:1.4;"><?php echo $title; ?></a>
-      <p style="font-size:12px;color:#aaa;margin:0;"><?php echo $meta_html; ?></p>
+      <a href="<?php echo $url; ?>" style="font-size:17px;font-weight:500;color:#2B2318;text-decoration:none;display:block;margin-bottom:3px;line-height:1.4;"><?php echo $title; ?></a>
+      <p class="card-meta" style="font-size:14px;color:#aaa;margin:0;"><?php echo $meta_html; ?></p>
     </td>
   </tr>
 </table>
