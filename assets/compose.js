@@ -93,7 +93,7 @@ jQuery( function ( $ ) {
         cancel: 'input,textarea,button,select,option,.mce-container,.wp-editor-wrap',
         start: function ( e, ui ) {
             // TinyMCE iframes break during drag — remove editors temporarily
-            ui.item.find( '.lg-wd-compose-html-block, &.lg-wd-compose-html-block' ).addBack().filter( '.lg-wd-compose-html-block' ).each( function () {
+            ui.item.find( '.lg-wd-compose-html-block' ).addBack().filter( '.lg-wd-compose-html-block' ).each( function () {
                 const edId = $( this ).data( 'editor-id' );
                 if ( edId && typeof tinyMCE !== 'undefined' && tinyMCE.get( edId ) ) {
                     tinyMCE.get( edId ).save();
@@ -103,7 +103,7 @@ jQuery( function ( $ ) {
         },
         stop: function ( e, ui ) {
             // Re-initialize TinyMCE editors after drag completes
-            ui.item.find( '.lg-wd-compose-html-block, &.lg-wd-compose-html-block' ).addBack().filter( '.lg-wd-compose-html-block' ).each( function () {
+            ui.item.find( '.lg-wd-compose-html-block' ).addBack().filter( '.lg-wd-compose-html-block' ).each( function () {
                 const edId = $( this ).data( 'editor-id' );
                 if ( edId && typeof wp !== 'undefined' && wp.editor ) {
                     wp.editor.initialize( edId, {

@@ -670,8 +670,13 @@ class LG_WD_Compose {
                         'post_ids'  => array_map( 'absint', $s['post_ids'] ?? [] ),
                     ];
 
-                    if ( ( $s['template'] ?? '' ) === 'html-block' && isset( $s['html_content'] ) ) {
-                        $entry['html_content'] = wp_kses_post( $s['html_content'] );
+                    if ( ( $s['template'] ?? '' ) === 'html-block' ) {
+                        if ( isset( $s['html_content'] ) ) {
+                            $entry['html_content'] = wp_kses_post( $s['html_content'] );
+                        }
+                        if ( ! empty( $s['html_header'] ) ) {
+                            $entry['html_header'] = sanitize_text_field( $s['html_header'] );
+                        }
                     }
 
                     $data['sections'][] = $entry;
