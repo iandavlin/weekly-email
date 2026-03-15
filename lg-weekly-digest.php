@@ -31,6 +31,7 @@ require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-sender.php';
 require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-admin.php';
 require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-compose.php';
 require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-cron.php';
+require_once LG_WD_PLUGIN_DIR . 'includes/class-lg-wd-frontend.php';
 
 // ─────────────────────────────────────────────
 // Boot
@@ -40,6 +41,7 @@ add_action( 'plugins_loaded', function () {
     LG_WD_Admin::init();
     LG_WD_Compose::init();
     LG_WD_Cron::init();
+    LG_WD_Frontend::init();
 } );
 
 // ─────────────────────────────────────────────
@@ -67,5 +69,12 @@ add_action( 'init', function () {
 } );
 
 // Activation / Deactivation
-register_activation_hook( __FILE__,   [ 'LG_WD_Cron', 'activate' ] );
-register_deactivation_hook( __FILE__, [ 'LG_WD_Cron', 'deactivate' ] );
+register_activation_hook( __FILE__, function () {
+    LG_WD_Issue::register_cpt();
+    flush_rewrite_rules();
+    LG_WD_Cron::activate();
+} );
+register_deactivation_hook( __FILE__, function () {
+    flush_rewrite_rules();
+    LG_WD_Cron::deactivate();
+} );

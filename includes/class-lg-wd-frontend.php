@@ -1,0 +1,439 @@
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * LG_WD_Frontend
+ * Public-facing shortcode [weekly_digest] that renders sent issues
+ * as a streaming feed with pagination. Also makes the weekly_email
+ * CPT public so BuddyBoss picks it up for the activity feed.
+ */
+class LG_WD_Frontend {
+
+    const PER_PAGE = 5;
+
+    public static function init(): void {
+        add_shortcode( 'weekly_digest', [ __CLASS__, 'render_shortcode' ] );
+        add_action( 'wp_enqueue_scripts', [ __CLASS__, 'maybe_enqueue' ] );
+        add_filter( 'the_content', [ __CLASS__, 'single_issue_content' ] );
+    }
+
+    // ── Shortcode ────────────────────────────────────────────────────────────
+
+    /**
+     * [weekly_digest per_page="5"]
+     */
+    public static function render_shortcode( $atts ): string {
+        $atts = shortcode_atts( [
+            'per_page' => self::PER_PAGE,
+        ], $atts, 'weekly_digest' );
+
+        $per_page = max( 1, (int) $atts['per_page'] );
+        $paged    = max( 1, (int) ( get_query_var( 'paged' ) ?: get_query_var( 'page' ) ?: 1 ) );
+
+        $query = new WP_Query( [
+            'post_type'      => LG_WD_Issue::POST_TYPE,
+            'post_status'    => 'publish',
+            'posts_per_page' => $per_page,
+            'paged'          => $paged,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ] );
+
+        if ( ! $query->have_posts() ) {
+            return '<p class="lg-wd-fe-empty">No issues have been published yet.</p>';
+        }
+
+        // Enqueue styles
+        wp_enqueue_style( 'lg-wd-frontend' );
+
+        ob_start();
+        echo '<div class="lg-wd-fe-archive">';
+
+        while ( $query->have_posts() ) {
+            $query->the_post();
+            $issue_id   = get_the_ID();
+            $issue_data = LG_WD_Issue::get_data( $issue_id );
+            $sent_at    = $issue_data['sent_at'] ?? '';
+            $date_label = $sent_at
+                ? date_i18n( 'F j, Y', strtotime( $sent_at ) )
+                : get_the_date( 'F j, Y' );
+
+            echo '<article class="lg-wd-fe-issue">';
+            echo '<header class="lg-wd-fe-issue-header">';
+            echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( get_the_title() ) . '</h2>';
+            echo '<p class="lg-wd-fe-issue-date">' . esc_html( $date_label ) . '</p>';
+            echo '</header>';
+
+            // Build and render the payload
+            self::render_issue_body( $issue_data );
+
+            echo '</article>';
+        }
+
+        // Pagination
+        $total_pages = $query->max_num_pages;
+        if ( $total_pages > 1 ) {
+            echo '<nav class="lg-wd-fe-pagination">';
+            echo paginate_links( [
+                'total'     => $total_pages,
+                'current'   => $paged,
+                'prev_text' => '&larr; Newer',
+                'next_text' => 'Older &rarr;',
+                'type'      => 'plain',
+            ] );
+            echo '</nav>';
+        }
+
+        echo '</div>';
+        wp_reset_postdata();
+
+        return ob_get_clean();
+    }
+
+    // ── Single issue content filter ──────────────────────────────────────────
+
+    /**
+     * When viewing a single weekly_email post, render the issue content.
+     */
+    public static function single_issue_content( string $content ): string {
+        if ( ! is_singular( LG_WD_Issue::POST_TYPE ) || ! in_the_loop() || ! is_main_query() ) {
+            return $content;
+        }
+
+        wp_enqueue_style( 'lg-wd-frontend' );
+
+        $issue_data = LG_WD_Issue::get_data( get_the_ID() );
+
+        ob_start();
+        echo '<div class="lg-wd-fe-archive"><article class="lg-wd-fe-issue lg-wd-fe-single">';
+        self::render_issue_body( $issue_data );
+        echo '</article></div>';
+
+        return ob_get_clean();
+    }
+
+    // ── Issue body renderer ──────────────────────────────────────────────────
+
+    /**
+     * Render the sections of an issue using web-friendly markup.
+     */
+    private static function render_issue_body( array $issue_data ): void {
+        $payload = LG_WD_Query::build_payload_from_issue( $issue_data );
+
+        if ( empty( $payload ) ) {
+            echo '<p class="lg-wd-fe-empty">This issue has no content.</p>';
+            return;
+        }
+
+        echo '<div class="lg-wd-fe-body">';
+
+        foreach ( $payload as $data ) {
+            // Group header
+            if ( ! empty( $data['is_header'] ) ) {
+                $label = esc_html( $data['section']['label'] );
+                echo '<div class="lg-wd-fe-group-header">';
+                echo '<span class="lg-wd-fe-group-label">' . $label . '</span>';
+                echo '<span class="lg-wd-fe-group-line"></span>';
+                echo '</div>';
+                continue;
+            }
+
+            $section      = $data['section'];
+            $items        = $data['items'] ?? [];
+            $under_header = ! empty( $data['under_header'] );
+            $hide_header  = ! empty( $data['hide_header'] );
+            $template     = $section['template'] ?? 'card';
+
+            if ( empty( $items ) ) continue;
+
+            echo '<div class="lg-wd-fe-section">';
+
+            // Section header
+            if ( ! $hide_header ) {
+                $label = esc_html( $section['label'] );
+                if ( $under_header ) {
+                    echo '<h4 class="lg-wd-fe-subheading">' . $label . '</h4>';
+                } else {
+                    echo '<div class="lg-wd-fe-section-header">';
+                    echo '<span class="lg-wd-fe-section-label">' . $label . '</span>';
+                    echo '<span class="lg-wd-fe-section-line"></span>';
+                    echo '</div>';
+                }
+            }
+
+            // Render items
+            foreach ( $items as $item ) {
+                self::render_item( $item, $template );
+            }
+
+            echo '</div>';
+
+            // Section divider
+            echo '<hr class="lg-wd-fe-divider">';
+        }
+
+        echo '</div>';
+    }
+
+    // ── Item renderers ───────────────────────────────────────────────────────
+
+    private static function render_item( array $item, string $template ): void {
+        switch ( $template ) {
+            case 'html-block':
+                self::render_html_block( $item );
+                break;
+            case 'date-forward':
+                self::render_event( $item );
+                break;
+            case 'sponsor':
+                self::render_sponsor( $item );
+                break;
+            case 'list':
+                self::render_list_item( $item );
+                break;
+            case 'full-text':
+                self::render_full_text( $item );
+                break;
+            default: // card, forum
+                self::render_card( $item );
+                break;
+        }
+    }
+
+    /**
+     * Card layout — thumbnail + title + excerpt + meta.
+     */
+    private static function render_card( array $item ): void {
+        $title   = esc_html( $item['title'] );
+        $url     = esc_url( $item['url'] );
+        $excerpt = esc_html( $item['excerpt'] ?? '' );
+        $date    = esc_html( $item['date'] ?? '' );
+        $img_url = esc_url( $item['thumb_url'] ?? '' );
+
+        $author = self::web_author( $item );
+
+        $meta = array_filter( [ $author, $date ] );
+
+        echo '<div class="lg-wd-fe-card">';
+        if ( $img_url ) {
+            echo '<a href="' . $url . '" class="lg-wd-fe-card-thumb">';
+            echo '<img src="' . $img_url . '" alt="' . $title . '" loading="lazy">';
+            echo '</a>';
+        }
+        echo '<div class="lg-wd-fe-card-body">';
+        echo '<a href="' . $url . '" class="lg-wd-fe-card-title">' . $title . '</a>';
+        if ( $excerpt ) {
+            echo '<p class="lg-wd-fe-card-excerpt">' . $excerpt . '</p>';
+        }
+        if ( $meta ) {
+            echo '<p class="lg-wd-fe-card-meta">' . implode( ' &middot; ', $meta ) . '</p>';
+        }
+        echo '</div></div>';
+    }
+
+    /**
+     * Event layout — date-forward with event meta.
+     */
+    private static function render_event( array $item ): void {
+        $title   = esc_html( $item['title'] );
+        $url     = esc_url( $item['url'] );
+        $img_url = esc_url( $item['thumb_url'] ?? '' );
+
+        // Parse event date
+        $date_raw = get_post_meta( $item['id'], 'events_start_date_and_time_', true );
+        $time_raw = get_post_meta( $item['id'], 'time_of_event', true );
+        $zoom_url = get_post_meta( $item['id'], 'zoom_url_for_looth_group_virtual_event', true );
+
+        $display_date = '';
+        if ( $date_raw ) {
+            $ts = DateTime::createFromFormat( 'Ymd', $date_raw, new DateTimeZone( LG_WD_TIMEZONE ) );
+            if ( $ts ) $display_date = $ts->format( 'l, F j, Y' );
+        }
+        if ( ! $display_date ) $display_date = $item['date'] ?? '';
+
+        // Time
+        $time_display = '';
+        if ( $time_raw && $date_raw ) {
+            $tz_eastern = new DateTimeZone( LG_WD_TIMEZONE );
+            $tz_utc     = new DateTimeZone( 'UTC' );
+            $formats    = [ 'Ymd H:i:s', 'Ymd H:i', 'Ymd g:ia', 'Ymd g:i a' ];
+            foreach ( $formats as $fmt ) {
+                $dt = DateTime::createFromFormat( $fmt, $date_raw . ' ' . $time_raw, $tz_eastern );
+                if ( $dt ) {
+                    $eastern = strtolower( $dt->format( 'g' ) ) . ':' . $dt->format( 'i' );
+                    $eastern = str_replace( ':00', '', $eastern );
+                    $eastern .= strtolower( $dt->format( 'A' ) ) . ' ' . $dt->format( 'T' );
+                    $dt->setTimezone( $tz_utc );
+                    $utc = strtolower( $dt->format( 'g' ) ) . ':' . $dt->format( 'i' );
+                    $utc = str_replace( ':00', '', $utc );
+                    $utc .= strtolower( $dt->format( 'A' ) ) . ' UTC';
+                    $time_display = $eastern . ' (' . $utc . ')';
+                    break;
+                }
+            }
+        }
+
+        // Tier
+        $tiers    = wp_get_post_terms( $item['id'], 'event_tier_', [ 'fields' => 'names' ] );
+        $tier     = ( ! is_wp_error( $tiers ) && ! empty( $tiers ) ) ? esc_html( $tiers[0] ) : '';
+        $location = $zoom_url ? 'Virtual Event' : 'In Person';
+        $author   = self::web_author( $item );
+
+        echo '<div class="lg-wd-fe-card lg-wd-fe-event">';
+        if ( $img_url ) {
+            echo '<a href="' . $url . '" class="lg-wd-fe-card-thumb">';
+            echo '<img src="' . $img_url . '" alt="' . $title . '" loading="lazy">';
+            echo '</a>';
+        }
+        echo '<div class="lg-wd-fe-card-body">';
+        echo '<a href="' . $url . '" class="lg-wd-fe-card-title">' . $title . '</a>';
+        echo '<p class="lg-wd-fe-event-date">' . esc_html( $display_date );
+        if ( $time_display ) echo ' &middot; ' . $time_display;
+        echo '</p>';
+
+        $event_meta = [];
+        if ( $tier ) $event_meta[] = '<span class="lg-wd-fe-tier lg-wd-fe-tier--' . sanitize_html_class( strtolower( $tier ) ) . '">' . $tier . '</span>';
+        $event_meta[] = '<span class="lg-wd-fe-location">' . esc_html( $location ) . '</span>';
+        if ( $author ) $event_meta[] = $author;
+        echo '<p class="lg-wd-fe-card-meta">' . implode( ' &middot; ', $event_meta ) . '</p>';
+
+        echo '</div></div>';
+    }
+
+    /**
+     * Sponsor layout — partner branding.
+     */
+    private static function render_sponsor( array $item ): void {
+        $title   = esc_html( $item['title'] );
+        $url     = esc_url( $item['url'] );
+        $excerpt = esc_html( $item['excerpt'] ?? '' );
+        $img_url = esc_url( $item['thumb_url'] ?? '' );
+
+        // Sponsor name from author
+        $author_id    = (int) get_post_field( 'post_author', $item['id'] );
+        $sponsor_name = $author_id ? esc_html( get_the_author_meta( 'display_name', $author_id ) ) : '';
+
+        echo '<div class="lg-wd-fe-card lg-wd-fe-sponsor">';
+        if ( $img_url ) {
+            echo '<a href="' . $url . '" class="lg-wd-fe-card-thumb">';
+            echo '<img src="' . $img_url . '" alt="' . $title . '" loading="lazy">';
+            echo '</a>';
+        }
+        echo '<div class="lg-wd-fe-card-body">';
+        if ( $sponsor_name ) {
+            echo '<p class="lg-wd-fe-sponsor-label">' . $sponsor_name . '</p>';
+        }
+        echo '<a href="' . $url . '" class="lg-wd-fe-card-title">' . $title . '</a>';
+        if ( $excerpt ) {
+            echo '<p class="lg-wd-fe-card-excerpt">' . $excerpt . '</p>';
+        }
+        echo '<a href="' . $url . '" class="lg-wd-fe-sponsor-cta">Learn more &rarr;</a>';
+        echo '</div></div>';
+    }
+
+    /**
+     * List layout — compact rows.
+     */
+    private static function render_list_item( array $item ): void {
+        $title  = esc_html( $item['title'] );
+        $url    = esc_url( $item['url'] );
+        $date   = esc_html( $item['date'] ?? '' );
+        $author = self::web_author( $item );
+
+        $reply_count = 0;
+        if ( ! empty( $item['id'] ) && function_exists( 'bbp_get_topic_reply_count' ) ) {
+            $reply_count = (int) bbp_get_topic_reply_count( $item['id'] );
+        }
+
+        $meta = [];
+        if ( $author ) $meta[] = $author;
+        if ( $reply_count ) $meta[] = $reply_count . ( $reply_count === 1 ? ' reply' : ' replies' );
+        if ( $date ) $meta[] = $date;
+
+        echo '<div class="lg-wd-fe-list-item">';
+        echo '<a href="' . $url . '" class="lg-wd-fe-list-title">' . $title . '</a>';
+        if ( $meta ) {
+            echo '<p class="lg-wd-fe-card-meta">' . implode( ' &middot; ', $meta ) . '</p>';
+        }
+        echo '</div>';
+    }
+
+    /**
+     * Full-text layout — WYSIWYG content.
+     */
+    private static function render_full_text( array $item ): void {
+        $post = get_post( $item['id'] ?? 0 );
+        if ( ! $post ) return;
+
+        echo '<div class="lg-wd-fe-full-text">';
+        echo wp_kses_post( apply_filters( 'the_content', $post->post_content ) );
+
+        $author = self::web_author( $item );
+        if ( $author ) {
+            echo '<p class="lg-wd-fe-card-meta">' . $author . '</p>';
+        }
+        echo '</div>';
+    }
+
+    /**
+     * HTML block — raw WYSIWYG content.
+     */
+    private static function render_html_block( array $item ): void {
+        $html = $item['html_content'] ?? '';
+        if ( ! $html ) return;
+
+        echo '<div class="lg-wd-fe-html-block">';
+        echo wp_kses_post( $html );
+        echo '</div>';
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * Build web-friendly author link (no inline styles).
+     */
+    private static function web_author( array $item ): string {
+        if ( ! empty( $item['id'] ) ) {
+            $author_id = (int) get_post_field( 'post_author', $item['id'] );
+            if ( ! $author_id ) return '';
+            $name = esc_html( get_the_author_meta( 'display_name', $author_id ) );
+            if ( ! $name ) return '';
+
+            $url = '';
+            if ( get_post_type( $item['id'] ) === 'topic' && function_exists( 'bp_core_get_user_domain' ) ) {
+                $member_url = bp_core_get_user_domain( $author_id );
+                if ( $member_url ) $url = trailingslashit( $member_url ) . 'forums/';
+            }
+            if ( ! $url ) {
+                $nicename = get_the_author_meta( 'user_nicename', $author_id );
+                if ( $nicename ) $url = home_url( '/archive/?_post_author=' . $nicename );
+            }
+
+            return $url
+                ? 'By <a href="' . esc_url( $url ) . '" class="lg-wd-fe-author-link">' . $name . '</a>'
+                : 'By <strong class="lg-wd-fe-author">' . $name . '</strong>';
+        }
+
+        if ( ! empty( $item['author_name'] ) ) {
+            $name = esc_html( $item['author_name'] );
+            $url  = ! empty( $item['author_url'] ) ? esc_url( $item['author_url'] ) : '';
+            return $url
+                ? 'By <a href="' . $url . '" class="lg-wd-fe-author-link">' . $name . '</a>'
+                : 'By <strong class="lg-wd-fe-author">' . $name . '</strong>';
+        }
+
+        return '';
+    }
+
+    // ── Assets ───────────────────────────────────────────────────────────────
+
+    public static function maybe_enqueue(): void {
+        // Register but don't enqueue — we enqueue on demand in the shortcode/filter
+        wp_register_style(
+            'lg-wd-frontend',
+            LG_WD_PLUGIN_URL . 'assets/frontend.css',
+            [],
+            LG_WD_VERSION
+        );
+    }
+}

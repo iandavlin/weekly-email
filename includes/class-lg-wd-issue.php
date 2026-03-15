@@ -28,13 +28,15 @@ class LG_WD_Issue {
                 'search_items'       => 'Search Issues',
                 'not_found'          => 'No issues found.',
             ],
-            'public'             => false,
+            'public'             => true,
+            'publicly_queryable' => true,
             'show_ui'            => true,
             'show_in_menu'       => false, // We add it to our custom menu
             'capability_type'    => 'post',
             'supports'           => [ 'title' ],
-            'has_archive'        => false,
-            'rewrite'            => false,
+            'has_archive'        => true,
+            'rewrite'            => [ 'slug' => 'weekly-digest', 'with_front' => false ],
+            'show_in_rest'       => true,
         ] );
     }
 
