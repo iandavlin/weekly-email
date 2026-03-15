@@ -357,10 +357,11 @@ class LG_WD_Compose {
             wp_editor( $html_content, $editor_id, [
                 'textarea_name' => $editor_id,
                 'textarea_rows' => 12,
-                'media_buttons' => false,
+                'media_buttons' => true,
                 'teeny'         => false,
                 'quicktags'     => true,
                 'tinymce'       => [
+                    'paste_data_images' => true,
                     'toolbar1'      => 'formatselect,bold,italic,underline,strikethrough,separator,bullist,numlist,separator,blockquote,hr,separator,alignleft,aligncenter,alignright,separator,link,unlink,separator,wp_more,wp_adv',
                     'toolbar2'      => 'fontsizeselect,forecolor,backcolor,separator,pastetext,removeformat,separator,charmap,separator,outdent,indent,separator,undo,redo,separator,wp_help',
                     'block_formats' => 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Preformatted=pre',
