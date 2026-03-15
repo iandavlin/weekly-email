@@ -624,14 +624,11 @@ body.single-weekly_email .entry-title {
   display: none;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────── */
+/* ── Sitewide widget styling (creamy containers) ─────────── */
 
-.lg-wd-fe-sidebar {
-  position: sticky;
-  top: 80px;
-}
-
-.lg-wd-fe-sidebar .widget {
+.widget-area .widget,
+aside .widget,
+.sidebar .widget {
   background: #FAF6EE;
   border: 1px solid rgba(92,78,58,0.12);
   border-radius: 10px;
@@ -639,8 +636,12 @@ body.single-weekly_email .entry-title {
   margin-bottom: 20px;
 }
 
-.lg-wd-fe-sidebar .widget-title,
-.lg-wd-fe-sidebar .widgettitle {
+.widget-area .widget-title,
+.widget-area .widgettitle,
+aside .widget-title,
+aside .widgettitle,
+.sidebar .widget-title,
+.sidebar .widgettitle {
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 15px;
   font-weight: 700;
@@ -650,6 +651,13 @@ body.single-weekly_email .entry-title {
   margin: 0 0 12px;
   padding-bottom: 8px;
   border-bottom: 2px solid #ECB351;
+}
+
+/* ── Digest sidebar layout ───────────────────────────────── */
+
+.lg-wd-fe-sidebar {
+  position: sticky;
+  top: 80px;
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
