@@ -46,9 +46,12 @@ class LG_WD_Frontend {
         // Enqueue styles
         wp_enqueue_style( 'lg-wd-frontend' );
 
+        $settings = LG_WD_Settings::get_all();
+
         ob_start();
         echo '<div class="lg-wd-fe-archive">';
 
+        $index = 0;
         while ( $query->have_posts() ) {
             $query->the_post();
             $issue_id   = get_the_ID();
@@ -57,18 +60,68 @@ class LG_WD_Frontend {
             $date_label = $sent_at
                 ? date_i18n( 'F j, Y', strtotime( $sent_at ) )
                 : get_the_date( 'F j, Y' );
+            $week_label = 'Week of ' . $date_label;
 
-            echo '<article class="lg-wd-fe-issue">';
-            echo '<header class="lg-wd-fe-issue-header">';
-            echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( get_the_title() ) . '</h2>';
-            echo '<p class="lg-wd-fe-issue-date">' . esc_html( $date_label ) . '</p>';
-            echo '</header>';
+            if ( $index === 0 && $paged === 1 ) {
+                // ── First issue: fully expanded with header/footer ──
+                $payload    = LG_WD_Query::build_payload_from_issue( $issue_data );
+                $item_count = array_sum( array_map( fn( $p ) => count( $p['items'] ), $payload ) );
 
-            // Build and render the payload
-            self::render_issue_body( $issue_data );
+                echo '<article class="lg-wd-fe-issue lg-wd-fe-single">';
 
-            echo '</article>';
+                // Header
+                $header_img = esc_url( $settings['header_image_url'] ?? '' );
+                echo '<header class="lg-wd-fe-issue-header">';
+                if ( $header_img ) {
+                    echo '<div class="lg-wd-fe-header-row">';
+                    echo '<a href="' . esc_url( home_url() ) . '"><img src="' . $header_img . '" alt="' . esc_attr( $settings['from_name'] ?? 'The Looth Group' ) . '" class="lg-wd-fe-header-img"></a>';
+                    echo '<button type="button" class="lg-wd-fe-subscribe-btn" >Subscribe</button>';
+                    echo '</div>';
+                } else {
+                    echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( $settings['from_name'] ?? 'THE LOOTH GROUP' ) . '</h2>';
+                    echo '<p class="lg-wd-fe-issue-date">' . esc_html( $settings['branding_tagline'] ?? 'Guitar Repair & Restoration Community' ) . '</p>';
+                    echo '<button type="button" class="lg-wd-fe-subscribe-btn" >Subscribe</button>';
+                }
+                echo '</header>';
+
+                // Hero band
+                echo '<div class="lg-wd-fe-hero">';
+                echo '<span class="lg-wd-fe-hero-left">Loothgroup Weekly</span>';
+                echo '<span class="lg-wd-fe-hero-right">' . esc_html( $week_label ) . ' &middot; ' . $item_count . ' items</span>';
+                echo '</div>';
+
+                // Body
+                $intro = trim( $settings['intro_text'] ?? '' );
+                self::render_issue_body( $issue_data, $payload, $intro );
+
+                // Signoff
+                $signoff = trim( $settings['signoff'] ?? '' );
+                if ( $signoff ) {
+                    echo '<div class="lg-wd-fe-signoff">';
+                    echo '<p>' . nl2br( esc_html( wp_unslash( $signoff ) ) ) . '</p>';
+                    echo '</div>';
+                }
+
+                // Footer
+                self::render_footer( $settings );
+
+                echo '</article>';
+            } else {
+                // ── Subsequent issues: linked card, opens in new tab ──
+                $permalink = esc_url( get_permalink( $issue_id ) );
+                echo '<a href="' . $permalink . '" target="_blank" rel="noopener" class="lg-wd-fe-issue lg-wd-fe-issue-link">';
+                echo '<header class="lg-wd-fe-issue-header">';
+                echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( get_the_title() ) . '</h2>';
+                echo '<p class="lg-wd-fe-issue-date">' . esc_html( $date_label ) . '</p>';
+                echo '</header>';
+                echo '</a>';
+            }
+
+            $index++;
         }
+
+        // Subscribe modal (once, outside archive wrapper)
+        self::render_subscribe_modal();
 
         // Pagination
         $total_pages = $query->max_num_pages;
@@ -121,24 +174,14 @@ class LG_WD_Frontend {
         if ( $header_img ) {
             echo '<div class="lg-wd-fe-header-row">';
             echo '<a href="' . esc_url( home_url() ) . '"><img src="' . $header_img . '" alt="' . esc_attr( $settings['from_name'] ?? 'The Looth Group' ) . '" class="lg-wd-fe-header-img"></a>';
-            echo '<button type="button" class="lg-wd-fe-subscribe-btn" onclick="document.getElementById(\'lg-wd-subscribe-modal\').style.display=\'flex\'">Subscribe</button>';
+            echo '<button type="button" class="lg-wd-fe-subscribe-btn" >Subscribe</button>';
             echo '</div>';
         } else {
             echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( $settings['from_name'] ?? 'THE LOOTH GROUP' ) . '</h2>';
             echo '<p class="lg-wd-fe-issue-date">' . esc_html( $settings['branding_tagline'] ?? 'Guitar Repair & Restoration Community' ) . '</p>';
-            echo '<button type="button" class="lg-wd-fe-subscribe-btn" onclick="document.getElementById(\'lg-wd-subscribe-modal\').style.display=\'flex\'">Subscribe</button>';
+            echo '<button type="button" class="lg-wd-fe-subscribe-btn" >Subscribe</button>';
         }
         echo '</header>';
-
-        // ── Subscribe modal ──
-        echo '<div id="lg-wd-subscribe-modal" class="lg-wd-fe-modal-overlay" onclick="if(event.target===this)this.style.display=\'none\'">';
-        echo '<div class="lg-wd-fe-modal">';
-        echo '<button type="button" class="lg-wd-fe-modal-close" onclick="this.closest(\'.lg-wd-fe-modal-overlay\').style.display=\'none\'">&times;</button>';
-        echo '<h3 class="lg-wd-fe-modal-title">Subscribe to the Weekly Digest</h3>';
-        echo '<p class="lg-wd-fe-modal-desc">Get the latest from The Looth Group delivered to your inbox every week.</p>';
-        echo do_shortcode( '[fluentform id="5"]' );
-        echo '</div>';
-        echo '</div>';
 
         // ── Hero band (gold) ──
         echo '<div class="lg-wd-fe-hero">';
@@ -159,28 +202,12 @@ class LG_WD_Frontend {
         }
 
         // ── Footer ──
-        $footer_links = json_decode( $settings['footer_links'] ?? '[]', true );
-        if ( ! is_array( $footer_links ) || empty( $footer_links ) ) {
-            $footer_links = [
-                [ 'label' => 'Website', 'url' => home_url() ],
-                [ 'label' => 'Forum',   'url' => home_url( '/forum' ) ],
-                [ 'label' => 'Events',  'url' => home_url( '/events' ) ],
-                [ 'label' => 'Videos',  'url' => home_url( '/videos' ) ],
-            ];
-        }
-        echo '<footer class="lg-wd-fe-footer">';
-        echo '<p class="lg-wd-fe-footer-brand">THE LOOTH GROUP</p>';
-        echo '<p class="lg-wd-fe-footer-links">';
-        $link_html = [];
-        foreach ( $footer_links as $fl ) {
-            $link_html[] = '<a href="' . esc_url( $fl['url'] ) . '">' . esc_html( $fl['label'] ) . '</a>';
-        }
-        echo implode( ' <span class="lg-wd-fe-footer-sep">&middot;</span> ', $link_html );
-        echo '</p>';
-        echo '<p class="lg-wd-fe-footer-tagline">' . esc_html( $settings['from_name'] ?? 'The Looth Group' ) . ' &middot; loothgroup.com</p>';
-        echo '</footer>';
+        self::render_footer( $settings );
 
         echo '</article></div>';
+
+        // Subscribe modal (rendered outside article so overflow:hidden doesn't clip it)
+        self::render_subscribe_modal();
 
         return ob_get_clean();
     }
@@ -509,6 +536,58 @@ class LG_WD_Frontend {
         }
 
         return '';
+    }
+
+    /**
+     * Subscribe modal — rendered outside any overflow:hidden containers.
+     */
+    private static function render_subscribe_modal(): void {
+        echo '<div id="lg-wd-subscribe-modal" class="lg-wd-fe-modal-overlay">';
+        echo '<div class="lg-wd-fe-modal">';
+        echo '<button type="button" class="lg-wd-fe-modal-close">&times;</button>';
+        echo '<h3 class="lg-wd-fe-modal-title">Subscribe to the Weekly Digest</h3>';
+        echo '<p class="lg-wd-fe-modal-desc">Get the latest from The Looth Group delivered to your inbox every week.</p>';
+        echo do_shortcode( '[fluentform id="5"]' );
+        echo '</div>';
+        echo '</div>';
+        // Inline script for modal open/close (no jQuery dependency)
+        echo '<script>
+(function(){
+  var modal=document.getElementById("lg-wd-subscribe-modal");
+  if(!modal)return;
+  document.querySelectorAll(".lg-wd-fe-subscribe-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){modal.style.display="flex";});
+  });
+  modal.addEventListener("click",function(e){if(e.target===modal)modal.style.display="none";});
+  modal.querySelector(".lg-wd-fe-modal-close").addEventListener("click",function(){modal.style.display="none";});
+})();
+</script>';
+    }
+
+    /**
+     * Shared footer renderer used by both shortcode and single view.
+     */
+    private static function render_footer( array $settings ): void {
+        $footer_links = json_decode( $settings['footer_links'] ?? '[]', true );
+        if ( ! is_array( $footer_links ) || empty( $footer_links ) ) {
+            $footer_links = [
+                [ 'label' => 'Website', 'url' => home_url() ],
+                [ 'label' => 'Forum',   'url' => home_url( '/forum' ) ],
+                [ 'label' => 'Events',  'url' => home_url( '/events' ) ],
+                [ 'label' => 'Videos',  'url' => home_url( '/videos' ) ],
+            ];
+        }
+        echo '<footer class="lg-wd-fe-footer">';
+        echo '<p class="lg-wd-fe-footer-brand">THE LOOTH GROUP</p>';
+        echo '<p class="lg-wd-fe-footer-links">';
+        $link_html = [];
+        foreach ( $footer_links as $fl ) {
+            $link_html[] = '<a href="' . esc_url( $fl['url'] ) . '">' . esc_html( $fl['label'] ) . '</a>';
+        }
+        echo implode( ' <span class="lg-wd-fe-footer-sep">&middot;</span> ', $link_html );
+        echo '</p>';
+        echo '<p class="lg-wd-fe-footer-tagline">' . esc_html( $settings['from_name'] ?? 'The Looth Group' ) . ' &middot; loothgroup.com</p>';
+        echo '</footer>';
     }
 
     // ── Assets ───────────────────────────────────────────────────────────────

@@ -42,6 +42,33 @@
   margin: 0;
 }
 
+/* ── Issue link cards (past issues in archive) ──────────── */
+
+a.lg-wd-fe-issue-link {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+a.lg-wd-fe-issue-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(43,35,24,0.12);
+}
+
+a.lg-wd-fe-issue-link .lg-wd-fe-issue-header {
+  padding: 20px 28px;
+}
+
+a.lg-wd-fe-issue-link .lg-wd-fe-issue-title {
+  font-size: 18px;
+  margin: 0 0 2px;
+}
+
+a.lg-wd-fe-issue-link .lg-wd-fe-issue-date {
+  margin: 0;
+}
+
 /* ── Issue body ──────────────────────────────────────────── */
 
 .lg-wd-fe-body {
