@@ -73,20 +73,17 @@ class LG_WD_Frontend {
                 $header_img = esc_url( $settings['header_image_url'] ?? '' );
                 echo '<header class="lg-wd-fe-issue-header">';
                 if ( $header_img ) {
-                    echo '<div class="lg-wd-fe-header-row">';
                     echo '<a href="' . esc_url( home_url() ) . '"><img src="' . $header_img . '" alt="' . esc_attr( $settings['from_name'] ?? 'The Looth Group' ) . '" class="lg-wd-fe-header-img"></a>';
-                    echo '<button type="button" class="lg-wd-fe-subscribe-btn" >Subscribe</button>';
-                    echo '</div>';
                 } else {
                     echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( $settings['from_name'] ?? 'THE LOOTH GROUP' ) . '</h2>';
                     echo '<p class="lg-wd-fe-issue-date">' . esc_html( $settings['branding_tagline'] ?? 'Guitar Repair & Restoration Community' ) . '</p>';
-                    echo '<button type="button" class="lg-wd-fe-subscribe-btn" >Subscribe</button>';
                 }
                 echo '</header>';
 
-                // Hero band
+                // Hero band with subscribe button
                 echo '<div class="lg-wd-fe-hero">';
                 echo '<span class="lg-wd-fe-hero-left">Loothgroup Weekly</span>';
+                echo '<button type="button" class="lg-wd-fe-subscribe-btn lg-wd-fe-subscribe-pulse">Subscribe</button>';
                 echo '<span class="lg-wd-fe-hero-right">' . esc_html( $week_label ) . ' &middot; ' . $item_count . ' items</span>';
                 echo '</div>';
 
@@ -172,20 +169,17 @@ class LG_WD_Frontend {
         $header_img = esc_url( $settings['header_image_url'] ?? '' );
         echo '<header class="lg-wd-fe-issue-header">';
         if ( $header_img ) {
-            echo '<div class="lg-wd-fe-header-row">';
             echo '<a href="' . esc_url( home_url() ) . '"><img src="' . $header_img . '" alt="' . esc_attr( $settings['from_name'] ?? 'The Looth Group' ) . '" class="lg-wd-fe-header-img"></a>';
-            echo '<button type="button" class="lg-wd-fe-subscribe-btn" >Subscribe</button>';
-            echo '</div>';
         } else {
             echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( $settings['from_name'] ?? 'THE LOOTH GROUP' ) . '</h2>';
             echo '<p class="lg-wd-fe-issue-date">' . esc_html( $settings['branding_tagline'] ?? 'Guitar Repair & Restoration Community' ) . '</p>';
-            echo '<button type="button" class="lg-wd-fe-subscribe-btn" >Subscribe</button>';
         }
         echo '</header>';
 
-        // ── Hero band (gold) ──
+        // ── Hero band (gold) with subscribe ──
         echo '<div class="lg-wd-fe-hero">';
         echo '<span class="lg-wd-fe-hero-left">Loothgroup Weekly</span>';
+        echo '<button type="button" class="lg-wd-fe-subscribe-btn lg-wd-fe-subscribe-pulse">Subscribe</button>';
         echo '<span class="lg-wd-fe-hero-right">' . esc_html( $week_label ) . ' &middot; ' . $item_count . ' items</span>';
         echo '</div>';
 

@@ -512,32 +512,38 @@ a.lg-wd-fe-issue-link .lg-wd-fe-issue-date {
 
 /* ── Subscribe button ───────────────────────────────────── */
 
-.lg-wd-fe-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-}
-
 .lg-wd-fe-subscribe-btn {
-  background: #ECB351;
-  color: #2B2318;
-  border: none;
+  background: #2B2318;
+  color: #ECB351;
+  border: 2px solid #ECB351;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  padding: 10px 24px;
-  border-radius: 6px;
+  padding: 7px 20px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
   white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(43,35,24,0.35);
+  transition: background 0.2s, color 0.2s, transform 0.1s, box-shadow 0.2s;
 }
 
 .lg-wd-fe-subscribe-btn:hover {
-  background: #d9a347;
+  background: #ECB351;
+  color: #2B2318;
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(236,179,81,0.4);
+}
+
+/* Pulse animation — fires twice on load then stops */
+@keyframes lg-wd-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(43,35,24,0.35); }
+  50% { transform: scale(1.08); box-shadow: 0 4px 18px rgba(236,179,81,0.5); }
+}
+
+.lg-wd-fe-subscribe-pulse {
+  animation: lg-wd-pulse 0.8s ease-in-out 2;
 }
 
 /* ── Subscribe modal ────────────────────────────────────── */
