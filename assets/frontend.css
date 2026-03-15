@@ -442,7 +442,7 @@
 
 .lg-wd-fe-footer {
   background: #2B2318;
-  padding: 24px;
+  padding: 28px 24px;
   text-align: center;
   border-radius: 0 0 10px 10px;
 }
@@ -451,38 +451,36 @@
   font-family: Georgia, 'Times New Roman', serif;
   color: #ECB351;
   font-size: 14px;
+  font-weight: 700;
   letter-spacing: 3px;
-  margin: 0 0 12px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.lg-wd-fe-footer-links {
+  margin: 0 0 14px;
 }
 
 .lg-wd-fe-footer-links a {
   color: #87986A;
   font-size: 14px;
   text-decoration: none;
-  margin: 0 8px;
 }
 
 .lg-wd-fe-footer-links a:hover {
   text-decoration: underline;
 }
 
-.lg-wd-fe-footer-links {
+.lg-wd-fe-footer-sep {
+  color: #5C4E3A;
+  margin: 0 10px;
+}
+
+.lg-wd-fe-footer-tagline {
+  font-size: 13px;
+  color: #5C4E3A;
   margin: 0;
-}
-
-/* ── Full-width: hide sidebar on weekly_email single ────── */
-
-body.single-weekly_email #secondary,
-body.single-weekly_email .bb-grid aside.bb-sidebar,
-body.single-weekly_email aside#secondary {
-  display: none !important;
-}
-
-body.single-weekly_email .bb-grid .bb-content,
-body.single-weekly_email #primary {
-  width: 100% !important;
-  max-width: 100% !important;
-  flex: 1 1 100% !important;
+  line-height: 1.6;
 }
 
 /* Hide the theme's default title — we render our own header */

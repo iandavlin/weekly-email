@@ -157,10 +157,13 @@ class LG_WD_Frontend {
         echo '<footer class="lg-wd-fe-footer">';
         echo '<p class="lg-wd-fe-footer-brand">THE LOOTH GROUP</p>';
         echo '<p class="lg-wd-fe-footer-links">';
+        $link_html = [];
         foreach ( $footer_links as $fl ) {
-            echo '<a href="' . esc_url( $fl['url'] ) . '">' . esc_html( $fl['label'] ) . '</a>';
+            $link_html[] = '<a href="' . esc_url( $fl['url'] ) . '">' . esc_html( $fl['label'] ) . '</a>';
         }
+        echo implode( ' <span class="lg-wd-fe-footer-sep">&middot;</span> ', $link_html );
         echo '</p>';
+        echo '<p class="lg-wd-fe-footer-tagline">' . esc_html( $settings['from_name'] ?? 'The Looth Group' ) . ' &middot; loothgroup.com</p>';
         echo '</footer>';
 
         echo '</article></div>';
