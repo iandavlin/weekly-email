@@ -103,10 +103,66 @@ class LG_WD_Frontend {
         wp_enqueue_style( 'lg-wd-frontend' );
 
         $issue_data = LG_WD_Issue::get_data( get_the_ID() );
+        $settings   = LG_WD_Settings::get_all();
+        $payload    = LG_WD_Query::build_payload_from_issue( $issue_data );
+        $item_count = array_sum( array_map( fn( $p ) => count( $p['items'] ), $payload ) );
+
+        $sent_at    = $issue_data['sent_at'] ?? '';
+        $week_label = $sent_at
+            ? 'Week of ' . date_i18n( 'F j, Y', strtotime( $sent_at ) )
+            : 'Week of ' . get_the_date( 'F j, Y' );
 
         ob_start();
         echo '<div class="lg-wd-fe-archive"><article class="lg-wd-fe-issue lg-wd-fe-single">';
-        self::render_issue_body( $issue_data );
+
+        // ── Header (dark banner + logo) ──
+        $header_img = esc_url( $settings['header_image_url'] ?? '' );
+        echo '<header class="lg-wd-fe-issue-header">';
+        if ( $header_img ) {
+            echo '<a href="' . esc_url( home_url() ) . '"><img src="' . $header_img . '" alt="' . esc_attr( $settings['from_name'] ?? 'The Looth Group' ) . '" class="lg-wd-fe-header-img"></a>';
+        } else {
+            echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( $settings['from_name'] ?? 'THE LOOTH GROUP' ) . '</h2>';
+            echo '<p class="lg-wd-fe-issue-date">' . esc_html( $settings['branding_tagline'] ?? 'Guitar Repair & Restoration Community' ) . '</p>';
+        }
+        echo '</header>';
+
+        // ── Hero band (gold) ──
+        echo '<div class="lg-wd-fe-hero">';
+        echo '<span class="lg-wd-fe-hero-left">Loothgroup Weekly</span>';
+        echo '<span class="lg-wd-fe-hero-right">' . esc_html( $week_label ) . ' &middot; ' . $item_count . ' items</span>';
+        echo '</div>';
+
+        // ── Body sections (with optional intro) ──
+        $intro = trim( $settings['intro_text'] ?? '' );
+        self::render_issue_body( $issue_data, $payload, $intro );
+
+        // ── Signoff ──
+        $signoff = trim( $settings['signoff'] ?? '' );
+        if ( $signoff ) {
+            echo '<div class="lg-wd-fe-signoff">';
+            echo '<p>' . nl2br( esc_html( wp_unslash( $signoff ) ) ) . '</p>';
+            echo '</div>';
+        }
+
+        // ── Footer ──
+        $footer_links = json_decode( $settings['footer_links'] ?? '[]', true );
+        if ( ! is_array( $footer_links ) || empty( $footer_links ) ) {
+            $footer_links = [
+                [ 'label' => 'Website', 'url' => home_url() ],
+                [ 'label' => 'Forum',   'url' => home_url( '/forum' ) ],
+                [ 'label' => 'Events',  'url' => home_url( '/events' ) ],
+                [ 'label' => 'Videos',  'url' => home_url( '/videos' ) ],
+            ];
+        }
+        echo '<footer class="lg-wd-fe-footer">';
+        echo '<p class="lg-wd-fe-footer-brand">THE LOOTH GROUP</p>';
+        echo '<p class="lg-wd-fe-footer-links">';
+        foreach ( $footer_links as $fl ) {
+            echo '<a href="' . esc_url( $fl['url'] ) . '">' . esc_html( $fl['label'] ) . '</a>';
+        }
+        echo '</p>';
+        echo '</footer>';
+
         echo '</article></div>';
 
         return ob_get_clean();
@@ -117,8 +173,8 @@ class LG_WD_Frontend {
     /**
      * Render the sections of an issue using web-friendly markup.
      */
-    private static function render_issue_body( array $issue_data ): void {
-        $payload = LG_WD_Query::build_payload_from_issue( $issue_data );
+    private static function render_issue_body( array $issue_data, ?array $payload = null, string $intro = '' ): void {
+        $payload = $payload ?? LG_WD_Query::build_payload_from_issue( $issue_data );
 
         if ( empty( $payload ) ) {
             echo '<p class="lg-wd-fe-empty">This issue has no content.</p>';
@@ -126,6 +182,10 @@ class LG_WD_Frontend {
         }
 
         echo '<div class="lg-wd-fe-body">';
+
+        if ( $intro ) {
+            echo '<p class="lg-wd-fe-intro">' . nl2br( esc_html( wp_unslash( $intro ) ) ) . '</p>';
+        }
 
         foreach ( $payload as $data ) {
             // Group header

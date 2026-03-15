@@ -377,11 +377,127 @@
   color: #aaa;
 }
 
+/* ── Header image ────────────────────────────────────────── */
+
+.lg-wd-fe-header-img {
+  max-width: 300px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Hero band (gold) ───────────────────────────────────── */
+
+.lg-wd-fe-hero {
+  background: #ECB351;
+  padding: 10px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lg-wd-fe-hero-left {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2B2318;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.lg-wd-fe-hero-right {
+  font-size: 13px;
+  color: #5C4E3A;
+}
+
+/* ── Intro text ─────────────────────────────────────────── */
+
+.lg-wd-fe-intro {
+  font-size: 17px;
+  color: #5C4E3A;
+  line-height: 1.6;
+  margin: 0;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #ECB351;
+}
+
+/* ── Signoff ────────────────────────────────────────────── */
+
+.lg-wd-fe-signoff {
+  padding: 0 28px 28px;
+  text-align: center;
+}
+
+.lg-wd-fe-signoff p {
+  font-size: 16px;
+  color: #5C4E3A;
+  font-style: italic;
+  line-height: 1.6;
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px solid #E2DDD3;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+
+.lg-wd-fe-footer {
+  background: #2B2318;
+  padding: 24px;
+  text-align: center;
+  border-radius: 0 0 10px 10px;
+}
+
+.lg-wd-fe-footer-brand {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #ECB351;
+  font-size: 14px;
+  letter-spacing: 3px;
+  margin: 0 0 12px;
+}
+
+.lg-wd-fe-footer-links a {
+  color: #87986A;
+  font-size: 14px;
+  text-decoration: none;
+  margin: 0 8px;
+}
+
+.lg-wd-fe-footer-links a:hover {
+  text-decoration: underline;
+}
+
+.lg-wd-fe-footer-links {
+  margin: 0;
+}
+
+/* ── Full-width: hide sidebar on weekly_email single ────── */
+
+body.single-weekly_email #secondary,
+body.single-weekly_email .bb-grid aside.bb-sidebar,
+body.single-weekly_email aside#secondary {
+  display: none !important;
+}
+
+body.single-weekly_email .bb-grid .bb-content,
+body.single-weekly_email #primary {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+}
+
+/* Hide the theme's default title — we render our own header */
+body.single-weekly_email .entry-title {
+  display: none;
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 
 @media (max-width: 768px) {
   .lg-wd-fe-body { padding: 20px; }
   .lg-wd-fe-issue-header { padding: 20px; }
+  .lg-wd-fe-hero { padding: 10px 20px; }
+  .lg-wd-fe-signoff { padding: 0 20px 24px; }
+  .lg-wd-fe-footer { padding: 20px; }
 }
 
 @media (max-width: 600px) {
@@ -395,6 +511,9 @@
 
   .lg-wd-fe-body { padding: 16px; }
   .lg-wd-fe-issue-header { padding: 16px; }
+  .lg-wd-fe-hero { padding: 8px 16px; flex-direction: column; text-align: center; gap: 2px; }
+  .lg-wd-fe-signoff { padding: 0 16px 20px; }
+  .lg-wd-fe-footer { padding: 16px; }
 
   .lg-wd-fe-group-label,
   .lg-wd-fe-section-label {

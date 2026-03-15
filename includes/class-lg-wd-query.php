@@ -312,6 +312,13 @@ class LG_WD_Query {
             ? get_the_post_thumbnail_url( $post->ID, 'large' )
             : '';
 
+        // Fallback: extract first <img> src from post content (e.g. bbPress topics)
+        if ( ! $thumb_url && ! empty( $post->post_content ) ) {
+            if ( preg_match( '/<img[^>]+src=["\']([^"\']+)/i', $post->post_content, $m ) ) {
+                $thumb_url = $m[1];
+            }
+        }
+
         return [
             'id'         => $post->ID,
             'title'      => get_the_title( $post ),
