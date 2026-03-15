@@ -281,6 +281,24 @@ a.lg-wd-fe-issue-link .lg-wd-fe-issue-date {
   color: #87986A;
 }
 
+.lg-wd-fe-calendar-link {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ECB351;
+  text-decoration: none;
+  padding: 4px 12px;
+  border: 1px solid #ECB351;
+  border-radius: 12px;
+  margin-top: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.lg-wd-fe-calendar-link:hover {
+  background: #ECB351;
+  color: #2B2318;
+}
+
 /* ── Sponsor specifics ───────────────────────────────────── */
 
 .lg-wd-fe-sponsor {

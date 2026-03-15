@@ -372,9 +372,13 @@ class LG_WD_Frontend {
         $zoom_url = get_post_meta( $item['id'], 'zoom_url_for_looth_group_virtual_event', true );
 
         $display_date = '';
+        $dt_start     = null;
         if ( $date_raw ) {
             $ts = DateTime::createFromFormat( 'Ymd', $date_raw, new DateTimeZone( LG_WD_TIMEZONE ) );
-            if ( $ts ) $display_date = $ts->format( 'l, F j, Y' );
+            if ( $ts ) {
+                $display_date = $ts->format( 'l, F j, Y' );
+                $dt_start     = $ts;
+            }
         }
         if ( ! $display_date ) $display_date = $item['date'] ?? '';
 
@@ -387,6 +391,7 @@ class LG_WD_Frontend {
             foreach ( $formats as $fmt ) {
                 $dt = DateTime::createFromFormat( $fmt, $date_raw . ' ' . $time_raw, $tz_eastern );
                 if ( $dt ) {
+                    $dt_start = clone $dt;
                     $eastern = strtolower( $dt->format( 'g' ) ) . ':' . $dt->format( 'i' );
                     $eastern = str_replace( ':00', '', $eastern );
                     $eastern .= strtolower( $dt->format( 'A' ) ) . ' ' . $dt->format( 'T' );
@@ -398,6 +403,22 @@ class LG_WD_Frontend {
                     break;
                 }
             }
+        }
+
+        // Google Calendar link
+        $gcal_url = '';
+        if ( $dt_start ) {
+            $dt_utc_start = clone $dt_start;
+            $dt_utc_start->setTimezone( new DateTimeZone( 'UTC' ) );
+            $dt_utc_end = clone $dt_utc_start;
+            $dt_utc_end->modify( '+1 hour' );
+            $gcal_url = 'https://calendar.google.com/calendar/render?' . http_build_query( [
+                'action'   => 'TEMPLATE',
+                'text'     => $item['title'],
+                'dates'    => $dt_utc_start->format( 'Ymd\THis\Z' ) . '/' . $dt_utc_end->format( 'Ymd\THis\Z' ),
+                'details'  => $item['url'],
+                'location' => $zoom_url ?: '',
+            ] );
         }
 
         // Tier
@@ -423,6 +444,10 @@ class LG_WD_Frontend {
         $event_meta[] = '<span class="lg-wd-fe-location">' . esc_html( $location ) . '</span>';
         if ( $author ) $event_meta[] = $author;
         echo '<p class="lg-wd-fe-card-meta">' . implode( ' &middot; ', $event_meta ) . '</p>';
+
+        if ( $gcal_url ) {
+            echo '<a href="' . esc_url( $gcal_url ) . '" target="_blank" rel="noopener" class="lg-wd-fe-calendar-link">&#128197; Add to Calendar</a>';
+        }
 
         echo '</div></div>';
     }
