@@ -128,6 +128,15 @@ jQuery( function ( $ ) {
         },
     });
 
+    // ── Issue Picker ─────────────────────────────────────────────────────────
+
+    $( '#lg-wd-issue-picker' ).on( 'change', function () {
+        const url = $( this ).val();
+        if ( url ) {
+            window.location.href = url;
+        }
+    });
+
     // ── New Issue ─────────────────────────────────────────────────────────────
 
     $( document ).on( 'click', '#lg-wd-new-issue-btn, #lg-wd-new-issue-btn-empty', function () {

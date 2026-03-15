@@ -68,6 +68,10 @@ class LG_WD_Compose {
 
         // Available sections from registry for "Add Section" dropdown
         $registry = LG_WD_CPT_Registry::get_all_with_overrides();
+
+        // All existing issues for the issue picker
+        $all_issues = LG_WD_Issue::get_all_issues();
+        $compose_url = admin_url( 'admin.php?page=' . self::PAGE_SLUG );
         ?>
         <div class="wrap lg-wd-wrap">
 
@@ -87,7 +91,20 @@ class LG_WD_Compose {
                 <?php endif; ?>
               </p>
             </div>
-            <div class="lg-wd-header-actions">
+            <div class="lg-wd-header-actions" style="display:flex;gap:8px;align-items:center;">
+              <?php if ( ! empty( $all_issues ) ) : ?>
+              <select id="lg-wd-issue-picker" class="lg-wd-select" style="min-width:280px;">
+                <option value="">— Load Existing Issue —</option>
+                <?php foreach ( $all_issues as $issue ) :
+                    $badge  = $issue['status'] === 'sent' ? '✓ Sent' : '● Draft';
+                    $selected = ( $issue['id'] === $issue_id ) ? ' selected' : '';
+                ?>
+                  <option value="<?php echo esc_attr( $compose_url . '&issue_id=' . $issue['id'] ); ?>"<?php echo $selected; ?>>
+                    <?php echo esc_html( "[{$badge}] {$issue['title']} — {$issue['date']}" ); ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+              <?php endif; ?>
               <button class="button lg-wd-btn-secondary" id="lg-wd-new-issue-btn">+ New Issue</button>
             </div>
           </div>
@@ -98,7 +115,11 @@ class LG_WD_Compose {
           <?php if ( ! $issue_id ) : ?>
             <div class="lg-wd-card">
               <div class="lg-wd-card-body" style="text-align:center;padding:40px;">
-                <p style="font-size:16px;color:#5C4E3A;">No draft issue found. Create a new one to get started.</p>
+                <?php if ( ! empty( $all_issues ) ) : ?>
+                  <p style="font-size:16px;color:#5C4E3A;">Select an existing issue above, or create a new one.</p>
+                <?php else : ?>
+                  <p style="font-size:16px;color:#5C4E3A;">No issues found. Create a new one to get started.</p>
+                <?php endif; ?>
                 <button class="button button-primary lg-wd-btn-primary" id="lg-wd-new-issue-btn-empty">+ New Issue</button>
               </div>
             </div>

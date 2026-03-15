@@ -252,6 +252,33 @@ class LG_WD_Issue {
     }
 
     /**
+     * Get all issues (drafts and sent), most recent first.
+     */
+    public static function get_all_issues( int $limit = 50 ): array {
+        $posts = get_posts( [
+            'post_type'      => self::POST_TYPE,
+            'post_status'    => [ 'draft', 'publish' ],
+            'posts_per_page' => $limit,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ] );
+
+        $issues = [];
+        foreach ( $posts as $post ) {
+            $data     = self::get_data( $post->ID );
+            $issues[] = [
+                'id'      => $post->ID,
+                'title'   => $post->post_title,
+                'status'  => $data['status'] ?? ( $post->post_status === 'publish' ? 'sent' : 'draft' ),
+                'date'    => get_the_date( 'M j, Y', $post ),
+                'sent_at' => $data['sent_at'] ?? null,
+            ];
+        }
+
+        return $issues;
+    }
+
+    /**
      * Get the latest draft issue, or null if none exists.
      */
     public static function get_latest_draft(): ?int {
