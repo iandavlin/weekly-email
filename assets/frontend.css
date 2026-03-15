@@ -647,3 +647,68 @@ body.single-weekly_email .entry-title {
     letter-spacing: 1px;
   }
 }
+
+/* ── Elementor compatibility ──────────────────────────────── */
+/* Elementor widgets apply aggressive img/layout rules that   */
+/* override our styles. These high-specificity selectors      */
+/* ensure the digest renders correctly inside Elementor.      */
+
+.elementor-widget-shortcode .lg-wd-fe-archive,
+.elementor-widget-text-editor .lg-wd-fe-archive,
+.elementor-element .lg-wd-fe-archive {
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #5C4E3A;
+}
+
+.elementor-element .lg-wd-fe-header-img {
+  max-width: 300px !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+  object-fit: contain !important;
+}
+
+.elementor-element .lg-wd-fe-issue-header img {
+  max-width: 300px !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.elementor-element .lg-wd-fe-card-thumb img {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  object-fit: cover !important;
+  border-radius: 6px !important;
+}
+
+.elementor-element .lg-wd-fe-issue {
+  background: #FAF6EE;
+  border: 1px solid rgba(92,78,58,0.12);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.elementor-element .lg-wd-fe-issue-header {
+  background: #2B2318;
+  padding: 24px 28px;
+  text-align: center;
+}
+
+.elementor-element .lg-wd-fe-hero {
+  background: #ECB351;
+  padding: 10px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.elementor-element .lg-wd-fe-footer {
+  background: #2B2318;
+  padding: 28px 24px;
+  text-align: center;
+  border-radius: 0 0 10px 10px;
+}
