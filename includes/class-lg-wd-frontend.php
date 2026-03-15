@@ -268,7 +268,16 @@ class LG_WD_Frontend {
         $url     = esc_url( $item['url'] );
         $excerpt = esc_html( $item['excerpt'] ?? '' );
         $date    = esc_html( $item['date'] ?? '' );
-        $img_url = esc_url( $item['thumb_url'] ?? '' );
+        $img_url = $item['thumb_url'] ?? '';
+
+        // Fallback: extract first <img> from post content (forum topics etc.)
+        if ( ! $img_url && ! empty( $item['id'] ) ) {
+            $post = get_post( $item['id'] );
+            if ( $post && preg_match( '/<img[^>]+src=["\']([^"\']+)["\']/', $post->post_content, $m ) ) {
+                $img_url = $m[1];
+            }
+        }
+        $img_url = esc_url( $img_url );
 
         $author = self::web_author( $item );
 
@@ -488,12 +497,16 @@ class LG_WD_Frontend {
     // ── Assets ───────────────────────────────────────────────────────────────
 
     public static function maybe_enqueue(): void {
-        // Register but don't enqueue — we enqueue on demand in the shortcode/filter
         wp_register_style(
             'lg-wd-frontend',
             LG_WD_PLUGIN_URL . 'assets/frontend.css',
             [],
             LG_WD_VERSION
         );
+
+        // Enqueue early on single weekly_email pages so sidebar-hiding CSS is in <head>
+        if ( is_singular( LG_WD_Issue::POST_TYPE ) ) {
+            wp_enqueue_style( 'lg-wd-frontend' );
+        }
     }
 }
