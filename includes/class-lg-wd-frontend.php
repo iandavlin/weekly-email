@@ -632,12 +632,16 @@ class LG_WD_Frontend {
     // ── Assets ───────────────────────────────────────────────────────────────
 
     public static function maybe_enqueue(): void {
-        // Always enqueue — widget styling applies sitewide
-        wp_enqueue_style(
+        wp_register_style(
             'lg-wd-frontend',
             LG_WD_PLUGIN_URL . 'assets/frontend.css',
             [],
             LG_WD_VERSION
         );
+
+        // Enqueue early on single weekly_email pages so sidebar-hiding CSS is in <head>
+        if ( is_singular( LG_WD_Issue::POST_TYPE ) ) {
+            wp_enqueue_style( 'lg-wd-frontend' );
+        }
     }
 }
