@@ -19,6 +19,25 @@ jQuery( function ( $ ) {
         mediaButtons: true,
     };
 
+    // ── Re-init PHP-rendered editors that failed to activate ─────────────────
+    // wp_editor() sometimes fails to fully initialize TinyMCE on custom admin
+    // pages. After the page is fully loaded, check each editor and re-init if
+    // the TinyMCE instance is missing.
+
+    $( window ).on( 'load', function () {
+        $( '.lg-wd-compose-html-block' ).each( function () {
+            const edId = $( this ).data( 'editor-id' );
+            if ( ! edId || typeof wp === 'undefined' || ! wp.editor ) return;
+
+            const existing = typeof tinyMCE !== 'undefined' && tinyMCE.get( edId );
+            if ( ! existing ) {
+                // TinyMCE failed to init — remove stale state and re-initialize
+                wp.editor.remove( edId );
+                wp.editor.initialize( edId, htmlBlockEditorSettings );
+            }
+        });
+    });
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     function showResponse( msg, type ) {
