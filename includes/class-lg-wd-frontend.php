@@ -49,7 +49,9 @@ class LG_WD_Frontend {
         $settings = LG_WD_Settings::get_all();
 
         ob_start();
-        echo '<div class="lg-wd-fe-archive">';
+        // Hide the page title via inline style scoped to the parent entry
+        echo '<style>.lg-wd-fe-archive-page .entry-title,.lg-wd-fe-archive-page .entry-header{display:none!important;}</style>';
+        echo '<div class="lg-wd-fe-archive lg-wd-fe-archive-page">';
 
         $index = 0;
         while ( $query->have_posts() ) {

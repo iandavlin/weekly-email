@@ -49,19 +49,22 @@ a.lg-wd-fe-issue-link {
   text-decoration: none;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
+  border-left: 4px solid #ECB351;
 }
 
 a.lg-wd-fe-issue-link:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(43,35,24,0.12);
+  box-shadow: 0 4px 16px rgba(43,35,24,0.15);
+  border-left-color: #87986A;
 }
 
 a.lg-wd-fe-issue-link .lg-wd-fe-issue-header {
-  padding: 20px 28px;
+  background: #3a3028;
+  padding: 18px 24px;
 }
 
 a.lg-wd-fe-issue-link .lg-wd-fe-issue-title {
-  font-size: 18px;
+  font-size: 17px;
   margin: 0 0 2px;
 }
 
