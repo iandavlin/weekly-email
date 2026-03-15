@@ -3,6 +3,22 @@ jQuery( function ( $ ) {
 
     const { nonce, ajaxUrl } = lgWDCompose;
 
+    // ── Shared TinyMCE config for HTML block editors ────────────────────────
+
+    const htmlBlockEditorSettings = {
+        tinymce: {
+            wpautop: true,
+            paste_data_images: true,
+            plugins: 'charmap,colorpicker,hr,lists,paste,tabfocus,textcolor,wordpress,wpautoresize,wpeditimage,wplink,wptextpattern',
+            toolbar1: 'formatselect,bold,italic,underline,strikethrough,separator,bullist,numlist,separator,blockquote,hr,separator,alignleft,aligncenter,alignright,separator,link,unlink,separator,wp_more,wp_adv',
+            toolbar2: 'fontsizeselect,forecolor,backcolor,separator,pastetext,removeformat,separator,charmap,separator,outdent,indent,separator,undo,redo,separator,wp_help',
+            block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Preformatted=pre',
+            content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
+        },
+        quicktags: true,
+        mediaButtons: true,
+    };
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     function showResponse( msg, type ) {
@@ -106,17 +122,7 @@ jQuery( function ( $ ) {
             ui.item.find( '.lg-wd-compose-html-block' ).addBack().filter( '.lg-wd-compose-html-block' ).each( function () {
                 const edId = $( this ).data( 'editor-id' );
                 if ( edId && typeof wp !== 'undefined' && wp.editor ) {
-                    wp.editor.initialize( edId, {
-                        tinymce: {
-                            wpautop: true,
-                            toolbar1: 'formatselect,bold,italic,underline,strikethrough,separator,bullist,numlist,separator,blockquote,hr,separator,alignleft,aligncenter,alignright,separator,link,unlink,separator,wp_more,wp_adv',
-                            toolbar2: 'fontsizeselect,forecolor,backcolor,separator,pastetext,removeformat,separator,charmap,separator,outdent,indent,separator,undo,redo,separator,wp_help',
-                            block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Preformatted=pre',
-                            content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
-                        },
-                        quicktags: true,
-                        mediaButtons: false,
-                    });
+                    wp.editor.initialize( edId, htmlBlockEditorSettings );
                 }
             });
         },
@@ -491,17 +497,7 @@ jQuery( function ( $ ) {
         // Initialize WP editor (TinyMCE + quicktags) — defer to let DOM settle
         setTimeout( function () {
             if ( typeof wp !== 'undefined' && wp.editor ) {
-                wp.editor.initialize( editorId, {
-                    tinymce: {
-                        wpautop: true,
-                        toolbar1: 'formatselect,bold,italic,underline,strikethrough,separator,bullist,numlist,separator,blockquote,hr,separator,alignleft,aligncenter,alignright,separator,link,unlink,separator,wp_more,wp_adv',
-                        toolbar2: 'fontsizeselect,forecolor,backcolor,separator,pastetext,removeformat,separator,charmap,separator,outdent,indent,separator,undo,redo,separator,wp_help',
-                        block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Preformatted=pre',
-                        content_style: 'body { font-family: Georgia, "Times New Roman", serif; font-size: 15px; color: #5C4E3A; line-height: 1.65; }',
-                    },
-                    quicktags: true,
-                    mediaButtons: false,
-                });
+                wp.editor.initialize( editorId, htmlBlockEditorSettings );
             }
         }, 100 );
     }
