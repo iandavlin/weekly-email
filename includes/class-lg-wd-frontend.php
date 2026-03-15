@@ -119,12 +119,26 @@ class LG_WD_Frontend {
         $header_img = esc_url( $settings['header_image_url'] ?? '' );
         echo '<header class="lg-wd-fe-issue-header">';
         if ( $header_img ) {
+            echo '<div class="lg-wd-fe-header-row">';
             echo '<a href="' . esc_url( home_url() ) . '"><img src="' . $header_img . '" alt="' . esc_attr( $settings['from_name'] ?? 'The Looth Group' ) . '" class="lg-wd-fe-header-img"></a>';
+            echo '<button type="button" class="lg-wd-fe-subscribe-btn" onclick="document.getElementById(\'lg-wd-subscribe-modal\').style.display=\'flex\'">Subscribe</button>';
+            echo '</div>';
         } else {
             echo '<h2 class="lg-wd-fe-issue-title">' . esc_html( $settings['from_name'] ?? 'THE LOOTH GROUP' ) . '</h2>';
             echo '<p class="lg-wd-fe-issue-date">' . esc_html( $settings['branding_tagline'] ?? 'Guitar Repair & Restoration Community' ) . '</p>';
+            echo '<button type="button" class="lg-wd-fe-subscribe-btn" onclick="document.getElementById(\'lg-wd-subscribe-modal\').style.display=\'flex\'">Subscribe</button>';
         }
         echo '</header>';
+
+        // ── Subscribe modal ──
+        echo '<div id="lg-wd-subscribe-modal" class="lg-wd-fe-modal-overlay" onclick="if(event.target===this)this.style.display=\'none\'">';
+        echo '<div class="lg-wd-fe-modal">';
+        echo '<button type="button" class="lg-wd-fe-modal-close" onclick="this.closest(\'.lg-wd-fe-modal-overlay\').style.display=\'none\'">&times;</button>';
+        echo '<h3 class="lg-wd-fe-modal-title">Subscribe to the Weekly Digest</h3>';
+        echo '<p class="lg-wd-fe-modal-desc">Get the latest from The Looth Group delivered to your inbox every week.</p>';
+        echo do_shortcode( '[fluentform id="5"]' );
+        echo '</div>';
+        echo '</div>';
 
         // ── Hero band (gold) ──
         echo '<div class="lg-wd-fe-hero">';
