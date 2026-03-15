@@ -50,7 +50,7 @@ class LG_WD_Frontend {
 
         ob_start();
         // Hide the page title via inline style scoped to the parent entry
-        echo '<style>.lg-wd-fe-archive-page .entry-title,.lg-wd-fe-archive-page .entry-header{display:none!important;}.wp-block-image img{border-radius:8px;box-shadow:0 2px 8px rgba(43,35,24,0.15);}</style>';
+        echo '<style>.lg-wd-fe-archive-page .entry-title,.lg-wd-fe-archive-page .entry-header{display:none!important;}</style>';
         echo '<div class="lg-wd-fe-archive lg-wd-fe-archive-page">';
 
         $index = 0;
