@@ -52,6 +52,8 @@ class LG_WD_Frontend {
         // Hide the page title via inline style scoped to the parent entry
         echo '<style>.lg-wd-fe-archive-page .entry-title,.lg-wd-fe-archive-page .entry-header{display:none!important;}</style>';
         echo '<div class="lg-wd-fe-archive lg-wd-fe-archive-page">';
+        echo '<div class="lg-wd-fe-layout">';
+        echo '<div class="lg-wd-fe-main">';
 
         $index = 0;
         while ( $query->have_posts() ) {
@@ -136,7 +138,13 @@ class LG_WD_Frontend {
             echo '</nav>';
         }
 
-        echo '</div>';
+        echo '</div>'; // .lg-wd-fe-main
+
+        // Sidebar
+        self::render_sidebar();
+
+        echo '</div>'; // .lg-wd-fe-layout
+        echo '</div>'; // .lg-wd-fe-archive
         wp_reset_postdata();
 
         return ob_get_clean();
@@ -165,7 +173,10 @@ class LG_WD_Frontend {
             : 'Week of ' . get_the_date( 'F j, Y' );
 
         ob_start();
-        echo '<div class="lg-wd-fe-archive"><article class="lg-wd-fe-issue lg-wd-fe-single">';
+        echo '<div class="lg-wd-fe-archive">';
+        echo '<div class="lg-wd-fe-layout">';
+        echo '<div class="lg-wd-fe-main">';
+        echo '<article class="lg-wd-fe-issue lg-wd-fe-single">';
 
         // ── Header (dark banner + logo) ──
         $header_img = esc_url( $settings['header_image_url'] ?? '' );
@@ -200,7 +211,14 @@ class LG_WD_Frontend {
         // ── Footer ──
         self::render_footer( $settings );
 
-        echo '</article></div>';
+        echo '</article>';
+        echo '</div>'; // .lg-wd-fe-main
+
+        // Sidebar
+        self::render_sidebar();
+
+        echo '</div>'; // .lg-wd-fe-layout
+        echo '</div>'; // .lg-wd-fe-archive
 
         // Subscribe modal (rendered outside article so overflow:hidden doesn't clip it)
         self::render_subscribe_modal();
@@ -584,6 +602,31 @@ class LG_WD_Frontend {
         echo '</p>';
         echo '<p class="lg-wd-fe-footer-tagline">' . esc_html( $settings['from_name'] ?? 'The Looth Group' ) . ' &middot; loothgroup.com</p>';
         echo '</footer>';
+    }
+
+    // ── Sidebar ──────────────────────────────────────────────────────────────
+
+    /**
+     * Render the WordPress widget sidebar.
+     * Tries the theme's primary sidebar, falls back to any registered sidebar.
+     */
+    private static function render_sidebar(): void {
+        // Common sidebar IDs across themes (BuddyBoss uses 'sidebar')
+        $sidebar_ids = [ 'sidebar', 'sidebar-1', 'primary-widget-area', 'primary' ];
+
+        $active_id = null;
+        foreach ( $sidebar_ids as $id ) {
+            if ( is_active_sidebar( $id ) ) {
+                $active_id = $id;
+                break;
+            }
+        }
+
+        if ( ! $active_id ) return;
+
+        echo '<aside class="lg-wd-fe-sidebar widget-area">';
+        dynamic_sidebar( $active_id );
+        echo '</aside>';
     }
 
     // ── Assets ───────────────────────────────────────────────────────────────

@@ -2,10 +2,23 @@
 /* Brand: Gold #ECB351, Mint #87986A/#D4E0B8, Dark #2B2318, Mid #5C4E3A, Light #FAF6EE */
 
 .lg-wd-fe-archive {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 20px auto 0;
   font-family: Arial, Helvetica, sans-serif;
   color: #5C4E3A;
+}
+
+/* ── Two-column layout ──────────────────────────────────── */
+
+.lg-wd-fe-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 32px;
+  align-items: start;
+}
+
+.lg-wd-fe-main {
+  min-width: 0;
 }
 
 /* ── Issue wrapper ───────────────────────────────────────── */
@@ -611,7 +624,45 @@ body.single-weekly_email .entry-title {
   display: none;
 }
 
+/* ── Sidebar ─────────────────────────────────────────────── */
+
+.lg-wd-fe-sidebar {
+  position: sticky;
+  top: 80px;
+}
+
+.lg-wd-fe-sidebar .widget {
+  background: #FAF6EE;
+  border: 1px solid rgba(92,78,58,0.12);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.lg-wd-fe-sidebar .widget-title,
+.lg-wd-fe-sidebar .widgettitle {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2B2318;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #ECB351;
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 960px) {
+  .lg-wd-fe-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lg-wd-fe-sidebar {
+    position: static;
+  }
+}
 
 @media (max-width: 768px) {
   .lg-wd-fe-body { padding: 20px; }
