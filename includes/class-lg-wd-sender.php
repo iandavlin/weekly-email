@@ -44,37 +44,35 @@ class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
         $from_name  = $settings['from_name'];
         $from_email = $settings['from_email'];
 
-        // Build subscriber filter — when tag is 'all', filter by list only
-        $is_all_tags = ( strtolower( $tag ) === 'all' || empty( $tag ) );
+        // FluentCRM requires both 'list' and 'tag' keys; use 'all' to skip filtering
+        $tag_value = ( empty( $tag ) ) ? 'all' : $tag;
 
         $subscriber_settings = [
             'subscribers' => [
-                $is_all_tags
-                    ? [ 'list' => $list_id ]
-                    : [ 'list' => $list_id, 'tag' => $tag ],
+                [ 'list' => $list_id, 'tag' => $tag_value ],
             ],
-            'sending_filter' => $is_all_tags ? 'list' : 'list_tag',
+            'sending_filter' => 'list_tag',
         ];
 
         $scheduled_at = current_time( 'mysql' );
 
         $campaign_data = [
-            'title'        => $options['campaign_title'] ?? ( 'Weekly Digest — ' . date_i18n( 'F j, Y' ) ),
-            'subject'      => $subject,
-            'status'       => 'scheduled',
-            'type'         => 'regular',
-            'template_id'  => 0,
-            'email_body'   => $html,
-            'settings'     => [
+            'title'         => $options['campaign_title'] ?? ( 'Weekly Digest — ' . date_i18n( 'F j, Y' ) ),
+            'email_subject' => $subject,
+            'status'        => 'draft',
+            'template_id'   => 0,
+            'email_body'    => $html,
+            'settings'      => [
                 'mailer_settings' => [
                     'from_name'  => $from_name,
                     'from_email' => $from_email,
                     'reply_to'   => $from_email,
                     'is_custom'  => 'yes',
                 ],
-                'subscribers'     => $subscriber_settings['subscribers'],
-                'sending_filter'  => $subscriber_settings['sending_filter'],
-                'template_config' => [
+                'subscribers'      => $subscriber_settings['subscribers'],
+                'sending_filter'   => 'list_tag',
+                'excludedSubscribers' => [],
+                'template_config'  => [
                     'content_width'    => '600',
                     'body_bg_color'    => '#e8e2d8',
                     'content_bg_color' => '#FAF6EE',
@@ -83,7 +81,7 @@ class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
                     'disable_footer'   => 'yes',
                 ],
             ],
-            'scheduled_at' => $scheduled_at,
+            'scheduled_at'  => $scheduled_at,
         ];
 
         self::log( 'INFO: Creating FluentCRM campaign: ' . $campaign_data['title'] );
