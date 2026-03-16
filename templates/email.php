@@ -8,7 +8,7 @@ defined( 'ABSPATH' ) || exit;
 $header_img_url = esc_url( $settings['header_image_url'] ?? '' );
 $signoff        = nl2br( esc_html( wp_unslash( $settings['signoff'] ?? '' ) ) );
 $site_url       = esc_url( home_url() );
-$unsubscribe    = '{{unsubscribe_url}}'; // FluentCRM smart code
+$unsubscribe    = '##crm.unsubscribe_url##'; // FluentCRM smart code
 $from_name      = esc_html( $settings['from_name'] ?? 'The Looth Group' );
 $week_label     = esc_html( 'Week of ' . $week_str );
 $item_count     = array_sum( array_map( fn( $p ) => count( $p['items'] ), $payload ) );
