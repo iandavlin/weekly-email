@@ -59,6 +59,7 @@ class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
         $campaign_data = [
             'title'         => $options['campaign_title'] ?? ( 'Weekly Digest — ' . date_i18n( 'F j, Y' ) ),
             'email_subject' => $subject,
+            'type'            => 'campaign',
             'status'          => 'draft',
             'template_id'     => 0,
             'design_template' => 'raw_html',
