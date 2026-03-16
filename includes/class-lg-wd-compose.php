@@ -683,13 +683,27 @@ class LG_WD_Compose {
                 $data = LG_WD_Issue::get_data( $issue_id );
                 $data['sections'] = [];
                 foreach ( $raw_sections as $s ) {
+                    // Sanitize manual (external) items
+                    $manual_items = [];
+                    foreach ( $s['manual_items'] ?? [] as $mi ) {
+                        $manual_items[] = [
+                            'title'       => sanitize_text_field( $mi['title'] ?? '' ),
+                            'url'         => esc_url_raw( $mi['url'] ?? '' ),
+                            'thumb_url'   => esc_url_raw( $mi['thumb_url'] ?? '' ),
+                            'excerpt'     => sanitize_text_field( $mi['excerpt'] ?? '' ),
+                            'author_name' => sanitize_text_field( $mi['author_name'] ?? '' ),
+                            'author_url'  => esc_url_raw( $mi['author_url'] ?? '' ),
+                        ];
+                    }
+
                     $entry = [
-                        'key'       => sanitize_key( $s['key'] ?? '' ),
-                        'label'     => sanitize_text_field( $s['label'] ?? '' ),
-                        'is_header' => ! empty( $s['is_header'] ),
-                        'slug'      => sanitize_text_field( $s['slug'] ?? '' ),
-                        'template'  => sanitize_key( $s['template'] ?? 'card' ),
-                        'post_ids'  => array_map( 'absint', $s['post_ids'] ?? [] ),
+                        'key'          => sanitize_key( $s['key'] ?? '' ),
+                        'label'        => sanitize_text_field( $s['label'] ?? '' ),
+                        'is_header'    => ! empty( $s['is_header'] ),
+                        'slug'         => sanitize_text_field( $s['slug'] ?? '' ),
+                        'template'     => sanitize_key( $s['template'] ?? 'card' ),
+                        'post_ids'     => array_map( 'absint', $s['post_ids'] ?? [] ),
+                        'manual_items' => $manual_items,
                     ];
 
                     if ( ( $s['template'] ?? '' ) === 'html-block' ) {

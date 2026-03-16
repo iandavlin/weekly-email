@@ -48,6 +48,7 @@ class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
             'subscribers' => [
                 [ 'list' => $list_id, 'tag' => $tag ],
             ],
+            'sending_filter' => 'list_tag',
         ];
 
         $scheduled_at = current_time( 'mysql' );
@@ -217,9 +218,11 @@ class LG_WD_Sender {
 
         // Default: FluentCRM if available, otherwise wp_mail
         if ( class_exists( 'FluentCrm\App\Models\Campaign' ) ) {
+            error_log( '[LG Weekly Digest] INFO: Using FluentCRM sender.' );
             return new LG_WD_Sender_FluentCRM();
         }
 
+        error_log( '[LG Weekly Digest] WARNING: FluentCRM not detected, falling back to wp_mail sender.' );
         return new LG_WD_Sender_WPMail();
     }
 

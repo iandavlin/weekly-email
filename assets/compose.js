@@ -336,6 +336,10 @@ jQuery( function ( $ ) {
             } else {
                 showResponse( '✗ ' + ( res.data || 'Send failed.' ), 'error' );
             }
+        }).fail( function ( xhr ) {
+            setLoading( $btn, false );
+            showResponse( '✗ Server error (' + xhr.status + '): ' + xhr.statusText, 'error' );
+            console.error( 'Send AJAX failed:', xhr.responseText );
         });
     });
 
