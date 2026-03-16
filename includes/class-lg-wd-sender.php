@@ -135,14 +135,14 @@ class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
             return [ 'success' => false, 'message' => 'CampaignEmail rows not created.', 'campaign_id' => $campaign->id ];
         }
 
-        $campaign->status = 'working';
+        $campaign->status = 'draft';
         $campaign->save();
 
-        self::log( "SUCCESS: Campaign ID={$campaign->id} dispatched to {$email_count} subscribers." );
+        self::log( "SUCCESS: Campaign ID={$campaign->id} ready for review with {$email_count} subscribers." );
 
         return [
             'success'     => true,
-            'message'     => "Digest sent to {$email_count} subscribers.",
+            'message'     => "Campaign created with {$email_count} subscribers. Review and send from FluentCRM.",
             'campaign_id' => $campaign->id,
         ];
     }
