@@ -44,11 +44,16 @@ class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
         $from_name  = $settings['from_name'];
         $from_email = $settings['from_email'];
 
+        // Build subscriber filter — when tag is 'all', filter by list only
+        $is_all_tags = ( strtolower( $tag ) === 'all' || empty( $tag ) );
+
         $subscriber_settings = [
             'subscribers' => [
-                [ 'list' => $list_id, 'tag' => $tag ],
+                $is_all_tags
+                    ? [ 'list' => $list_id ]
+                    : [ 'list' => $list_id, 'tag' => $tag ],
             ],
-            'sending_filter' => 'list_tag',
+            'sending_filter' => $is_all_tags ? 'list' : 'list_tag',
         ];
 
         $scheduled_at = current_time( 'mysql' );
@@ -68,7 +73,7 @@ class LG_WD_Sender_FluentCRM implements LG_WD_Sender_Interface {
                     'is_custom'  => 'yes',
                 ],
                 'subscribers'     => $subscriber_settings['subscribers'],
-                'sending_filter'  => 'list_tag',
+                'sending_filter'  => $subscriber_settings['sending_filter'],
                 'template_config' => [
                     'content_width'    => '600',
                     'body_bg_color'    => '#e8e2d8',
