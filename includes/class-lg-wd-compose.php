@@ -19,6 +19,7 @@ class LG_WD_Compose {
         add_action( 'wp_ajax_lg_wd_compose_send',        [ __CLASS__, 'ajax_send' ] );
         add_action( 'wp_ajax_lg_wd_compose_new_issue',   [ __CLASS__, 'ajax_new_issue' ] );
         add_action( 'wp_ajax_lg_wd_compose_delete_draft', [ __CLASS__, 'ajax_delete_draft' ] );
+        add_action( 'wp_ajax_lg_wd_compose_reset_draft',  [ __CLASS__, 'ajax_reset_draft' ] );
     }
 
     // ── Assets ────────────────────────────────────────────────────────────────
@@ -243,8 +244,9 @@ class LG_WD_Compose {
                        value="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>"
                        class="lg-wd-input-sm">
                 <button class="button lg-wd-btn-secondary" id="lg-wd-test-btn">Send Test</button>
-                <?php if ( ! $is_sent ) : ?>
-                  <button class="button lg-wd-btn-danger" id="lg-wd-send-btn">Send Now</button>
+                <button class="button lg-wd-btn-danger" id="lg-wd-send-btn">Send Now</button>
+                <?php if ( $is_sent ) : ?>
+                  <button class="button lg-wd-btn-secondary" id="lg-wd-reset-draft-btn">Reset to Draft</button>
                 <?php endif; ?>
               </div>
             </div>
@@ -668,6 +670,38 @@ class LG_WD_Compose {
 
         wp_send_json_success( [
             'redirect' => admin_url( 'admin.php?page=' . self::PAGE_SLUG ),
+        ] );
+    }
+
+    /**
+     * Reset a sent issue back to draft status.
+     */
+    public static function ajax_reset_draft(): void {
+        check_ajax_referer( 'lg_wd_compose', 'nonce' );
+        if ( ! current_user_can( self::CAP ) ) wp_send_json_error( 'Unauthorized' );
+
+        $issue_id = (int) ( $_POST['issue_id'] ?? 0 );
+        if ( ! $issue_id ) {
+            wp_send_json_error( 'No issue ID.' );
+        }
+
+        $post = get_post( $issue_id );
+        if ( ! $post || $post->post_type !== 'weekly_email' ) {
+            wp_send_json_error( 'Invalid issue.' );
+        }
+
+        // Reset WP post status to draft
+        wp_update_post( [ 'ID' => $issue_id, 'post_status' => 'draft' ] );
+
+        // Reset issue meta status
+        $data = LG_WD_Issue::get_data( $issue_id );
+        $data['status']      = 'draft';
+        $data['sent_at']     = null;
+        $data['campaign_id'] = null;
+        LG_WD_Issue::save_data( $issue_id, $data );
+
+        wp_send_json_success( [
+            'redirect' => admin_url( 'admin.php?page=' . self::PAGE_SLUG . '&issue_id=' . $issue_id ),
         ] );
     }
 

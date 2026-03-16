@@ -343,6 +343,34 @@ jQuery( function ( $ ) {
         });
     });
 
+    // ── Reset to Draft ────────────────────────────────────────────────────
+
+    $( '#lg-wd-reset-draft-btn' ).on( 'click', function () {
+        if ( ! confirm( 'Reset this issue to draft status?' ) ) return;
+
+        const $btn    = $( this );
+        const issueId = $( '#lg-wd-issue-id' ).val();
+        if ( ! issueId ) return;
+
+        setLoading( $btn, true );
+
+        $.post( ajaxUrl, {
+            action:   'lg_wd_compose_reset_draft',
+            nonce,
+            issue_id: issueId,
+        }, function ( res ) {
+            setLoading( $btn, false );
+            if ( res.success && res.data.redirect ) {
+                window.location.href = res.data.redirect;
+            } else {
+                showResponse( '✗ ' + ( res.data || 'Reset failed.' ), 'error' );
+            }
+        }).fail( function ( xhr ) {
+            setLoading( $btn, false );
+            showResponse( '✗ Server error (' + xhr.status + ')', 'error' );
+        });
+    });
+
     // ── Clear Draft ─────────────────────────────────────────────────────────
 
     $( '#lg-wd-clear-draft-btn' ).on( 'click', function () {
