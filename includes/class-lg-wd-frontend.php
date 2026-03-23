@@ -214,8 +214,8 @@ class LG_WD_Frontend {
         echo '</article>';
         echo '</div>'; // .lg-wd-fe-main
 
-        // Sidebar
-        self::render_sidebar();
+        // Sidebar removed — theme already provides one on single views
+        // Sidebar removed — theme already provides one on single views
 
         echo '</div>'; // .lg-wd-fe-layout
         echo '</div>'; // .lg-wd-fe-archive
