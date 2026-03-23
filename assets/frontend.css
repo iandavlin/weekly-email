@@ -159,6 +159,7 @@ a.lg-wd-fe-issue-link .lg-wd-fe-issue-date {
 
 .lg-wd-fe-divider {
   border: none;
+  clear: both;
   height: 1px;
   background: #D4E0B8;
   max-width: 40%;
@@ -364,6 +365,8 @@ a.lg-wd-fe-issue-link .lg-wd-fe-issue-date {
 .lg-wd-fe-full-text,
 .lg-wd-fe-html-block {
   font-size: 15px;
+  overflow: hidden;
+  clear: both;
   color: #5C4E3A;
   line-height: 1.65;
   margin-bottom: 12px;
