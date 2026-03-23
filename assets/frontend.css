@@ -16,6 +16,9 @@
   gap: 32px;
   align-items: start;
 }
+.lg-wd-fe-layout:not(:has(.lg-wd-fe-sidebar)) {
+  grid-template-columns: 1fr;
+}
 
 .lg-wd-fe-main {
   min-width: 0;
