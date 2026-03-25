@@ -146,7 +146,7 @@ class LG_WD_Query {
 
         $posts = get_posts( [
             'post_type'      => $types ?: 'any',
-            'post_status'    => [ 'publish', 'closed', 'open' ],
+            'post_status'    => [ 'publish', 'closed', 'open', 'archived' ],
             'posts_per_page' => $limit,
             's'              => $search_term,
             'orderby'        => 'date',
@@ -301,7 +301,7 @@ class LG_WD_Query {
             'post__in'       => $post_ids,
             'posts_per_page' => count( $post_ids ),
             'orderby'        => 'post__in',
-            'post_status'    => [ 'publish', 'closed', 'open' ],
+            'post_status'    => [ 'publish', 'closed', 'open', 'archived' ],
         ] );
 
         return array_map( fn( $p ) => self::normalize_post( $p, $excerpt_length ), $posts );
