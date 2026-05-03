@@ -319,6 +319,8 @@ class LG_WD_Query {
             }
         }
 
+        $tier = self::get_tier( $post->ID );
+
         return [
             'id'         => $post->ID,
             'title'      => get_the_title( $post ),
@@ -328,7 +330,25 @@ class LG_WD_Query {
             'date'       => get_the_date( 'M j', $post ),
             'post_type'  => $post->post_type,
             'type_label' => self::cpt_label( $post->post_type ),
+            'tier_slug'  => $tier['slug'],
+            'tier_label' => $tier['label'],
         ];
+    }
+
+    /**
+     * Return the first 'tier' taxonomy term assigned to a post.
+     * Falls back to empty strings if the taxonomy is missing or no term is assigned.
+     */
+    public static function get_tier( int $post_id ): array {
+        if ( ! taxonomy_exists( 'tier' ) ) {
+            return [ 'slug' => '', 'label' => '' ];
+        }
+        $terms = get_the_terms( $post_id, 'tier' );
+        if ( empty( $terms ) || is_wp_error( $terms ) ) {
+            return [ 'slug' => '', 'label' => '' ];
+        }
+        $term = $terms[0];
+        return [ 'slug' => $term->slug, 'label' => $term->name ];
     }
 
     // ── Utilities ─────────────────────────────────────────────────────────────

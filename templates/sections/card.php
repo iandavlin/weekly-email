@@ -15,6 +15,19 @@ $url          = esc_url( LG_WD_Email_Builder::add_utm( $item['url'] ) );
 $type_label   = esc_html( $item['type_label'] );
 $date         = esc_html( $item['date'] );
 
+// Tier — inline colored text in the meta line (Public / Looth Lite / Looth Pro)
+$tier_slug  = $item['tier_slug']  ?? '';
+$tier_label = $item['tier_label'] ?? '';
+$tier_colors = [
+    'public'     => '#87986A',
+    'looth-lite' => '#C68A1E',
+    'looth-pro'  => '#2B2318',
+];
+$tier_color = $tier_colors[ $tier_slug ] ?? '';
+$tier_html  = ( $tier_color && $tier_label )
+    ? '<span style="color:' . $tier_color . ';font-weight:600;">' . esc_html( $tier_label ) . '</span>'
+    : '';
+
 // Author attribution
 if ( ! empty( $item['id'] ) ) {
     $author_html = LG_WD_Email_Builder::author_html( $item['id'] );
@@ -32,10 +45,11 @@ $excerpt = $show_excerpt && ! empty( $item['excerpt'] )
     ? '<p class="card-excerpt" style="font-size:17px;color:#5C4E3A;margin:6px 0 0;line-height:1.55;">' . esc_html( $item['excerpt'] ) . '</p>'
     : '';
 
-// Meta line: "By Author · Mar 12"
+// Meta line: "By Author · Mar 12 · Looth Pro"
 $meta_parts = [];
 if ( $author_html ) $meta_parts[] = $author_html;
-if ( $date ) $meta_parts[] = $date;
+if ( $date )        $meta_parts[] = $date;
+if ( $tier_html )   $meta_parts[] = $tier_html;
 $meta_html = implode( ' &middot; ', $meta_parts );
 
 // Image
