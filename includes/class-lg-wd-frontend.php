@@ -303,7 +303,7 @@ class LG_WD_Frontend {
         ];
         $style = $styles[ $slug ] ?? '';
         if ( ! $style || ! $label ) return '';
-        return '<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;' . $style . '">' . esc_html( $label ) . '</span>';
+        return '<span style="display:inline-block;padding:0 10px;border-radius:999px;font-size:11px;line-height:1.6;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;' . $style . '">' . esc_html( $label ) . '</span>';
     }
 
     private static function render_item( array $item, string $template ): void {

@@ -85,7 +85,7 @@ $tier_pill_styles = [
 ];
 $tier_pill_style = $tier_pill_styles[ $tier_slug ] ?? '';
 $tier_html = ( $tier_pill_style && $tier_label )
-    ? '<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-right:6px;' . $tier_pill_style . '">' . esc_html( $tier_label ) . '</span>'
+    ? '<span style="display:inline-block;padding:0 10px;border-radius:999px;font-size:11px;line-height:1.6;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-right:6px;' . $tier_pill_style . '">' . esc_html( $tier_label ) . '</span>'
     : '';
 
 // Author
