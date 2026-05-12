@@ -15,17 +15,17 @@ $url          = esc_url( LG_WD_Email_Builder::add_utm( $item['url'] ) );
 $type_label   = esc_html( $item['type_label'] );
 $date         = esc_html( $item['date'] );
 
-// Tier — inline colored text in the meta line (Public / Looth Lite / Looth Pro)
+// Tier — solid pill (Public / Looth Lite / Looth Pro)
 $tier_slug  = $item['tier_slug']  ?? '';
 $tier_label = $item['tier_label'] ?? '';
-$tier_colors = [
-    'public'     => '#87986A',
-    'looth-lite' => '#C68A1E',
-    'looth-pro'  => '#2B2318',
+$tier_pill_styles = [
+    'public'     => 'background:#D4E0B8;color:#3d4a2a;',
+    'looth-lite' => 'background:#F5D69A;color:#6e4b0c;',
+    'looth-pro'  => 'background:#2B2318;color:#ECB351;',
 ];
-$tier_color = $tier_colors[ $tier_slug ] ?? '';
-$tier_html  = ( $tier_color && $tier_label )
-    ? '<span style="color:' . $tier_color . ';font-weight:600;">' . esc_html( $tier_label ) . '</span>'
+$tier_pill_style = $tier_pill_styles[ $tier_slug ] ?? '';
+$tier_html = ( $tier_pill_style && $tier_label )
+    ? '<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;' . $tier_pill_style . '">' . esc_html( $tier_label ) . '</span>'
     : '';
 
 // Author attribution
@@ -45,11 +45,11 @@ $excerpt = $show_excerpt && ! empty( $item['excerpt'] )
     ? '<p class="card-excerpt" style="font-size:17px;color:#5C4E3A;margin:6px 0 0;line-height:1.55;">' . esc_html( $item['excerpt'] ) . '</p>'
     : '';
 
-// Meta line: "By Author · Mar 12 · Looth Pro"
+// Meta line: "[pill] · By Author · Mar 12"
 $meta_parts = [];
+if ( $tier_html )   $meta_parts[] = $tier_html;
 if ( $author_html ) $meta_parts[] = $author_html;
 if ( $date )        $meta_parts[] = $date;
-if ( $tier_html )   $meta_parts[] = $tier_html;
 $meta_html = implode( ' &middot; ', $meta_parts );
 
 // Image
