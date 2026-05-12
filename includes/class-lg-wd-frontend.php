@@ -295,6 +295,17 @@ class LG_WD_Frontend {
 
     // ── Item renderers ───────────────────────────────────────────────────────
 
+    private static function tier_pill( string $slug, string $label ): string {
+        $styles = [
+            'public'     => 'background:#D4E0B8;color:#3d4a2a;',
+            'looth-lite' => 'background:#F5D69A;color:#6e4b0c;',
+            'looth-pro'  => 'background:#2B2318;color:#ECB351;',
+        ];
+        $style = $styles[ $slug ] ?? '';
+        if ( ! $style || ! $label ) return '';
+        return '<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;' . $style . '">' . esc_html( $label ) . '</span>';
+    }
+
     private static function render_item( array $item, string $template ): void {
         switch ( $template ) {
             case 'html-block':
@@ -337,9 +348,10 @@ class LG_WD_Frontend {
         }
         $img_url = esc_url( $img_url );
 
-        $author = self::web_author( $item );
+        $author    = self::web_author( $item );
+        $tier_html = self::tier_pill( $item['tier_slug'] ?? '', $item['tier_label'] ?? '' );
 
-        $meta = array_filter( [ $author, $date ] );
+        $meta = array_filter( [ $tier_html, $author, $date ] );
 
         echo '<div class="lg-wd-fe-card">';
         if ( $img_url ) {
@@ -421,11 +433,17 @@ class LG_WD_Frontend {
             ] );
         }
 
-        // Tier
-        $tiers    = wp_get_post_terms( $item['id'], 'event_tier_', [ 'fields' => 'names' ] );
-        $tier     = ( ! is_wp_error( $tiers ) && ! empty( $tiers ) ) ? esc_html( $tiers[0] ) : '';
-        $location = $zoom_url ? 'Virtual Event' : 'In Person';
-        $author   = self::web_author( $item );
+        // Tier (event_tier_ taxonomy → match post tier slugs)
+        $tiers     = wp_get_post_terms( $item['id'], 'event_tier_', [ 'fields' => 'names' ] );
+        $tier_name = ( ! is_wp_error( $tiers ) && ! empty( $tiers ) ) ? $tiers[0] : '';
+        $tier_slug = str_replace( ' ', '-', strtolower( $tier_name ) );
+        $tier_html = self::tier_pill( $tier_slug, $tier_name );
+        $location  = $zoom_url ? 'Virtual Event' : 'In Person';
+        $author    = self::web_author( $item );
+
+        $gcal_link = $gcal_url
+            ? ' &middot; <a href="' . esc_url( $gcal_url ) . '" target="_blank" rel="noopener" class="lg-wd-fe-calendar-link">&#128197; Add</a>'
+            : '';
 
         echo '<div class="lg-wd-fe-card lg-wd-fe-event">';
         if ( $img_url ) {
@@ -437,17 +455,14 @@ class LG_WD_Frontend {
         echo '<a href="' . $url . '" class="lg-wd-fe-card-title">' . $title . '</a>';
         echo '<p class="lg-wd-fe-event-date">' . esc_html( $display_date );
         if ( $time_display ) echo ' &middot; ' . $time_display;
+        echo $gcal_link;
         echo '</p>';
 
         $event_meta = [];
-        if ( $tier ) $event_meta[] = '<span class="lg-wd-fe-tier lg-wd-fe-tier--' . sanitize_html_class( strtolower( $tier ) ) . '">' . $tier . '</span>';
+        if ( $tier_html ) $event_meta[] = $tier_html;
         $event_meta[] = '<span class="lg-wd-fe-location">' . esc_html( $location ) . '</span>';
         if ( $author ) $event_meta[] = $author;
         echo '<p class="lg-wd-fe-card-meta">' . implode( ' &middot; ', $event_meta ) . '</p>';
-
-        if ( $gcal_url ) {
-            echo '<a href="' . esc_url( $gcal_url ) . '" target="_blank" rel="noopener" class="lg-wd-fe-calendar-link">&#128197; Add to Calendar</a>';
-        }
 
         echo '</div></div>';
     }

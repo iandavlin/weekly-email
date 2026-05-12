@@ -74,16 +74,19 @@ if ( $time_raw && $date_raw ) {
     $time_display = esc_html( $time_raw );
 }
 
-// Tier badge
-$tiers    = wp_get_post_terms( $item['id'], 'event_tier_', [ 'fields' => 'names' ] );
-$tier     = ( ! is_wp_error( $tiers ) && ! empty( $tiers ) ) ? $tiers[0] : '';
-$location = $zoom_url ? 'Virtual Event' : 'In Person';
-
-$tier_bg     = match ( strtolower( $tier ) ) { 'looth pro' => '#ECB351', 'looth lite' => '#D4E0B8', default => '#FAF6EE' };
-$tier_color  = ( strtolower( $tier ) === 'looth pro' ) ? '#2B2318' : '#5C4E3A';
-$tier_border = ( strtolower( $tier ) === 'public' ) ? 'border:1px solid #D4E0B8;' : '';
-$tier_html   = $tier
-    ? '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' . $tier_bg . ';color:' . $tier_color . ';' . $tier_border . 'margin-right:6px;">' . esc_html( $tier ) . '</span>'
+// Tier badge — solid pill matching post card style
+$tiers     = wp_get_post_terms( $item['id'], 'event_tier_', [ 'fields' => 'names' ] );
+$tier      = ( ! is_wp_error( $tiers ) && ! empty( $tiers ) ) ? $tiers[0] : '';
+$location  = $zoom_url ? 'Virtual Event' : 'In Person';
+$tier_key  = str_replace( ' ', '-', strtolower( $tier ) );
+$tier_pill_styles = [
+    'public'     => 'background:#D4E0B8;color:#3d4a2a;',
+    'looth-lite' => 'background:#F5D69A;color:#6e4b0c;',
+    'looth-pro'  => 'background:#2B2318;color:#ECB351;',
+];
+$tier_pill_style = $tier_pill_styles[ $tier_key ] ?? '';
+$tier_html = ( $tier_pill_style && $tier )
+    ? '<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-right:6px;' . $tier_pill_style . '">' . esc_html( $tier ) . '</span>'
     : '';
 
 // Author
@@ -157,6 +160,11 @@ $detail_width = 624;
               <?php if ( $time_display ) : ?>
                 &middot; <?php echo $time_display; ?>
               <?php endif; ?>
+              <?php if ( $gcal_url ) : ?>
+                &middot; <a href="<?php echo esc_url( $gcal_url ); ?>"
+                   style="font-size:14px;font-weight:600;color:#ECB351;text-decoration:none;"
+                   target="_blank">&#128197; Add</a>
+              <?php endif; ?>
             </p>
             <p class="event-meta" style="font-size:15px;color:#aaa;margin:0 0 6px;">
               <?php echo $tier_html; ?>
@@ -165,13 +173,6 @@ $detail_width = 624;
                 &middot; <?php echo $author_html; ?>
               <?php endif; ?>
             </p>
-            <?php if ( $gcal_url ) : ?>
-            <div style="margin-top:6px;">
-              <a href="<?php echo esc_url( $gcal_url ); ?>"
-                 style="display:inline-block;font-size:12px;font-weight:600;color:#ECB351;text-decoration:none;padding:4px 12px;border:1px solid #ECB351;border-radius:12px;line-height:1.4;"
-                 target="_blank">&#128197; Add to Calendar</a>
-            </div>
-            <?php endif; ?>
           </td>
         </tr>
       </table>
