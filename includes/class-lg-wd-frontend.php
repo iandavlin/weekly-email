@@ -438,7 +438,7 @@ class LG_WD_Frontend {
         $author    = self::web_author( $item );
 
         $gcal_link = $gcal_url
-            ? ' &middot; <a href="' . esc_url( $gcal_url ) . '" target="_blank" rel="noopener" class="lg-wd-fe-calendar-link">&#128197; Add</a>'
+            ? ' &middot; <a href="' . esc_url( $gcal_url ) . '" target="_blank" rel="noopener" class="lg-wd-fe-calendar-link" style="display:inline-block;padding:0 10px;border-radius:999px;font-size:11px;line-height:1.6;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#ECB351;border:1px solid #ECB351;text-decoration:none;"><span style="font-size:9px;">&#128197;</span> Add</a>'
             : '';
 
         echo '<div class="lg-wd-fe-card lg-wd-fe-event">';

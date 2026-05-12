@@ -161,8 +161,8 @@ $detail_width = 624;
               <?php endif; ?>
               <?php if ( $gcal_url ) : ?>
                 &middot; <a href="<?php echo esc_url( $gcal_url ); ?>"
-                   style="font-size:14px;font-weight:600;color:#ECB351;text-decoration:none;"
-                   target="_blank">&#128197; Add</a>
+                   style="display:inline-block;padding:0 10px;border-radius:999px;font-size:11px;line-height:1.6;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#ECB351;border:1px solid #ECB351;text-decoration:none;"
+                   target="_blank"><span style="font-size:9px;">&#128197;</span> Add</a>
               <?php endif; ?>
             </p>
             <p class="event-meta" style="font-size:15px;color:#aaa;margin:0 0 6px;">
