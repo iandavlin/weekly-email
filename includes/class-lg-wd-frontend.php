@@ -433,11 +433,7 @@ class LG_WD_Frontend {
             ] );
         }
 
-        // Tier (event_tier_ taxonomy → match post tier slugs)
-        $tiers     = wp_get_post_terms( $item['id'], 'event_tier_', [ 'fields' => 'names' ] );
-        $tier_name = ( ! is_wp_error( $tiers ) && ! empty( $tiers ) ) ? $tiers[0] : '';
-        $tier_slug = str_replace( ' ', '-', strtolower( $tier_name ) );
-        $tier_html = self::tier_pill( $tier_slug, $tier_name );
+        $tier_html = self::tier_pill( $item['tier_slug'] ?? '', $item['tier_label'] ?? '' );
         $location  = $zoom_url ? 'Virtual Event' : 'In Person';
         $author    = self::web_author( $item );
 

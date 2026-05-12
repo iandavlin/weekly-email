@@ -74,19 +74,18 @@ if ( $time_raw && $date_raw ) {
     $time_display = esc_html( $time_raw );
 }
 
-// Tier badge — solid pill matching post card style
-$tiers     = wp_get_post_terms( $item['id'], 'event_tier_', [ 'fields' => 'names' ] );
-$tier      = ( ! is_wp_error( $tiers ) && ! empty( $tiers ) ) ? $tiers[0] : '';
-$location  = $zoom_url ? 'Virtual Event' : 'In Person';
-$tier_key  = str_replace( ' ', '-', strtolower( $tier ) );
+// Tier badge — solid pill matching post card style (sourced from payload `tier` taxonomy)
+$tier_slug  = $item['tier_slug']  ?? '';
+$tier_label = $item['tier_label'] ?? '';
+$location   = $zoom_url ? 'Virtual Event' : 'In Person';
 $tier_pill_styles = [
     'public'     => 'background:#D4E0B8;color:#3d4a2a;',
     'looth-lite' => 'background:#F5D69A;color:#6e4b0c;',
     'looth-pro'  => 'background:#2B2318;color:#ECB351;',
 ];
-$tier_pill_style = $tier_pill_styles[ $tier_key ] ?? '';
-$tier_html = ( $tier_pill_style && $tier )
-    ? '<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-right:6px;' . $tier_pill_style . '">' . esc_html( $tier ) . '</span>'
+$tier_pill_style = $tier_pill_styles[ $tier_slug ] ?? '';
+$tier_html = ( $tier_pill_style && $tier_label )
+    ? '<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-right:6px;' . $tier_pill_style . '">' . esc_html( $tier_label ) . '</span>'
     : '';
 
 // Author
